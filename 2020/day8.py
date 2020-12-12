@@ -53,6 +53,7 @@ def print_part2_ans(input):
 
         try:
             print(run(instructions))
+            break
         except:
             pass
         instructions[i] = orig
