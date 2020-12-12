@@ -1132,11 +1132,46 @@ ecl:brn
 pid:487702556 hcl:#602927
 hgt:167cm eyr:2026"""
 
+import re
+
 REQUIRED_FIELDS = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
 
 
+def year_between(val, min, max):
+    if re.match("^\d{4}$", val):
+        int_val = int(val)
+        return int_val >= min and int_val <= max
+    else:
+        return False
+
+def valid_height(val):
+    match = re.match("^(\d+)(in|cm)$", val)
+    if match and match[2] == 'cm':
+        int_val = int(match[1])
+        return int_val >= 150 and int_val <= 193
+    elif match and match[2] == 'in':
+        int_val = int(match[1])
+        return int_val >= 59 and int_val <= 76
+    else:
+        return False
+
+VALID_EYE_COLORS = ["amb", "blu", "brn", "gry", "grn", "hzl", "oth"]
+PART2_VALIDATION = {
+    "byr": lambda val: year_between(val, 1920, 2002),
+    "iyr": lambda val: year_between(val, 2010, 2020),
+    "eyr": lambda val: year_between(val, 2020, 2030),
+    "hgt": valid_height,
+    "hcl": lambda val: re.match("^#[\da-f]{6}$", val) is not None,
+    "ecl": lambda val: val in VALID_EYE_COLORS,
+    "pid": lambda val: re.match("^\d{9}$", val) is not None
+}
+
 def part1_validation(field, val):
     return True
+
+
+def part2_validation(field, val):
+    return PART2_VALIDATION[field](val)
 
 
 def print_ans(input, validation_fn):
@@ -1160,4 +1195,4 @@ def print_ans(input, validation_fn):
     print(num_valid)
 
 
-print_ans(INPUT, part1_validation)
+print_ans(INPUT, part2_validation)
