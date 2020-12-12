@@ -1,7 +1,7 @@
 INPUT = [int(l.rstrip()) for l in open("day9_input.txt", "r").readlines()]
 
 
-def print_part1_ans(input, pool_size=25):
+def first_invalid_number(input, pool_size=25):
     number_pool = {n for n in input[0:pool_size]}
     for i in range(pool_size, len(input)):
         valid = False
@@ -10,11 +10,13 @@ def print_part1_ans(input, pool_size=25):
                 valid = True
                 break
         if not valid:
-            print(input[i])
-            break
+            return input[i]
         number_pool.remove(input[i - pool_size])
         number_pool.add(input[i])
 
+
+def print_part1_ans(input, pool_size=25):
+    print(first_invalid_number(input, pool_size))
 
 
 print_part1_ans(INPUT)
