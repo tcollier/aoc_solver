@@ -322,6 +322,8 @@ INPUT = """....#...#####..##.#..##..#....#
 ..#.##..#......#...#.....##.#..
 ...###....#.....#...#..#.##..#."""
 
+import functools
+
 
 def parse_input(input):
     def parse_line(line):
@@ -342,4 +344,12 @@ def print_part1_ans(input):
     print(num_trees(parse_input(input), 1, 3))
 
 
-print_part1_ans(INPUT)
+def print_part2_ans(input):
+    slopes = [(1, 1), (1, 3), (1, 5), (1, 7), (2, 1)]
+    grid = parse_input(input)
+    num_trees_list = [num_trees(grid, s[0], s[1]) for s in slopes]
+    product = functools.reduce(lambda a, b: a * b, num_trees_list)
+    print(product)
+
+
+print_part2_ans(INPUT)
