@@ -18,7 +18,7 @@ def valid_part2(rule, pwd):
     first, second = [int(n) for n in positiions.split("-")]
     char_in_first = pwd[first - 1] == char
     char_in_second = pwd[second - 1] == char
-    return (char_in_first and not char_in_second) or (not char_in_first and char_in_second)
+    return char_in_first != char_in_second
 
 
 def print_ans(input, valid_fn):
