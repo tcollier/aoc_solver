@@ -999,7 +999,7 @@ INPUT = """9-10 m: mmmmnxmmmwm
 3-4 d: ddjg
 17-18 b: jnlntbblbbqbkqmbbb"""
 
-def valid(rule, pwd):
+def valid_part1(rule, pwd):
     range, char = rule.split(" ")
     min, max = [int(n) for n in range.split("-")]
     num_char = 0
@@ -1012,13 +1012,13 @@ def valid(rule, pwd):
         return True
 
 
-def print_part1_ans(input):
+def print_ans(input, valid_fn):
     num_correct = 0
     for line in input.split("\n"):
         rule, pwd = line.split(": ")
-        if valid(rule, pwd):
+        if valid_fn(rule, pwd):
             num_correct += 1
     print(num_correct)
 
 
-print_part1_ans(INPUT)
+print_ans(INPUT, valid_part1)
