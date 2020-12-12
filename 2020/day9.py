@@ -10,13 +10,28 @@ def first_invalid_number(input, pool_size=25):
                 valid = True
                 break
         if not valid:
-            return input[i]
+            return i, input[i]
         number_pool.remove(input[i - pool_size])
         number_pool.add(input[i])
 
 
 def print_part1_ans(input, pool_size=25):
-    print(first_invalid_number(input, pool_size))
+    print(first_invalid_number(input, pool_size)[1])
 
 
-print_part1_ans(INPUT)
+def print_part2_ans(input, pool_size=25):
+    max_index, target_num = first_invalid_number(input, pool_size)
+    for i in range(max_index):
+        sum = input[i]
+        for j in range(i + 1, max_index):
+            sum = sum + input[j]
+            if sum == target_num:
+                elems = input[i:j + 1]
+                elems.sort()
+                print(elems[0] + elems[-1])
+                return
+            elif sum > target_num:
+                break
+
+
+print_part2_ans(INPUT)
