@@ -1012,6 +1012,14 @@ def valid_part1(rule, pwd):
         return True
 
 
+def valid_part2(rule, pwd):
+    positiions, char = rule.split(" ")
+    first, second = [int(n) for n in positiions.split("-")]
+    char_in_first = pwd[first - 1] == char
+    char_in_second = pwd[second - 1] == char
+    return (char_in_first and not char_in_second) or (not char_in_first and char_in_second)
+
+
 def print_ans(input, valid_fn):
     num_correct = 0
     for line in input.split("\n"):
@@ -1021,4 +1029,4 @@ def print_ans(input, valid_fn):
     print(num_correct)
 
 
-print_ans(INPUT, valid_part1)
+print_ans(INPUT, valid_part2)
