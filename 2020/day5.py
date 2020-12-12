@@ -17,4 +17,11 @@ def print_part1_ans(input):
     print(max_id)
 
 
-print_part1_ans(INPUT)
+def print_part2_ans(input):
+    ids = {string_to_id(l.rstrip()) for l in input}
+    for id in ids:
+        if id + 1 not in ids and id + 2 in ids:
+            print(id + 1)
+
+
+print_part2_ans(INPUT)
