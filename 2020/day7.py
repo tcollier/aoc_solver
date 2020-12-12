@@ -35,4 +35,18 @@ def print_part1_ans(input):
     print(len(options))
 
 
-print_part1_ans(INPUT)
+def count_bags(bags, color):
+    total = 1
+    for contained_color, num_bags in bags[color].items():
+        total = total + num_bags * count_bags(bags, contained_color)
+    return total
+
+
+def print_part2_ans(input):
+    bags = {}
+    for line in input:
+        container, contents = parse_rule(line.rstrip())
+        bags[container] = contents
+    print(count_bags(bags, "shiny gold") - 1)
+
+print_part2_ans(INPUT)
