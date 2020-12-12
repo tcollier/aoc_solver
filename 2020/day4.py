@@ -1135,7 +1135,11 @@ hgt:167cm eyr:2026"""
 REQUIRED_FIELDS = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
 
 
-def print_part1_ans(input):
+def part1_validation(field, val):
+    return True
+
+
+def print_ans(input, validation_fn):
     valid = False
     needed_fields = {f for f in REQUIRED_FIELDS}
     num_valid = 0
@@ -1148,12 +1152,12 @@ def print_part1_ans(input):
 
         parts = line.split(" ")
         for part in parts:
-            field, _ = part.split(":")
-            if field != "cid":
+            field, val = part.split(":")
+            if field != "cid" and validation_fn(field, val):
                 needed_fields.remove(field)
     if not needed_fields:
         num_valid = num_valid + 1
     print(num_valid)
 
 
-print_part1_ans(INPUT)
+print_ans(INPUT, part1_validation)
