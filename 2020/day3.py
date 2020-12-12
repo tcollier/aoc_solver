@@ -323,16 +323,23 @@ INPUT = """....#...#####..##.#..##..#....#
 ...###....#.....#...#..#.##..#."""
 
 
-def print_part1_ans(input):
+def parse_input(input):
     def parse_line(line):
         return [1 if c == "#" else 0 for c in line]
 
-    grid = [parse_line(l) for l in input.split("\n")]
+    return [parse_line(l) for l in input.split("\n")]
+
+
+def num_trees(grid, down_steps, right_steps):
     num_trees = 0
-    for row in range(len(grid)):
-        col = row * 3 % len(grid[0])
+    for row in range(0, len(grid), down_steps):
+        col = row * right_steps % len(grid[0])
         num_trees = num_trees + grid[row][col]
-    print(num_trees)
+    return num_trees
+
+
+def print_part1_ans(input):
+    print(num_trees(parse_input(input), 1, 3))
 
 
 print_part1_ans(INPUT)
