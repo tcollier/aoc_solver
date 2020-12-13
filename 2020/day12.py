@@ -37,4 +37,39 @@ def print_part1_ans(input):
     print(abs(east) + abs(north))
 
 
-print_part1_ans(INPUT)
+class Point(object):
+    def __init__(self, east, north):
+        self.east = east
+        self.north = north
+
+
+def part2_apply_instruction(ship, waypoint, instruction):
+    if instruction[0] in ["R", "L"]:
+        steps = int(instruction[1:]) // 90
+        for _ in range(steps):
+            if instruction[0] == "R":
+                waypoint = Point(waypoint.north, -waypoint.east)
+            else:
+                waypoint = Point(-waypoint.north, waypoint.east)
+    elif instruction[0] == "F":
+        dist = int(instruction[1:])
+        ship = Point(
+            ship.east + dist * waypoint.east,
+            ship.north + dist * waypoint.north
+        )
+    else:
+        fn = MOVE[instruction[0]]
+        east, north = fn(waypoint.east, waypoint.north, None, int(instruction[1:]))
+        waypoint = Point(east, north)
+    return ship, waypoint
+
+
+def print_part2_ans(input):
+    ship = Point(0, 0)
+    waypoint = Point(10, 1)
+    for instruction in input:
+        ship, waypoint = part2_apply_instruction(ship, waypoint, instruction.rstrip())
+    print(abs(ship.east) + abs(ship.north))
+
+
+print_part2_ans(INPUT)
