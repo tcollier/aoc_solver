@@ -4,12 +4,12 @@ import re
 
 
 def parse_rule(line):
-    match = re.match("(.+) bags contain (.+)\.", line)
+    match = re.match(r"(.+) bags contain (.+)\.", line)
     container = match[1]
     contents = {}
     if match[2] != "no other bags":
         for part in match[2].split(", "):
-            match = re.match("(\d+) (.+) bags?", part)
+            match = re.match(r"(\d+) (.+) bags?", part)
             contents[match[2]] = int(match[1])
     return container, contents
 
@@ -48,5 +48,6 @@ def print_part2_ans(input):
         container, contents = parse_rule(line.rstrip())
         bags[container] = contents
     print(count_bags(bags, "shiny gold") - 1)
+
 
 print_part2_ans(INPUT)
