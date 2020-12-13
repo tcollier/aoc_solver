@@ -10,15 +10,15 @@ MOVE = {
 }
 
 
-def move_forward(east, north, dir_index, dist):
+def part1_move_forward(east, north, dir_index, dist):
     fn = MOVE[DIRECTIONS[dir_index]]
     return fn(east, north, dir_index, dist)
 
 
-MOVE["F"] = move_forward
+MOVE["F"] = part1_move_forward
 
 
-def apply_instruction(east, north, dir_index, instruction):
+def part1_apply_instruction(east, north, dir_index, instruction):
     if instruction[0] in ["R", "L"]:
         steps = int(instruction[1:]) // 90
         if instruction[0] == "L":
@@ -33,7 +33,7 @@ def apply_instruction(east, north, dir_index, instruction):
 def print_part1_ans(input):
     east = north = dir_index = 0
     for instruction in input:
-        east, north, dir_index = apply_instruction(east, north, dir_index, instruction.rstrip())
+        east, north, dir_index = part1_apply_instruction(east, north, dir_index, instruction.rstrip())
     print(abs(east) + abs(north))
 
 
