@@ -15,4 +15,16 @@ def print_part1_ans(input):
     print(num_1_diff * num_3_diff)
 
 
-print_part1_ans(INPUT)
+def print_part2_ans(input):
+    input.append(0)
+    input.sort()
+    counts = [0 for _ in input]
+    counts[0] = counts[1] = 1
+    for i in range(2, len(input)):
+        for j in range(max(0, i - 3), i):
+            if input[i] - input[j] <= 3:
+                counts[i] += counts[j]
+    print(counts[-1])
+
+
+print_part2_ans(INPUT)
