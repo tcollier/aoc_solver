@@ -1,8 +1,9 @@
+import re
+
 INPUT = open("day2_input.txt", "r").readlines()
 
-def valid_part1(rule, pwd):
-    range, char = rule.split(" ")
-    min, max = [int(n) for n in range.split("-")]
+
+def valid_part1(min, max, char, pwd):
     num_char = 0
     for c in pwd:
         if c == char:
@@ -13,19 +14,15 @@ def valid_part1(rule, pwd):
         return True
 
 
-def valid_part2(rule, pwd):
-    positiions, char = rule.split(" ")
-    first, second = [int(n) for n in positiions.split("-")]
-    char_in_first = pwd[first - 1] == char
-    char_in_second = pwd[second - 1] == char
-    return char_in_first != char_in_second
+def valid_part2(pos1, pos2, char, pwd):
+    return (pwd[pos1 - 1] == char) != (pwd[pos2 - 1] == char)
 
 
 def print_ans(input, valid_fn):
     num_correct = 0
     for line in input:
-        rule, pwd = line.split(": ")
-        if valid_fn(rule, pwd):
+        match = re.match(r"^(\d+)-(\d+) (\w): (\w+)$", line.rstrip())
+        if valid_fn(int(match[1]), int(match[2]), match[3], match[4]):
             num_correct += 1
     print(num_correct)
 
