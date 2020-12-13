@@ -13,7 +13,6 @@ def pair_with_sum(arr, sum):
 def triple_with_sum(arr, sum):
     arr.sort()
     for val_index, val in enumerate(arr):
-        diff = sum - val
         i = val_index + 1
         j = len(arr) - 1
         while i < j:
