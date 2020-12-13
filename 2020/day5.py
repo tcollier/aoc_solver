@@ -1,5 +1,6 @@
 INPUT = open("day5_input.txt", "r").readlines()
 
+
 def string_to_id(str):
     id = 0
     for char in str:
@@ -7,6 +8,7 @@ def string_to_id(str):
         if char in ["B", "R"]:
             id = id + 1
     return id
+
 
 def print_part1_ans(input):
     max_id = 0
