@@ -16,4 +16,54 @@ def print_part1_ans(input):
     print(min_wait_id * min_wait)
 
 
-print_part1_ans(INPUT)
+def merge_factors(f1, f2):
+    factors = {}
+    for fact in set([k for k in f1.keys()] + [k for k in f2.keys()]):
+        count1 = f1.get(fact, 0)
+        count2 = f2.get(fact, 0)
+        factors[fact] = max(count1, count2)
+    return factors
+
+
+def factor(n):
+    factors = {}
+    while n > 1:
+        for i in range(2, n + 1):
+            if n % i == 0:
+                if i not in factors:
+                    factors[i] = 0
+                factors[i] = factors[i] + 1
+                n = n // i
+                break
+    return factors
+
+
+def product(f):
+    p = 1
+    for fact, exp in f.items():
+        p = p * (fact ** exp)
+    return p
+
+
+def lcm(vals):
+    factors = {}
+    for val in vals:
+        factors = merge_factors(factors, factor(val))
+    return product(factors)
+
+
+def print_part2_ans(input):
+    bus_ids = {
+        i: int(n) for i, n in enumerate(input[1].rstrip().split(",")) if n != "x"
+    }
+    first_bus_id = bus_ids.pop(0)
+    incrementer = 1
+    trip_count = 1
+    for offset, bus_id in bus_ids.items():
+        while (trip_count * first_bus_id + offset) % bus_id != 0:
+            trip_count = trip_count + incrementer
+        incrementer = lcm([incrementer, bus_id])
+    print(trip_count * first_bus_id)
+
+
+print_part2_ans(INPUT)
