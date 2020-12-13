@@ -6,7 +6,7 @@ def print_part1_ans(input):
     total_answered = 0
     for line in input:
         if line == "\n":
-            total_answered = total_answered + len(group_answers)
+            total_answered += len(group_answers)
             group_answers = set()
             continue
         for question in line.rstrip():
@@ -20,7 +20,7 @@ def print_part2_ans(input):
     first_person = True
     for line in input:
         if line == "\n":
-            total_answered = total_answered + len(group_answers)
+            total_answered += len(group_answers)
             first_person = True
             continue
         person_answers = {q for q in line.rstrip()}

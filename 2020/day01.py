@@ -19,9 +19,9 @@ def triple_with_sum(arr, sum):
             if arr[i] + arr[j] + val == sum:
                 return (val, arr[i], arr[j])
             elif arr[i] + arr[j] + val < sum:
-                i = i + 1
+                i += 1
             else:
-                j = j - 1
+                j -= 1
 
 
 def print_part1_ans():

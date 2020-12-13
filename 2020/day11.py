@@ -23,7 +23,7 @@ def part1_occupied_count(seats, row, col):
             if row == adj_row and col == adj_col:
                 continue
             if seats[adj_row][adj_col] == OCCUPIED:
-                num_occupied = num_occupied + 1
+                num_occupied += 1
     return num_occupied
 
 
@@ -39,12 +39,12 @@ def part2_occupied_count(seats, row, col):
             and adj_col < len(seats[adj_row])
         ):
             if seats[adj_row][adj_col] == OCCUPIED:
-                num_occupied = num_occupied + 1
+                num_occupied += 1
                 break
             if seats[adj_row][adj_col] == EMPTY:
                 break
-            adj_row = adj_row + direction[0]
-            adj_col = adj_col + direction[1]
+            adj_row += direction[0]
+            adj_col += direction[1]
 
     return num_occupied
 
@@ -84,7 +84,7 @@ def print_ans(input, visible_threshold, occupiend_count_fn):
         seats = iterate(seats, visible_threshold, occupiend_count_fn)
         if seats == prev_seats:
             break
-        iterations = iterations + 1
+        iterations += 1
         prev_seats = seats
 
     print(count_occupied(seats))

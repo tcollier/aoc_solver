@@ -51,7 +51,7 @@ def print_ans(input, validation_fn):
     for line in input:
         if line == "\n":
             if not needed_fields:
-                num_valid = num_valid + 1
+                num_valid += 1
             needed_fields = {f for f in REQUIRED_FIELDS}
             continue
         parts = line.rstrip().split(" ")
@@ -60,7 +60,7 @@ def print_ans(input, validation_fn):
             if field != "cid" and validation_fn(field, val):
                 needed_fields.remove(field)
     if not needed_fields:
-        num_valid = num_valid + 1
+        num_valid += 1
     print(num_valid)
 
 

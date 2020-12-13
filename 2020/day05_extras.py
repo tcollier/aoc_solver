@@ -6,9 +6,9 @@ import timeit
 def tcollier_solution(bp):
     id = 0
     for char in bp:
-        id = id << 1
+        id <<= 1
         if char in ["B", "R"]:
-            id = id + 1
+            id += 1
     return id
 
 
@@ -38,8 +38,8 @@ def random_bp():
             next_ch = "B" if mask & seat_id else "F"
         else:
             next_ch = "R" if mask & seat_id else "L"
-        bp = bp + next_ch
-        mask = mask >> 1
+        bp += next_ch
+        mask >>= 1
     return bp
 
 

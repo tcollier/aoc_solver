@@ -4,9 +4,9 @@ INPUT = open("day05_input.txt", "r").readlines()
 def string_to_id(str):
     id = 0
     for char in str:
-        id = id << 1
+        id <<= 1
         if char in ["B", "R"]:
-            id = id + 1
+            id += 1
     return id
 
 

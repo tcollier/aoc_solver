@@ -26,7 +26,7 @@ def print_part2_ans(input):
     for i in range(max_index):
         sum = input[i]
         for j in range(i + 1, max_index):
-            sum = sum + input[j]
+            sum += input[j]
             if sum == target_num:
                 elems = input[i : j + 1]
                 elems.sort()

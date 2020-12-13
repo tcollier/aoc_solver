@@ -7,7 +7,7 @@ def valid_part1(min, max, char, pwd):
     num_char = 0
     for c in pwd:
         if c == char:
-            num_char = num_char + 1
+            num_char += 1
             if num_char > max:
                 return False
     if num_char >= min:

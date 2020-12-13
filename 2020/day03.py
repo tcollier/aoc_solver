@@ -14,7 +14,7 @@ def num_trees(grid, down_steps, right_steps):
     num_trees = 0
     for row in range(0, len(grid), down_steps):
         col = row // down_steps * right_steps % len(grid[0])
-        num_trees = num_trees + grid[row][col]
+        num_trees += grid[row][col]
     return num_trees
 
 

@@ -14,12 +14,12 @@ def run(instructions, fail_on_loop):
         visited.add(curr_ptr)
         instruction = instructions[curr_ptr]
         if instruction[0:3] == "acc":
-            acc = acc + int(instruction[4:])
-            curr_ptr = curr_ptr + 1
+            acc += int(instruction[4:])
+            curr_ptr += 1
         elif instruction[0:3] == "jmp":
-            curr_ptr = curr_ptr + int(instruction[4:])
+            curr_ptr += int(instruction[4:])
         elif instruction[0:3] == "nop":
-            curr_ptr = curr_ptr + 1
+            curr_ptr += 1
     return acc
 
 

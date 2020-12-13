@@ -9,9 +9,9 @@ def print_part1_ans(input):
     for i in range(1, len(input)):
         diff = input[i] - input[i - 1]
         if diff == 1:
-            num_1_diff = num_1_diff + 1
+            num_1_diff += 1
         elif diff == 3:
-            num_3_diff = num_3_diff + 1
+            num_3_diff += 1
     print(num_1_diff * num_3_diff)
 
 

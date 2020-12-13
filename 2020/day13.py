@@ -28,7 +28,7 @@ def print_part2_ans(input):
     incrementer = timestamp = first_bus_id
     for offset, bus_id in bus_ids.items():
         while (timestamp + offset) % bus_id != 0:
-            timestamp = timestamp + incrementer
+            timestamp += incrementer
         incrementer = lcm(incrementer, bus_id)
     print(timestamp)
 

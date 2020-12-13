@@ -38,7 +38,7 @@ def print_part1_ans(input):
 def count_bags(bags, color):
     total = 1
     for contained_color, num_bags in bags[color].items():
-        total = total + num_bags * count_bags(bags, contained_color)
+        total += num_bags * count_bags(bags, contained_color)
     return total
 
 
