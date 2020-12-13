@@ -57,13 +57,12 @@ def print_part2_ans(input):
         i: int(n) for i, n in enumerate(input[1].rstrip().split(",")) if n != "x"
     }
     first_bus_id = bus_ids.pop(0)
-    incrementer = 1
-    trip_count = 1
+    incrementer = timestamp = first_bus_id
     for offset, bus_id in bus_ids.items():
-        while (trip_count * first_bus_id + offset) % bus_id != 0:
-            trip_count = trip_count + incrementer
+        while (timestamp + offset) % bus_id != 0:
+            timestamp = timestamp + incrementer
         incrementer = lcm([incrementer, bus_id])
-    print(trip_count * first_bus_id)
+    print(timestamp)
 
 
 print_part2_ans(INPUT)
