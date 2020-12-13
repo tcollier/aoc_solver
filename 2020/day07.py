@@ -1,4 +1,4 @@
-INPUT = open("day7_input.txt", "r").readlines()
+INPUT = open("day07_input.txt", "r").readlines()
 
 import re
 

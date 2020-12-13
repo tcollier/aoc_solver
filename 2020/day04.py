@@ -1,6 +1,6 @@
 import re
 
-INPUT = open("day4_input.txt", "r").readlines()
+INPUT = open("day04_input.txt", "r").readlines()
 
 REQUIRED_FIELDS = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
 
@@ -64,4 +64,4 @@ def print_ans(input, validation_fn):
     print(num_valid)
 
 
-print_ans(INPUT, part_validation)
+print_ans(INPUT, part2_validation)

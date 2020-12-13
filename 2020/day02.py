@@ -1,6 +1,6 @@
 import re
 
-INPUT = open("day2_input.txt", "r").readlines()
+INPUT = open("day02_input.txt", "r").readlines()
 
 
 def valid_part1(min, max, char, pwd):

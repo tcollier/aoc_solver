@@ -1,6 +1,6 @@
 import functools
 
-INPUT = open("day3_input.txt", "r").readlines()
+INPUT = open("day03_input.txt", "r").readlines()
 
 
 def parse_input(input):

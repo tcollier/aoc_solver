@@ -1,4 +1,4 @@
-INPUT = [int(l.rstrip()) for l in open("day9_input.txt", "r").readlines()]
+INPUT = [int(l.rstrip()) for l in open("day09_input.txt", "r").readlines()]
 
 POOL_SIZE = 25
 

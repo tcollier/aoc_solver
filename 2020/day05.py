@@ -1,4 +1,4 @@
-INPUT = open("day5_input.txt", "r").readlines()
+INPUT = open("day05_input.txt", "r").readlines()
 
 
 def string_to_id(str):

@@ -1,4 +1,4 @@
-INPUT = open("day6_input.txt", "r").readlines()
+INPUT = open("day06_input.txt", "r").readlines()
 
 
 def print_part1_ans(input):

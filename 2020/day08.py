@@ -1,4 +1,4 @@
-INPUT = open("day8_input.txt", "r").readlines()
+INPUT = open("day08_input.txt", "r").readlines()
 
 
 def run(instructions, fail_on_loop):
