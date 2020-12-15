@@ -2,18 +2,17 @@ INPUT = [14, 3, 1, 0, 9, 5]
 
 
 def print_ans(input, n):
-    prev_last_usage = {}
     last_usage = {}
-    for i, curr_num in enumerate(input):
-        last_usage[curr_num] = i
+    for i in range(len(input) - 1):
+        last_usage[input[i]] = i
+    prev_num = input[-1]
     for i in range(len(input), n):
-        if curr_num not in prev_last_usage:
+        if prev_num not in last_usage:
             curr_num = 0
         else:
-            curr_num = last_usage[curr_num] - prev_last_usage[curr_num]
-        if curr_num in last_usage:
-            prev_last_usage[curr_num] = last_usage[curr_num]
-        last_usage[curr_num] = i
+            curr_num = i - 1 - last_usage[prev_num]
+        last_usage[prev_num] = i - 1
+        prev_num = curr_num
     print(curr_num)
 
 
