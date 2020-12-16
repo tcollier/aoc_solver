@@ -3,65 +3,52 @@ import re
 INPUT = [l.rstrip() for l in open("day16_input.txt", "r").readlines()]
 
 
-def ticket_parts(input):
+def parse_input(input):
+    parse_state = "start"
     parts = {}
+    mine = None
+    nearby = []
     for line in input:
-        if line == "":
-            return parts
-        else:
-            match = re.match(r"(.+): (\d+)-(\d+) or (\d+)-(\d+)", line)
-            parts[match[1]] = [
-                range(int(match[2]), int(match[3]) + 1),
-                range(int(match[4]), int(match[5]) + 1),
-            ]
+        if parse_state == "start":
+            if line == "":
+                parse_state = "mine"
+            else:
+                match = re.match(r"(.+): (\d+)-(\d+) or (\d+)-(\d+)", line)
+                parts[match[1]] = [
+                    range(int(match[2]), int(match[3]) + 1),
+                    range(int(match[4]), int(match[5]) + 1),
+                ]
+        elif parse_state == "mine":
+            if line == "":
+                parse_state = "nearby"
+            elif line != "your ticket:":
+                mine = [int(i) for i in line.split(",")]
+        elif line != "nearby tickets:":
+            nearby.append([int(i) for i in line.split(",")])
+    return {"parts": parts, "mine": mine, "nearby": nearby}
 
 
-def valid_numbers(input):
+def valid_numbers(parts):
     max_val = 0
     range_max = 0
-    for _, rngs in ticket_parts(input).items():
+    for _, rngs in parts.items():
         for rng in rngs:
             range_max = max(i for i in rng)
             if range_max > max_val:
                 max_val = range_max
     valid_nums = [False for _ in range(range_max + 1)]
-    for _, rngs in ticket_parts(input).items():
+    for _, rngs in parts.items():
         for rng in rngs:
             for i in rng:
                 valid_nums[i] = True
     return valid_nums
 
 
-def my_ticket(input):
-    parse_state = "start"
-    for line in input:
-        if parse_state == "start":
-            if line == "":
-                parse_state = "mine"
-        elif parse_state == "mine":
-            if line != "your ticket:":
-                return [int(i) for i in line.split(",")]
-
-
-def nearby_tickets(input):
-    parse_state = "start"
-    tickets = []
-    for line in input:
-        if parse_state == "start":
-            if line == "":
-                parse_state = "mine"
-        elif parse_state == "mine":
-            if line == "":
-                parse_state = "nearby"
-        elif line != "nearby tickets:":
-            tickets.append([int(i) for i in line.split(",")])
-    return tickets
-
-
 def print_part1_ans(input):
-    valid_nums = valid_numbers(input)
     invalid_sum = 0
-    for ticket in nearby_tickets(input):
+    data = parse_input(input)
+    valid_nums = valid_numbers(data["parts"])
+    for ticket in data["nearby"]:
         for num in ticket:
             if num >= len(valid_nums) or not valid_nums[num]:
                 invalid_sum += num
@@ -69,9 +56,10 @@ def print_part1_ans(input):
 
 
 def print_part2_ans(input):
-    valid_nums = valid_numbers(input)
     valid_tickets = []
-    for ticket in nearby_tickets(input):
+    data = parse_input(input)
+    valid_nums = valid_numbers(data["parts"])
+    for ticket in data["nearby"]:
         valid = True
         for num in ticket:
             if num >= len(valid_nums) or not valid_nums[num]:
@@ -79,7 +67,7 @@ def print_part2_ans(input):
                 break
         if valid:
             valid_tickets.append(ticket)
-    parts = ticket_parts(input)
+    parts = data["parts"]
     possible_part_order = []
     for i in range(len(parts)):
         available_parts = set()
@@ -93,7 +81,6 @@ def print_part2_ans(input):
                     break
         possible_part_order.append(available_parts)
     part_order = [None for _ in range(len(possible_part_order))]
-
     done = False
     while not done:
         for i in range(len(possible_part_order)):
@@ -108,10 +95,10 @@ def print_part2_ans(input):
                 done = False
                 break
     product = 1
-    my_tick = my_ticket(input)
+    my_ticket = data["mine"]
     for i, part in enumerate(part_order):
         if re.match(r"departure", part):
-            product *= my_tick[i]
+            product *= my_ticket[i]
     print(product)
 
 
