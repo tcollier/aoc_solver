@@ -3,6 +3,32 @@ import re
 INPUT = [l.rstrip() for l in open("day16_input.txt", "r").readlines()]
 
 
+def my_ticket(input):
+    parse_state = "start"
+    for line in input:
+        if parse_state == "start":
+            if line == "":
+                parse_state = "mine"
+        elif parse_state == "mine":
+            if line != "your ticket:":
+                return [int(i) for i in line.split(",")]
+
+
+def nearby_tickets(input):
+    parse_state = "start"
+    tickets = []
+    for line in input:
+        if parse_state == "start":
+            if line == "":
+                parse_state = "mine"
+        elif parse_state == "mine":
+            if line == "":
+                parse_state = "nearby"
+        elif line != "nearby tickets:":
+            tickets.append([int(i) for i in line.split(",")])
+    return tickets
+
+
 def valid_numbers(input):
     ranges = []
     for line in input:
@@ -24,20 +50,12 @@ def valid_numbers(input):
 
 
 def print_part1_ans(input):
-    parse_state = "start"
     valid_nums = valid_numbers(input)
     invalid_sum = 0
-    for line in input:
-        if parse_state == "start":
-            if line == "":
-                parse_state = "mine"
-        elif parse_state == "mine":
-            if line == "":
-                parse_state = "nearby"
-        elif line != "nearby tickets:":
-            for num in [int(i) for i in line.split(",")]:
-                if num >= len(valid_nums) or not valid_nums[num]:
-                    invalid_sum += num
+    for ticket in nearby_tickets(input):
+        for num in ticket:
+            if num >= len(valid_nums) or not valid_nums[num]:
+                invalid_sum += num
     print(invalid_sum)
 
 
