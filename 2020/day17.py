@@ -77,17 +77,6 @@ class Board(object):
             new_hcubes.append(new_cubes)
         return Board(new_hcubes)
 
-    # def __repr__(self):
-    #     repr = ""
-    #     z_index = -(len(self.hcubes) - 1) // 2
-    #     for layer in self.cubes:
-    #         repr += f"z {z_index}\n"
-    #         for row in layer:
-    #             repr += "".join(["#" if cube == 1 else "." for cube in row]) + "\n"
-    #         repr += "\n"
-    #         z_index += 1
-    #     return repr
-
 
 def print_part1_ans(input):
     board = Board.from_input(input)
