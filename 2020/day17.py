@@ -31,6 +31,20 @@ class Board(object):
         return count
 
     def iterate(self):
+        def num_neighbors(w, z, y, x):
+            count = 0
+            for nw in range(max(0, w - 1), min(w + 2, len(self.hcubes))):
+                for nz in range(max(0, z - 1), min(z + 2, len(self.hcubes[0]))):
+                    for ny in range(max(0, y - 1), min(y + 2, len(self.hcubes[0][0]))):
+                        for nx in range(
+                            max(0, x - 1), min(x + 2, len(self.hcubes[0][0][0])),
+                        ):
+                            if w == nw and z == nz and y == ny and x == nx:
+                                continue
+                            else:
+                                count += self.hcubes[nw][nz][ny][nx]
+            return count
+
         new_hcubes = deque()
         for w in range(-1, len(self.hcubes) + 1):
             new_cubes = deque()
@@ -47,24 +61,7 @@ class Board(object):
                             and 0 <= x < len(self.hcubes[w][z][y])
                         ):
                             cube = self.hcubes[w][z][y][x]
-                        active_neighbors = 0
-                        for nw in range(max(0, w - 1), min(w + 2, len(self.hcubes))):
-                            for nz in range(
-                                max(0, z - 1), min(z + 2, len(self.hcubes[0]))
-                            ):
-                                for ny in range(
-                                    max(0, y - 1), min(y + 2, len(self.hcubes[0][0]))
-                                ):
-                                    for nx in range(
-                                        max(0, x - 1),
-                                        min(x + 2, len(self.hcubes[0][0][0])),
-                                    ):
-                                        if w == nw and z == nz and y == ny and x == nx:
-                                            continue
-                                        else:
-                                            active_neighbors += self.hcubes[nw][nz][ny][
-                                                nx
-                                            ]
+                        active_neighbors = num_neighbors(w, z, y, x)
                         if cube == 1 and active_neighbors in [2, 3]:
                             new_row.append(1)
                         elif cube == 0 and active_neighbors == 3:
