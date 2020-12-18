@@ -4,8 +4,4 @@ class Integer
   end
 end
 
-total = 0
-File.open('day18_input.txt', 'r').each do |line|
-  total += eval(line.gsub(/\+/, '**'))
-end
-puts total
+puts eval(File.read('day18_input.txt').chomp.gsub(/\+/, '**').gsub("\n", '+'))
