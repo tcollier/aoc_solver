@@ -12,7 +12,7 @@ def flip_matrix(matrix):
     return [row[::-1] for row in matrix]
 
 
-class TileOrientation(object):
+class Tile(object):
     def __init__(self, tile_num, pixels, flipped):
         self.tile_num = tile_num
         self.pixels = [[p for p in row] for row in pixels]
@@ -56,8 +56,8 @@ def parse_tiles(input):
     pixels = []
     for line in input:
         if line == "":
-            tiles.append(TileOrientation(curr_tile_num, pixels, False))
-            tiles.append(TileOrientation(curr_tile_num, pixels, True))
+            tiles.append(Tile(curr_tile_num, pixels, False))
+            tiles.append(Tile(curr_tile_num, pixels, True))
             pixels = []
         else:
             match = re.match(r"Tile (\d+):", line)
@@ -65,8 +65,8 @@ def parse_tiles(input):
                 curr_tile_num = int(match[1])
             else:
                 pixels.append([c for c in line])
-    tiles.append(TileOrientation(curr_tile_num, pixels, False))
-    tiles.append(TileOrientation(curr_tile_num, pixels, True))
+    tiles.append(Tile(curr_tile_num, pixels, False))
+    tiles.append(Tile(curr_tile_num, pixels, True))
     set_lonely_edges(tiles)
     return tiles
 
