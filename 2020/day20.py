@@ -153,8 +153,7 @@ MONSTER = [
 ]
 
 
-def assemble_puzzle(tiles, pieces):
-    side_length = int(math.sqrt(len(tiles) / 2))
+def assemble_puzzle(pieces, side_length):
     used = set()
     puzzle = [[None for _ in range(side_length)] for _ in range(side_length)]
 
@@ -218,7 +217,7 @@ def all_rotations(orig):
 def print_part2_ans(input):
     tiles = parse_tiles(input)
     pieces = group_pieces(tiles)
-    puzzle = assemble_puzzle(tiles, pieces)
+    puzzle = assemble_puzzle(pieces, int(math.sqrt(len(tiles) / 2)))
     image = join_puzzle(puzzle)
     monsters = all_rotations(MONSTER)
     monster_count = 0
