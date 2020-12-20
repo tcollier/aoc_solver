@@ -46,21 +46,8 @@ class TileOrientation(object):
     def lonely_top(self):
         return self.top() in self._lonely_edges
 
-    def lonely_right(self):
-        return self.right() in self._lonely_edges
-
-    def lonely_bottom(self):
-        return self.bottom(True) in self._lonely_edges
-
     def lonely_left(self):
         return self.left(True) in self._lonely_edges
-
-    def __repr__(self):
-        string = f"Tile: {self.tile_num}\n"
-        for row in self.pixels:
-            string += "".join(row)
-            string += "\n"
-        return string + "\n"
 
 
 def parse_tiles(input):
@@ -217,7 +204,7 @@ def count_hashes(image):
     return hashes
 
 
-def image_rotations(orig):
+def all_rotations(orig):
     images = []
     flipped = flip_matrix(orig)
     for _ in range(4):
@@ -233,7 +220,7 @@ def print_part2_ans(input):
     pieces = group_pieces(tiles)
     puzzle = assemble_puzzle(tiles, pieces)
     image = join_puzzle(puzzle)
-    monsters = image_rotations(MONSTER)
+    monsters = all_rotations(MONSTER)
     monster_count = 0
     for monster in monsters:
         monster_count = count_monsters(image, monster)
