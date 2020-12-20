@@ -233,15 +233,13 @@ def print_part2_ans(input):
     pieces = group_pieces(tiles)
     puzzle = assemble_puzzle(tiles, pieces)
     image = join_puzzle(puzzle)
-    image_hashes = count_hashes(image)
-    monster_hashes = count_hashes(MONSTER)
     monsters = image_rotations(MONSTER)
     monster_count = 0
     for monster in monsters:
         monster_count = count_monsters(image, monster)
         if monster_count > 0:
             break
-    print(image_hashes - monster_count * monster_hashes)
+    print(count_hashes(image) - monster_count * count_hashes(MONSTER))
 
 
 print_part2_ans(INPUT)
