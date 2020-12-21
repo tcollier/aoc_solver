@@ -12,9 +12,9 @@ def get_allergens(input):
         foods.append(set(match[1].split(" ")))
         for allergen in match[2].split(", "):
             if allergen in possible_allergens:
-                possible_allergens[allergen] = possible_allergens[
-                    allergen
-                ].intersection(ingredients)
+                possible_allergens[allergen] = (
+                    possible_allergens[allergen] & ingredients
+                )
             else:
                 possible_allergens[allergen] = ingredients
     allergens = {}
@@ -25,7 +25,7 @@ def get_allergens(input):
                 allergens[allergen] = ingredient
                 for allergen in possible_allergens.keys():
                     if ingredient in possible_allergens[allergen]:
-                        possible_allergens[allergen].remove(ingredient)
+                        possible_allergens[allergen] -= {ingredient}
                 break
     return allergens, foods
 
