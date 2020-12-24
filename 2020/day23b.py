@@ -6,22 +6,6 @@ INPUT = "198753462"
 # Sample
 # INPUT = "389125467"
 
-DEBUG = False
-
-
-def cups_to_str(cups, head):
-    labels = []
-    curr = head
-    while True:
-        if curr == head:
-            labels.append(f"({str(cups[curr] + 1)})")
-        else:
-            labels.append(str(cups[curr] + 1))
-        curr = cups[curr]
-        if curr == head:
-            break
-    return " ".join(labels)
-
 
 def generate_circle(labels, num_cups):
     indexes = [l - 1 for l in labels]
@@ -41,19 +25,12 @@ def generate_circle(labels, num_cups):
 
 
 def move(cups, head, move_num):
-    if DEBUG:
-        print(f"-- move {move_num} --")
-        print("cups:", cups_to_str(cups, head))
-
     cup1 = cups[head]
     cup2 = cups[cup1]
     cup3 = cups[cup2]
     cup4 = cups[cup3]
     pickups = set([cup2, cup3, cup4])
     cups[cup1] = cups[cup4]
-
-    if DEBUG:
-        print(f"pick up: {cup2 + 1} {cup3 + 1} {cup4 + 1}")
 
     dest = cups[head] - 1
     if dest < 0:
@@ -62,10 +39,6 @@ def move(cups, head, move_num):
         dest -= 1
         if dest < 0:
             dest = len(cups) - 1
-
-    if DEBUG:
-        print("destination:", dest + 1)
-        print()
 
     tmp = cups[dest]
     cups[dest] = cup2

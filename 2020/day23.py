@@ -6,27 +6,11 @@ INPUT = "198753462"
 # Sample
 # INPUT = "389125467"
 
-DEBUG = False
-
 
 class Cup(object):
     def __init__(self, label):
         self.label = label
         self.next = None
-
-
-def cups_to_str(head, highlight_head=False, delim=" "):
-    curr = head
-    cups = []
-    while curr:
-        if curr == head and highlight_head:
-            cups.append(f"({head.label})")
-        else:
-            cups.append(str(curr.label))
-        curr = curr.next
-        if curr == head:
-            break
-    return delim.join(cups)
 
 
 def generate_circle(labels, num_cups):
@@ -71,17 +55,10 @@ def insert_pickups(destination, pick_ups):
 
 
 def move(head, indexes, num_cups, move_num):
-    if DEBUG:
-        print(f"-- move {move_num} --")
-        print("cups:", cups_to_str(head, True))
-
     dest_label = head.label - 1
     pick_ups = head.next
     head.next = skip_cups(head.next, 3)
     break_circle(pick_ups, 2)
-
-    if DEBUG:
-        print("pick up:", cups_to_str(pick_ups))
 
     picked = set()
     curr_picked = pick_ups
@@ -94,10 +71,6 @@ def move(head, indexes, num_cups, move_num):
         dest_label -= 1
         if dest_label == 0:
             dest_label = num_cups
-
-    if DEBUG:
-        print("destination:", dest_label)
-        print()
 
     insert_pickups(indexes[dest_label - 1], pick_ups)
 
