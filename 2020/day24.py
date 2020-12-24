@@ -1,16 +1,23 @@
 INPUT = [l.rstrip() for l in open("day24_input.txt", "r").readlines()]
 
+SE = 1 - 1j
+SW = -1 - 1j
+NE = 1 + 1j
+NW = -1 + 1j
+E = 2
+W = -2
+
 
 def initial_flip(input):
     tiles = set()
     for line in input:
         modified_line = (
-            line.replace(r"se", "(1 - 1j) + ")
-            .replace(r"sw", "(-1 - 1j) + ")
-            .replace(r"ne", "(1 + 1j) + ")
-            .replace(r"nw", "(-1 + 1j) + ")
-            .replace(r"e", "2 + ")
-            .replace(r"w", "-2 + ")
+            line.replace(r"se", f"{SE} + ")
+            .replace(r"sw", f"{SW} + ")
+            .replace(r"ne", f"{NE} + ")
+            .replace(r"nw", f"{NW} + ")
+            .replace(r"e", f"{E} + ")
+            .replace(r"w", f"{W} + ")
         )
         tile = eval(modified_line + "0")
         if tile in tiles:
@@ -26,12 +33,12 @@ def print_part1_ans(input):
 
 def neighbors(tile):
     return [
-        tile + 1 - 1j,
-        tile - 1 - 1j,
-        tile + 1 + 1j,
-        tile - 1 + 1j,
-        tile + 2,
-        tile - 2,
+        tile + SE,
+        tile + SW,
+        tile + NE,
+        tile + NW,
+        tile + E,
+        tile + W,
     ]
 
 
