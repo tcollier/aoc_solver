@@ -2,51 +2,36 @@ INPUT = [l.rstrip() for l in open("day24_input.txt", "r").readlines()]
 
 
 def initial_flip(input):
-    points = set()
+    tiles = set()
     for line in input:
-        x, y = 0, 0
         modified_line = (
-            line.replace(r"se", "a")
-            .replace(r"sw", "b")
-            .replace(r"ne", "c")
-            .replace(r"nw", "d")
+            line.replace(r"se", "(1 - 1j) + ")
+            .replace(r"sw", "(-1 - 1j) + ")
+            .replace(r"ne", "(1 + 1j) + ")
+            .replace(r"nw", "(-1 + 1j) + ")
+            .replace(r"e", "2 + ")
+            .replace(r"w", "-2 + ")
         )
-        for c in modified_line:
-            if c == "a":
-                x += 0.5
-                y -= 1
-            elif c == "b":
-                x -= 0.5
-                y -= 1
-            elif c == "c":
-                x += 0.5
-                y += 1
-            elif c == "d":
-                x -= 0.5
-                y += 1
-            elif c == "e":
-                x += 1
-            elif c == "w":
-                x -= 1
-        if (x, y) not in points:
-            points.add((x, y))
+        tile = eval(modified_line + "0")
+        if tile in tiles:
+            tiles.remove(tile)
         else:
-            points.remove((x, y))
-    return points
+            tiles.add(tile)
+    return tiles
 
 
 def print_part1_ans(input):
     print(len(initial_flip(input)))
 
 
-def neighbors(point):
+def neighbors(tile):
     return [
-        (point[0] + 0.5, point[1] - 1),
-        (point[0] - 0.5, point[1] - 1),
-        (point[0] + 1, point[1]),
-        (point[0] + 0.5, point[1] + 1),
-        (point[0] - 0.5, point[1] + 1),
-        (point[0] - 1, point[1]),
+        tile + 1 - 1j,
+        tile - 1 - 1j,
+        tile + 1 + 1j,
+        tile - 1 + 1j,
+        tile + 2,
+        tile - 2,
     ]
 
 
