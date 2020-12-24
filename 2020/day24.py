@@ -68,4 +68,4 @@ def print_part2_ans(input):
     print(len(tiles))
 
 
-print_part2_ans(INPUT)
+# print_part2_ans(INPUT)
