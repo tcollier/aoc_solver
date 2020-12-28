@@ -1,18 +1,12 @@
-class Point(object):
-    def __init__(self, east, north):
-        self.east = east
-        self.north = north
-
-
 INPUT = open("day12_input.txt", "r").readlines()
 
 DIRECTIONS = ["E", "S", "W", "N"]
 
 MOVE = {
-    "E": lambda point, _, dist: Point(point.east + dist, point.north),
-    "S": lambda point, _, dist: Point(point.east, point.north - dist),
-    "W": lambda point, _, dist: Point(point.east - dist, point.north),
-    "N": lambda point, _, dist: Point(point.east, point.north + dist),
+    "E": lambda point, _, dist: point + dist,
+    "S": lambda point, _, dist: point - dist * 1j,
+    "W": lambda point, _, dist: point - dist,
+    "N": lambda point, _, dist: point + dist * 1j,
 }
 
 
@@ -37,13 +31,13 @@ def part1_apply_instruction(point, dir_index, instruction):
 
 
 def print_part1_ans(input):
-    point = Point(0, 0)
+    point = 0
     dir_index = 0
     for instruction in input:
         point, dir_index = part1_apply_instruction(
             point, dir_index, instruction.rstrip()
         )
-    print(abs(point.east) + abs(point.north))
+    print(round(abs(point.real) + abs(point.imag)))
 
 
 def part2_apply_instruction(ship, waypoint, instruction):
@@ -51,14 +45,12 @@ def part2_apply_instruction(ship, waypoint, instruction):
         steps = int(instruction[1:]) // 90
         for _ in range(steps):
             if instruction[0] == "R":
-                waypoint = Point(waypoint.north, -waypoint.east)
+                waypoint *= -1j
             else:
-                waypoint = Point(-waypoint.north, waypoint.east)
+                waypoint *= 1j
     elif instruction[0] == "F":
         dist = int(instruction[1:])
-        ship = Point(
-            ship.east + dist * waypoint.east, ship.north + dist * waypoint.north
-        )
+        ship = ship + dist * waypoint
     else:
         fn = MOVE[instruction[0]]
         waypoint = fn(waypoint, None, int(instruction[1:]))
@@ -66,11 +58,11 @@ def part2_apply_instruction(ship, waypoint, instruction):
 
 
 def print_part2_ans(input):
-    ship = Point(0, 0)
-    waypoint = Point(10, 1)
+    ship = 0
+    waypoint = 10 + 1j
     for instruction in input:
         ship, waypoint = part2_apply_instruction(ship, waypoint, instruction.rstrip())
-    print(abs(ship.east) + abs(ship.north))
+    print(round(abs(ship.real) + abs(ship.imag)))
 
 
 print_part1_ans(INPUT)
