@@ -1,4 +1,4 @@
-INPUT = open("day08_input.txt", "r").readlines()
+INPUT = [l.rstrip() for l in open("day08_input.txt", "r").readlines()]
 
 
 def run(instructions, fail_on_loop):
@@ -24,27 +24,25 @@ def run(instructions, fail_on_loop):
 
 
 def print_part1_ans(input):
-    instructions = [l.rstrip() for l in input]
-    print(run(instructions, False))
+    print(run(input, False))
 
 
 def print_part2_ans(input):
-    instructions = [l.rstrip() for l in input]
-    for i in range(len(instructions)):
-        orig = instructions[i]
+    for i in range(len(input)):
+        orig = input[i]
         if orig[0:3] == "jmp":
-            instructions[i] = f"nop {orig[4:]}"
+            input[i] = f"nop {orig[4:]}"
         elif orig[0:3] == "nop":
-            instructions[i] = f"jmp {orig[4:]}"
+            input[i] = f"jmp {orig[4:]}"
         else:
             continue
 
         try:
-            print(run(instructions, True))
+            print(run(input, True))
             break
         except:
             pass
-        instructions[i] = orig
+        input[i] = orig
 
 
 print_part2_ans(INPUT)

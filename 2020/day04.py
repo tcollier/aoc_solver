@@ -1,6 +1,6 @@
 import re
 
-INPUT = open("day04_input.txt", "r").readlines()
+INPUT = [l.rstrip() for l in open("day04_input.txt", "r").readlines()]
 
 REQUIRED_FIELDS = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
 
@@ -49,12 +49,12 @@ def print_ans(input, validation_fn):
     needed_fields = {f for f in REQUIRED_FIELDS}
     num_valid = 0
     for line in input:
-        if line == "\n":
+        if line == "":
             if not needed_fields:
                 num_valid += 1
             needed_fields = {f for f in REQUIRED_FIELDS}
             continue
-        parts = line.rstrip().split(" ")
+        parts = line.split(" ")
         for part in parts:
             field, val = part.split(":")
             if field != "cid" and validation_fn(field, val):

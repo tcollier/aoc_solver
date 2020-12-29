@@ -1,4 +1,4 @@
-INPUT = open("day07_input.txt", "r").readlines()
+INPUT = [l.rstrip() for l in open("day07_input.txt", "r").readlines()]
 
 import re
 
@@ -17,7 +17,7 @@ def parse_rule(line):
 def print_part1_ans(input):
     bags = {}
     for line in input:
-        container, contents = parse_rule(line.rstrip())
+        container, contents = parse_rule(line)
         if container not in bags:
             bags[container] = set()
         for contained in contents:
@@ -45,7 +45,7 @@ def count_bags(bags, color):
 def print_part2_ans(input):
     bags = {}
     for line in input:
-        container, contents = parse_rule(line.rstrip())
+        container, contents = parse_rule(line)
         bags[container] = contents
     print(count_bags(bags, "shiny gold") - 1)
 

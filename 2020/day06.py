@@ -1,15 +1,15 @@
-INPUT = open("day06_input.txt", "r").readlines()
+INPUT = [l.rstrip() for l in open("day06_input.txt", "r").readlines()]
 
 
 def print_part1_ans(input):
     group_answers = set()
     total_answered = 0
     for line in input:
-        if line == "\n":
+        if line == "":
             total_answered += len(group_answers)
             group_answers = set()
             continue
-        for question in line.rstrip():
+        for question in line:
             group_answers.add(question)
 
     print(total_answered + len(group_answers))
@@ -19,11 +19,11 @@ def print_part2_ans(input):
     total_answered = 0
     first_person = True
     for line in input:
-        if line == "\n":
+        if line == "":
             total_answered += len(group_answers)
             first_person = True
             continue
-        person_answers = {q for q in line.rstrip()}
+        person_answers = {q for q in line}
         if first_person:
             group_answers = person_answers
             first_person = False

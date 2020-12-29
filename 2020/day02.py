@@ -1,6 +1,6 @@
 import re
 
-INPUT = open("day02_input.txt", "r").readlines()
+INPUT = [l.rstrip() for l in open("day02_input.txt", "r").readlines()]
 
 
 def valid_part1(min, max, char, pwd):
@@ -21,7 +21,7 @@ def valid_part2(pos1, pos2, char, pwd):
 def print_ans(input, valid_fn):
     num_correct = 0
     for line in input:
-        match = re.match(r"^(\d+)-(\d+) (\w): (\w+)$", line.rstrip())
+        match = re.match(r"^(\d+)-(\d+) (\w): (\w+)$", line)
         if valid_fn(int(match[1]), int(match[2]), match[3], match[4]):
             num_correct += 1
     print(num_correct)

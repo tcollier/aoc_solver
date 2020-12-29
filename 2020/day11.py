@@ -1,4 +1,4 @@
-INPUT = open("day11_input.txt", "r").readlines()
+INPUT = [l.rstrip() for l in open("day11_input.txt", "r").readlines()]
 
 DIRECTIONS = [
     (-1, -1),
@@ -76,12 +76,12 @@ def print_seats(seats):
     print("\n".join(["".join(r) for r in seats]))
 
 
-def print_ans(input, visible_threshold, occupiend_count_fn):
-    seats = [[s for s in l.rstrip()] for l in input]
+def print_ans(input, visible_threshold, occupied_count_fn):
+    seats = [[s for s in l] for l in input]
     iterations = 0
     prev_seats = None
     while True:
-        seats = iterate(seats, visible_threshold, occupiend_count_fn)
+        seats = iterate(seats, visible_threshold, occupied_count_fn)
         if seats == prev_seats:
             break
         iterations += 1

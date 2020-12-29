@@ -1,4 +1,4 @@
-INPUT = [int(l) for l in open("day01_input.txt", "r").readlines()]
+INPUT = [int(l.rstrip()) for l in open("day01_input.txt", "r").readlines()]
 
 
 def pair_with_sum(arr, sum):
