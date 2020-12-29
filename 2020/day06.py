@@ -23,7 +23,7 @@ def print_part2_ans(input):
             total_answered += len(group_answers)
             first_person = True
             continue
-        person_answers = {q for q in line}
+        person_answers = set(line)
         if first_person:
             group_answers = person_answers
             first_person = False

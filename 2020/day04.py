@@ -7,8 +7,7 @@ REQUIRED_FIELDS = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
 
 def year_between(val, min, max):
     if re.match(r"^\d{4}$", val):
-        int_val = int(val)
-        return min <= int_val <= max
+        return min <= int(val) <= max
     else:
         return False
 
@@ -16,11 +15,9 @@ def year_between(val, min, max):
 def valid_height(val):
     match = re.match(r"^(\d+)(in|cm)$", val)
     if match and match[2] == "cm":
-        int_val = int(match[1])
-        return 150 <= int_val <= 193
+        return 150 <= int(match[1]) <= 193
     elif match and match[2] == "in":
-        int_val = int(match[1])
-        return 59 <= int_val <= 76
+        return 59 <= int(match[1]) <= 76
     else:
         return False
 
@@ -46,13 +43,13 @@ def part2_validation(field, val):
 
 
 def print_ans(input, validation_fn):
-    needed_fields = {f for f in REQUIRED_FIELDS}
+    needed_fields = set(REQUIRED_FIELDS)
     num_valid = 0
     for line in input:
         if line == "":
             if not needed_fields:
                 num_valid += 1
-            needed_fields = {f for f in REQUIRED_FIELDS}
+            needed_fields = set(REQUIRED_FIELDS)
             continue
         parts = line.split(" ")
         for part in parts:

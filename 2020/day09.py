@@ -4,7 +4,7 @@ POOL_SIZE = 25
 
 
 def first_invalid_number(input):
-    number_pool = {n for n in input[0:POOL_SIZE]}
+    number_pool = set(input[0:POOL_SIZE])
     for i in range(POOL_SIZE, len(input)):
         valid = False
         for j in range(POOL_SIZE):
