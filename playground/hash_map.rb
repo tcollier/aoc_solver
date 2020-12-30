@@ -70,7 +70,7 @@ class HashMap
     end
   end
 
-  def to_s
+  def inspect
     str = '{'
     first = true
     @entries.each do |entry|
