@@ -1,7 +1,7 @@
 require 'benchmark'
 require_relative 'hash_map'
 
-NUM_ITERATIONS = 100_000
+NUM_ITERATIONS = 1_000_000
 
 WIDTH = 20
 
@@ -17,6 +17,18 @@ end
 num_iterations = NUM_ITERATIONS
 while num_iterations >= 1
   num_keys = NUM_ITERATIONS / num_iterations
+
+  hash_map_entries = num_keys.times.map { |i| [i, i] }
+  hash_entries = hash_map_entries.flatten
+  Benchmark.bm(WIDTH) do |bm|
+    bm.report("Hash #{num_keys}-init") do
+      num_iterations.times { Hash.new[hash_entries] }
+    end
+    bm.report("HashMap #{num_keys}-init") do
+      num_iterations.times { HashMap.new(hash_map_entries) }
+    end
+  end
+
   hash = Hash.new
   map = HashMap.new
 
@@ -46,5 +58,5 @@ while num_iterations >= 1
     end
   end
 
-  num_iterations /= 10
+  num_iterations /= 100
 end

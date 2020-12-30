@@ -155,4 +155,32 @@ describe HashMap do
     entries = map.instance_variable_get('@entries')
     expect(entries.length).to be > orig_entries.length
   end
+
+  context 'when entries are initialized' do
+    subject(:map) { described_class.new([[:a, 1]]) }
+
+    it 'retrieves the value' do
+      expect(map[:a]).to eq(1)
+    end
+  end
+
+  context 'when entries are initialized with two keys in the same bucket' do
+    subject(:map) { described_class.new([[key1, 1], [key2, 2]]) }
+
+    let(:key1) { HashableKey.new(0) }
+    let(:key2) { HashableKey.new(0) }
+
+    it 'retrieves the values' do
+      expect(map[key1]).to eq(1)
+      expect(map[key2]).to eq(2)
+    end
+  end
+
+  context 'when entries are initialized with identical keys' do
+    it 'raises an ArgumentError' do
+      expect do
+        described_class.new([[:a, 1], [:a, 2]])
+      end.to raise_error(ArgumentError)
+    end
+  end
 end

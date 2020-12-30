@@ -28,14 +28,43 @@ class HashMap
   ]
   private_constant :SIZES
 
-  def initialize
-    @size_index = 0
+  def initialize(entries=[])
+    cum_alloc = 0
+    SIZES.each.with_index do |size, index|
+      cum_alloc += size[1]
+      if entries.length <= cum_alloc
+        @size_index = index
+        break
+      end
+    end
+    @size_index = SIZES.length - 1 if @size_index.nil?
+
     @size = SIZES[@size_index][0]
     @entries = Array.new(@size)
 
     # Pre-allocated a bunch of entries so that they are more likely to be in
     # contiguous memory and thus reads should be faster.
-    @prealloc_entries = Array.new(SIZES[@size_index][1]) { Entry.new }
+    prealloc_size = entries.length + SIZES[@size_index][1]
+    @prealloc_entries = Array.new(prealloc_size) { Entry.new }
+    entries.each do |key, value|
+      entry = @prealloc_entries.pop
+      entry.key = key
+      entry.value = value
+      bucket = key.hash % @size
+      prev = nil
+      curr = @entries[bucket]
+      while curr
+        raise ArgumentError, "Duplicate key definition: #{key}" if curr.key == key
+        prev = curr
+        curr = curr.next
+      end
+      if prev
+        entry.next = prev.next
+        prev.next = entry
+      else
+        @entries[bucket] = entry
+      end
+    end
   end
 
   def [](key)
