@@ -1,5 +1,7 @@
 # It's like a Hash, but slower!
 class HashMap
+  include Enumerable
+
   # A linked list item that stores the entry
   Entry = Struct.new(:key, :value, :next)
   private_constant :Entry
@@ -82,6 +84,16 @@ class HashMap
       resize! if @prealloc_entries.empty?
     end
     value
+  end
+
+  def each(&block)
+    @entries.each do |entry|
+      while entry
+        yield entry.key, entry.value
+        entry = entry.next
+      end
+    end
+    self
   end
 
   def inspect
