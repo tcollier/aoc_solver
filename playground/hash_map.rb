@@ -81,6 +81,7 @@ class HashMap
       end
       resize! if @prealloc_entries.empty?
     end
+    value
   end
 
   def inspect
