@@ -3,28 +3,48 @@ require_relative 'hash_map'
 
 NUM_ITERATIONS = 100_000
 
-hash = Hash.new
-map = HashMap.new
+WIDTH = 20
 
-Benchmark.bm(10) do |bm|
-  bm.report('Hash set') { NUM_ITERATIONS.times { |i| hash[0] = i } }
-  bm.report('HashMap set') { NUM_ITERATIONS.times { |i| map[0] = i } }
+Benchmark.bm(WIDTH) do |bm|
+  bm.report('Hash init') do
+    NUM_ITERATIONS.times { Hash.new }
+  end
+  bm.report('HashMap init') do
+    NUM_ITERATIONS.times { HashMap.new }
+  end
 end
 
-hash = Hash.new
-hash[0] = :a
-map = HashMap.new
-map[0] = :a
+num_iterations = NUM_ITERATIONS
+while num_iterations >= 1
+  num_keys = NUM_ITERATIONS / num_iterations
+  hash = Hash.new
+  map = HashMap.new
 
-Benchmark.bm(10) do |bm|
-  bm.report('Hash get') { NUM_ITERATIONS.times { hash[0] } }
-  bm.report('HashMap get') { NUM_ITERATIONS.times { map[0] } }
-end
+  Benchmark.bm(WIDTH) do |bm|
+    bm.report("Hash #{num_keys}-set") do
+      num_iterations.times do
+        num_keys.times { |i| hash[i] = i }
+      end
+    end
+    bm.report("HashMap #{num_keys}-set") do
+      num_iterations.times do
+        num_keys.times { |i| map[i] = i }
+      end
+    end
+  end
 
-hash = Hash.new
-map = HashMap.new
+  Benchmark.bm(WIDTH) do |bm|
+    bm.report("Hash #{num_keys}-get") do
+      num_iterations.times do
+        num_keys.times { |i| hash[i] }
+      end
+    end
+    bm.report("HashMap #{num_keys}-get") do
+      num_iterations.times do
+        num_keys.times { |i| map[i] }
+      end
+    end
+  end
 
-Benchmark.bm(16) do |bm|
-  bm.report('Hash multi-set') { NUM_ITERATIONS.times { |i| hash[i] = i } }
-  bm.report('HashMap multi-set') { NUM_ITERATIONS.times { |i| map[i] = i } }
+  num_iterations /= 10
 end
