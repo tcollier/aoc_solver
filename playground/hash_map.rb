@@ -85,18 +85,21 @@ class HashMap
 
   def resize!
     if @size_index == SIZES.length - 1
-      @shells = Array.new(@size * 6) { Entry.new }
+      @shells = Array.new(@size * 5) { Entry.new }
       return
     end
     old_entries = @entries
     @size_index += 1
     @size = SIZES[@size_index]
-    @shells = Array.new(@size * 3) { Entry.new }
+    @shells = Array.new(@size * 2) { Entry.new }
     @entries = Array.new(@size)
     old_entries.each do |entry|
       while entry
-        self[entry.key] = entry.value
-        entry = entry.next
+        old_next = entry.next
+        new_bucket = entry.key.hash % @size
+        entry.next = @entries[new_bucket]
+        @entries[new_bucket] = entry
+        entry = old_next
       end
     end
   end
