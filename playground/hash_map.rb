@@ -24,8 +24,7 @@ class HashMap
     @size_index = 0
     @size = SIZES[@size_index]
     @entries = Array.new(@size)
-    @stats = Array.new(@size) { 0 }
-    @num_empty = @size
+    @shells = Array.new(3 * @size) { Entry.new }
   end
 
   def [](key)
@@ -48,25 +47,20 @@ class HashMap
         curr.value = value
       elsif prev
         prev.next = curr.next
-        @stats[bucket] -= 1
-        @num_empty += 1 if @stats[bucket] == 0
       else
         @entries[bucket] = curr.next
-        @stats[bucket] -= 1
-        @num_empty += 1 if @stats[bucket] == 0
       end
     elsif !value.nil?
-      entry = Entry.new(key, value, curr&.next)
-      @stats[bucket] += 1
+      entry = @shells.pop
+      entry.key = key
+      entry.value = value
+      entry.next = curr&.next
       if curr
         curr.next = entry
       else
         @entries[bucket] = entry
       end
-      if @stats[bucket] == 1
-        @num_empty -= 1
-        resize! if @num_empty.to_f / @size <= 0.75
-      end
+      resize! if @shells.empty?
     end
   end
 
@@ -90,13 +84,15 @@ class HashMap
   private
 
   def resize!
-    return if @size_index == SIZES.length - 1
+    if @size_index == SIZES.length - 1
+      @shells = Array.new(@size * 6) { Entry.new }
+      return
+    end
     old_entries = @entries
     @size_index += 1
     @size = SIZES[@size_index]
+    @shells = Array.new(@size * 3) { Entry.new }
     @entries = Array.new(@size)
-    @stats = Array.new(@size) { 0 }
-    @num_empty = @size
     old_entries.each do |entry|
       while entry
         self[entry.key] = entry.value
