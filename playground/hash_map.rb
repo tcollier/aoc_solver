@@ -16,6 +16,8 @@ class HashMap
     17419,
     34819,
     69623,
+    139241,
+    278479,
   ]
 
   def initialize
@@ -63,7 +65,7 @@ class HashMap
       end
       if @stats[bucket] == 1
         @num_empty -= 1
-        resize! if @num_empty == 0
+        resize! if @num_empty.to_f / @size <= 0.75
       end
     end
   end

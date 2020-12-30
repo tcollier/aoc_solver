@@ -6,7 +6,7 @@ def prime?(num)
 end
 
 num = 12
-while num < 1_000_000
+while num < 10_000_000
   num -= 1 while !prime?(num)
   puts num
   num *= 2
