@@ -47,8 +47,10 @@ class HashMap
         curr.value = value
       elsif prev
         prev.next = curr.next
+        @shells.push(curr)
       else
         @entries[bucket] = curr.next
+        @shells.push(curr)
       end
     elsif !value.nil?
       entry = @shells.pop
