@@ -33,3 +33,4 @@ def print_part2_ans(input):
 
 
 print_part1_ans(INPUT)
+print_part2_ans(INPUT)
