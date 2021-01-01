@@ -2,4 +2,5 @@ day*_c
 day*_go
 day*_rust
 *.class
+*.jar
 *.js

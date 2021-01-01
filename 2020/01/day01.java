@@ -73,7 +73,7 @@ class Day01 {
 
     public static void main(String[] args) {
         try {
-            int[] numbers = loadNumbers("day01_input.txt");
+            int[] numbers = loadNumbers("2020/01/input.txt");
             int[] pair = pairWithSum(numbers, 2020);
             System.out.println(pair[0] * pair[1]);
             int[] triplet = tripletWithSum(numbers, 2020);

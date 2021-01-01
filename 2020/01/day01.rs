@@ -40,7 +40,7 @@ fn triplet_with_sum(numbers: &Vec<Number>, sum: Number) -> Triplet {
 
 fn main() {
   let mut numbers: Vec<Number> = Vec::new();
-  let contents = fs::read_to_string("./day01_input.txt").expect("File not found");
+  let contents = fs::read_to_string("./2020/01/input.txt").expect("File not found");
   for line in contents.lines() {
       numbers.push(line.parse::<Number>().unwrap());
   }

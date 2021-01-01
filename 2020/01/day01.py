@@ -1,4 +1,8 @@
-INPUT = [int(l.rstrip()) for l in open("day01_input.txt", "r").readlines()]
+import os
+
+
+CWD = os.path.dirname(os.path.abspath(__file__))
+INPUT = [int(l.rstrip()) for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
 def pair_with_sum(arr, sum):

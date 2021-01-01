@@ -36,7 +36,6 @@ func tripletWithSum(numbers []int, sum int) (triplet, error) {
 	for i := 0; i < len(numbers)-2; i++ {
 		for j, k := i+1, len(numbers)-1; j < k; {
 			total := numbers[i] + numbers[j] + numbers[k]
-			// fmt.Printf("Trying %d + %d + %d (= %d)\n", numbers[i], numbers[j], numbers[k], total)
 			if total == sum {
 				return triplet{numbers[i], numbers[j], numbers[k]}, nil
 			} else if total < sum {
@@ -76,7 +75,7 @@ func loadNumbers(fn string) ([]int, error) {
 }
 
 func main() {
-	numbers, err := loadNumbers("day01_input.txt")
+	numbers, err := loadNumbers("2020/01/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}

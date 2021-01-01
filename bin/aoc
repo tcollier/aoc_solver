@@ -1,0 +1,214 @@
+#!/usr/bin/env python
+
+import argparse
+import os
+import subprocess
+import timeit
+
+from datetime import datetime
+
+TIMING_ITERATIONS = 10
+
+
+def noop_build(file):
+    return file
+
+
+def c_build(file):
+    bin_file = file.replace(".", "_")
+    os.system(f"gcc -o {bin_file} {file} > /dev/null")
+    return bin_file
+
+
+def c_cmd(file):
+    return [f"./{file}"]
+
+
+def golang_build(file):
+    bin_file = file.replace(".", "_")
+    os.system(f"go build -o {bin_file} {file} > /dev/null")
+    return bin_file
+
+
+def golang_cmd(file):
+    return [f"./{file}"]
+
+
+def java_build(file):
+    base_dir = os.path.dirname(file)
+    base_file = os.path.basename(file)
+    jar_file = base_file.replace("java", "jar")
+    class_name = f"D{base_file[1:]}".split(".")[0]
+    os.system(
+        f"pushd {base_dir} > /dev/null && javac {base_file} && jar cfe {jar_file} {class_name} *.class"
+    )
+    return os.path.join(base_dir, jar_file)
+
+
+def java_cmd(file):
+    return ["java", "-jar", file]
+
+
+def python_cmd(file):
+    return ["python", file]
+
+
+def ruby_cmd(file):
+    return ["ruby", file]
+
+
+def rust_build(file):
+    bin_file = file.replace(".", "_")
+    os.system(f"rustc -o {bin_file} {file} > /dev/null")
+    return bin_file
+
+
+def rust_cmd(file):
+    return [f"./{file}"]
+
+
+def typescript_build(file):
+    os.system(f"yarn tsc {file} > /dev/null")
+    return file.replace(".ts", "")
+
+
+def typescript_cmd(file):
+    return ["node", "index.js", f"./{file}"]
+
+
+class LanguageConfig(object):
+    def __init__(self, extension, cmd_fn, build_fn=noop_build):
+        self.extension = extension
+        self.cmd_fn = cmd_fn
+        self.build_fn = build_fn
+
+
+LANGUAGES = {
+    "c": LanguageConfig("c", c_cmd, c_build),
+    "golang": LanguageConfig("go", golang_cmd, golang_build),
+    "java": LanguageConfig("java", java_cmd, java_build),
+    "python": LanguageConfig("py", python_cmd),
+    "ruby": LanguageConfig("rb", ruby_cmd),
+    "rust": LanguageConfig("rs", rust_cmd, rust_build),
+    "typescript": LanguageConfig("ts", typescript_cmd, typescript_build),
+}
+language_list = ", ".join([l for l in LANGUAGES.keys()])
+
+
+def find_files(args):
+    languages = args.language if args.language else LANGUAGES.keys()
+    for language in languages:
+        if language not in LANGUAGES.keys():
+            raise Exception(
+                f"Unrecognized language: {language} (available: {language_list})"
+            )
+    if not os.path.isdir(args.year):
+        raise Exception(f"Invalid year {args.year}")
+    day = args.day.zfill(2)
+    if not os.path.isdir(os.path.join(args.year, day)):
+        raise Exception(f"Invalid day {args.day} for {args.year}")
+    for language in languages:
+        found = False
+        filename = os.path.join(
+            args.year, day, f"day{day}.{LANGUAGES[language].extension}"
+        )
+        if os.path.isfile(filename):
+            found = True
+            yield language, filename
+        elif args.language:
+            raise Exception(f"File for langage {language} does not exist: {filename}")
+    if not found:
+        raise Exception(f"No source files found in {os.path.join(args.year, day)}")
+
+
+def find_solution(args):
+    day = args.day.zfill(2)
+    filename = os.path.join(args.year, day, "output.txt")
+    if os.path.isfile(filename):
+        return "".join(open(filename, "r").readlines())
+    else:
+        return None
+
+
+def run(language, cmd):
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE, universal_newlines=True)
+    stdout = ""
+    while True:
+        stdout += process.stdout.readline()
+        return_code = process.poll()
+        if return_code is None:
+            continue
+        elif return_code > 0:
+            raise Exception(
+                f"Running {language} command {cmd} exited with {return_code}"
+            )
+        else:
+            stdout += process.stdout.readline()
+        break
+    return stdout
+
+
+def solve(args):
+    expected = find_solution(args)
+    for language, filename in find_files(args):
+        config = LANGUAGES[language]
+        cmd = config.cmd_fn(config.build_fn(filename))
+        actual = run(language, cmd)
+        if expected:
+            if actual == expected:
+                running_time = timeit.timeit(
+                    lambda: run(language, cmd), number=TIMING_ITERATIONS
+                )
+                print(f"PASS ({language}, {running_time / TIMING_ITERATIONS})")
+            else:
+                print(f"FAIL ({language})")
+                print("Expected:")
+                print(expected)
+                print("Actual:")
+                print(actual)
+        else:
+            print(actual.rstrip())
+
+
+current_day = datetime.utcnow()
+parser = argparse.ArgumentParser(
+    description=(
+        "Run Advent of Code solution for a given year/day in the chosen language"
+    )
+)
+
+default_year = os.environ.get("YEAR", current_day.year)
+parser.add_argument(
+    "-y",
+    "--year",
+    help=f"competition year (default: {default_year})",
+    default=default_year,
+)
+
+default_day = os.environ.get("DAY", current_day.day)
+parser.add_argument(
+    "-d",
+    "--day",
+    help=f"competition day (default: {default_day})",
+    default=default_day,
+)
+
+default_language = os.environ.get("LANGUAGE")
+if default_language:
+    language_helper = f"default: {default_language}"
+else:
+    language_helper = f"available languages: {language_list}"
+parser.add_argument(
+    "-l",
+    "--language",
+    nargs="+",
+    help=f"programming language of the solution to run ({language_helper})",
+    default=default_language,
+)
+
+args = parser.parse_args()
+
+try:
+    solve(args)
+except Exception as e:
+    print(e)

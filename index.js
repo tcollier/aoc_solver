@@ -1,7 +1,4 @@
-const year = '2020';
-const day = '01';
-
-const solution = require(`./${year}/day${day}/day${day}`);
+const solution = require(process.argv[process.argv.length - 1]);
 
 console.log(solution.part1Result());
 console.log(solution.part2Result());

@@ -1,27 +1,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct Pair {
+struct Pair
+{
   int a, b;
 };
 
-struct Triplet {
+struct Triplet
+{
   int a, b, c;
 };
 
-struct Pair pair_with_sum(int *numbers, int numbers_len, int sum) {
+struct Pair pair_with_sum(int *numbers, int numbers_len, int sum)
+{
   struct Pair pair;
   int i = 0;
   int j = numbers_len - 1;
-  while (i < j) {
+  while (i < j)
+  {
     int total = numbers[i] + numbers[j];
-    if (total == sum) {
+    if (total == sum)
+    {
       pair.a = numbers[i];
       pair.b = numbers[j];
       return pair;
-    } else if (total < sum) {
+    }
+    else if (total < sum)
+    {
       i++;
-    } else {
+    }
+    else
+    {
       j--;
     }
   }
@@ -29,30 +38,42 @@ struct Pair pair_with_sum(int *numbers, int numbers_len, int sum) {
   return pair;
 }
 
-int compare(const void *a, const void *b) {
-  int int_a = * ( (int*) a );
-  int int_b = * ( (int*) b );
+int compare(const void *a, const void *b)
+{
+  int int_a = *((int *)a);
+  int int_b = *((int *)b);
 
-  if ( int_a == int_b ) return 0;
-  else if ( int_a < int_b ) return -1;
-  else return 1;
+  if (int_a == int_b)
+    return 0;
+  else if (int_a < int_b)
+    return -1;
+  else
+    return 1;
 }
 
-struct Triplet triplet_with_sum(int *numbers, int numbers_len, int sum) {
+struct Triplet triplet_with_sum(int *numbers, int numbers_len, int sum)
+{
   struct Triplet triplet;
-  for (int i = 0; i < numbers_len - 2; i++) {
+  for (int i = 0; i < numbers_len - 2; i++)
+  {
     int j = i + 1;
     int k = numbers_len - 1;
-    while (j < k) {
+    while (j < k)
+    {
       int total = numbers[i] + numbers[j] + numbers[k];
-      if (total == sum) {
+      if (total == sum)
+      {
         triplet.a = numbers[i];
         triplet.b = numbers[j];
         triplet.c = numbers[k];
         return triplet;
-      } else if (total < sum) {
+      }
+      else if (total < sum)
+      {
         j++;
-      } else {
+      }
+      else
+      {
         k--;
       }
     }
@@ -61,20 +82,23 @@ struct Triplet triplet_with_sum(int *numbers, int numbers_len, int sum) {
   return triplet;
 }
 
-int main() {
+int main()
+{
   int numbers[200];
-  FILE * fp;
-  char * line = NULL;
+  FILE *fp;
+  char *line = NULL;
   size_t len = 0;
   ssize_t read;
-  fp = fopen("day01_input.txt", "r");
+  fp = fopen("2020/01/input.txt", "r");
   if (fp == NULL)
     exit(EXIT_FAILURE);
 
   int index = 0;
-  while ((read = getline(&line, &len, fp)) != -1) {
+  while ((read = getline(&line, &len, fp)) != -1)
+  {
     numbers[index] = 0;
-    for (int i = 0; i < read - 1; i++) {
+    for (int i = 0; i < read - 1; i++)
+    {
       numbers[index] *= 10;
       numbers[index] += line[i] - '0';
     }

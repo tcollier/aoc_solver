@@ -36,7 +36,7 @@ const tripletWithSum = (numbers: number[], sum: number): Triplet => {
 }
 
 const loadNumbers = (): number[] =>
-  fs.readFileSync('./2020/day01/day01_input.txt', 'utf8').split("\n").map(l => parseInt(l));
+  fs.readFileSync('./2020/01/input.txt', 'utf8').split("\n").map(l => parseInt(l));
 
 const part1Result = (): number => {
   const pair = pairWithSum(loadNumbers(), 2020);

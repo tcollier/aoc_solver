@@ -1,6 +1,6 @@
 require 'set'
 
-INPUT = File.readlines('day01_input.txt').map(&:to_i)
+INPUT = File.readlines(File.join(File.dirname(__FILE__), 'input.txt')).map(&:to_i)
 
 def pair_with_sum(numbers, sum)
   others = Set.new(numbers[1..-1])
