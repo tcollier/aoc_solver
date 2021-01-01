@@ -16,7 +16,9 @@ def noop_build(file):
 
 def c_build(file):
     bin_file = file.replace(".", "_")
-    os.system(f"gcc -o {bin_file} {file} > /dev/null")
+    code = os.system(f"gcc -o {bin_file} {file} > /dev/null")
+    if code != 0:
+        raise Exception(f"C compilation failed with exit code {code}")
     return bin_file
 
 
@@ -26,7 +28,9 @@ def c_cmd(file):
 
 def golang_build(file):
     bin_file = file.replace(".", "_")
-    os.system(f"go build -o {bin_file} {file} > /dev/null")
+    code = os.system(f"go build -o {bin_file} {file} > /dev/null")
+    if code != 0:
+        raise Exception(f"Golang compilation failed with exit code {code}")
     return bin_file
 
 
@@ -37,9 +41,11 @@ def golang_cmd(file):
 def java_build(file):
     base_dir = os.path.dirname(file)
     jar_file = os.path.basename(file).replace(".java", ".jar")
-    os.system(
+    code = os.system(
         f"pushd {base_dir} > /dev/null && javac Main.java && jar cfe {jar_file} Main *.class"
     )
+    if code != 0:
+        raise Exception(f"Java compilation failed with exit code {code}")
     return os.path.join(base_dir, jar_file)
 
 
@@ -57,7 +63,9 @@ def ruby_cmd(file):
 
 def rust_build(file):
     bin_file = file.replace(".", "_")
-    os.system(f"rustc -o {bin_file} {file} > /dev/null")
+    code = os.system(f"rustc -o {bin_file} {file} > /dev/null")
+    if code != 0:
+        raise Exception(f"Rust compilation failed with exit code {code}")
     return bin_file
 
 
@@ -66,7 +74,9 @@ def rust_cmd(file):
 
 
 def typescript_build(file):
-    os.system(f"yarn tsc {file} > /dev/null")
+    code = os.system(f"yarn tsc {file} > /dev/null")
+    if code != 0:
+        raise Exception(f"Typescript compilation failed with exit code {code}")
     return file.replace(".ts", "")
 
 

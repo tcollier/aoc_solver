@@ -1,5 +1,3 @@
-from collections import deque
-
 # Mine
 INPUT = "198753462"
 
