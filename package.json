@@ -1,0 +1,29 @@
+{
+  "name": "aoc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "tsc */*/*.ts && node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tcollier/aoc.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/tcollier/aoc/issues"
+  },
+  "homepage": "https://github.com/tcollier/aoc#readme",
+  "devDependencies": {
+    "@types/node": "^14.14.17",
+    "tslint": "^6.1.3",
+    "typescript": "^4.1.3"
+  },
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "ts-node": "^9.1.1"
+  }
+}
