@@ -1,7 +1,0 @@
-[package]
-name = "aoc_2020_day_15"
-version = "0.1.0"
-authors = ["Tom"]
-
-[dependencies]
-bit-set = "0.5.0"

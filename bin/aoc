@@ -36,11 +36,9 @@ def golang_cmd(file):
 
 def java_build(file):
     base_dir = os.path.dirname(file)
-    base_file = os.path.basename(file)
-    jar_file = base_file.replace("java", "jar")
-    class_name = f"D{base_file[1:]}".split(".")[0]
+    jar_file = os.path.basename(file).replace(".java", ".jar")
     os.system(
-        f"pushd {base_dir} > /dev/null && javac {base_file} && jar cfe {jar_file} {class_name} *.class"
+        f"pushd {base_dir} > /dev/null && javac Main.java && jar cfe {jar_file} Main *.class"
     )
     return os.path.join(base_dir, jar_file)
 
@@ -107,11 +105,9 @@ def find_files(args):
     day = args.day.zfill(2)
     if not os.path.isdir(os.path.join(args.year, day)):
         raise Exception(f"Invalid day {args.day} for {args.year}")
+    found = False
     for language in languages:
-        found = False
-        filename = os.path.join(
-            args.year, day, f"day{day}.{LANGUAGES[language].extension}"
-        )
+        filename = os.path.join(args.year, day, f"main.{LANGUAGES[language].extension}")
         if os.path.isfile(filename):
             found = True
             yield language, filename
@@ -121,9 +117,12 @@ def find_files(args):
         raise Exception(f"No source files found in {os.path.join(args.year, day)}")
 
 
-def find_solution(args):
+def output_file(args):
     day = args.day.zfill(2)
-    filename = os.path.join(args.year, day, "output.txt")
+    return os.path.join(args.year, day, "output.txt")
+
+
+def find_solution(filename):
     if os.path.isfile(filename):
         return "".join(open(filename, "r").readlines())
     else:
@@ -149,7 +148,12 @@ def run(language, cmd):
 
 
 def solve(args):
-    expected = find_solution(args)
+    outfile = output_file(args)
+    expected = find_solution(outfile)
+    if expected and args.save:
+        raise Exception(
+            f"Cannot save results when {output_file(args)} alread exists, please delete it"
+        )
     for language, filename in find_files(args):
         config = LANGUAGES[language]
         cmd = config.cmd_fn(config.build_fn(filename))
@@ -168,6 +172,9 @@ def solve(args):
                 print(actual)
         else:
             print(actual.rstrip())
+            if args.save:
+                open(outfile, "w").write(actual)
+                print(f"Saved reault to {outfile}")
 
 
 current_day = datetime.utcnow()
@@ -204,6 +211,9 @@ parser.add_argument(
     nargs="+",
     help=f"programming language of the solution to run ({language_helper})",
     default=default_language,
+)
+parser.add_argument(
+    "--save", help=f"save the programs output to output.txt", action="store_true"
 )
 
 args = parser.parse_args()

@@ -1,6 +1,6 @@
-day*_c
-day*_go
-day*_rust
+main_c
+main_go
+main_rs
+main.jar
 *.class
-*.jar
 *.js
