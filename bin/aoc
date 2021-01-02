@@ -76,6 +76,7 @@ def rust_cmd(file):
 def typescript_build(file):
     code = os.system(f"yarn tsc {file} > /dev/null")
     if code != 0:
+        os.system(f"yarn tsc {file}")
         raise Exception(f"Typescript compilation failed with exit code {code}")
     return file.replace(".ts", "")
 
