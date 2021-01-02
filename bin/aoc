@@ -58,6 +58,10 @@ def java_cmd(file):
     return f"java -jar {file}"
 
 
+def lisp_cmd(file):
+    return f"sbcl --script {file}"
+
+
 def python_cmd(file):
     return f"python {file}"
 
@@ -100,6 +104,7 @@ LANGUAGES = {
     "c": LanguageConfig("c", c_cmd, c_build),
     "golang": LanguageConfig("go", golang_cmd, golang_build),
     "java": LanguageConfig("java", java_cmd, java_build),
+    "lisp": LanguageConfig("lisp", lisp_cmd),
     "python": LanguageConfig("py", python_cmd),
     "ruby": LanguageConfig("rb", ruby_cmd),
     "rust": LanguageConfig("rs", rust_cmd, rust_build),
