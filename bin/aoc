@@ -80,8 +80,14 @@ def rust_cmd(file):
     return f"./{file}"
 
 
-def scala_cmd(file):
-    return f"scala {file}"
+def scala_build(file):
+    base_dir = os.path.dirname(file)
+    shell_out(f"scalac -d {base_dir} {file}")
+    return base_dir
+
+
+def scala_cmd(base_dir):
+    return f"scala -classpath {base_dir} Main"
 
 
 def typescript_build(file):
@@ -108,7 +114,7 @@ LANGUAGES = {
     "python": LanguageConfig("py", python_cmd),
     "ruby": LanguageConfig("rb", ruby_cmd),
     "rust": LanguageConfig("rs", rust_cmd, rust_build),
-    "scala": LanguageConfig("scala", scala_cmd),
+    "scala": LanguageConfig("scala", scala_cmd, scala_build),
     "typescript": LanguageConfig("ts", typescript_cmd, typescript_build),
 }
 language_list = ", ".join([l for l in LANGUAGES.keys()])
