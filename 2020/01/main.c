@@ -15,15 +15,15 @@ typedef enum
   true
 } bool;
 
-struct Pair
+typedef struct Pair
 {
   int a, b;
-};
+} Pair;
 
-struct Triplet
+typedef struct Triplet
 {
   int a, b, c;
-};
+} Triplet;
 
 void bit_vec_set(BV_TYPE *bv, int n)
 {
@@ -56,9 +56,9 @@ void bit_vec_values(BV_TYPE *bv, int bv_len, int *values)
   }
 }
 
-struct Pair pair_with_sum(int *numbers, int numbers_len, BV_TYPE *bv, int sum)
+Pair pair_with_sum(int *numbers, int numbers_len, BV_TYPE *bv, int sum)
 {
-  struct Pair pair;
+  Pair pair;
   int i;
   for (i = 0; i < numbers_len - 1; i++)
   {
@@ -74,9 +74,9 @@ struct Pair pair_with_sum(int *numbers, int numbers_len, BV_TYPE *bv, int sum)
   return pair;
 }
 
-struct Triplet triplet_with_sum(int *numbers, int numbers_len, int sum)
+Triplet triplet_with_sum(int *numbers, int numbers_len, int sum)
 {
-  struct Triplet triplet;
+  Triplet triplet;
   for (int i = 0; i < numbers_len - 2; i++)
   {
     int j = i + 1;
@@ -136,10 +136,10 @@ int main()
   int *numbers = malloc(numbers_len * sizeof(int));
   bit_vec_values(bv, 64, numbers);
 
-  struct Pair pair = pair_with_sum(numbers, numbers_len, bv, TARGET_SUM);
+  Pair pair = pair_with_sum(numbers, numbers_len, bv, TARGET_SUM);
   printf("%d\n", pair.a * pair.b);
 
-  struct Triplet triplet = triplet_with_sum(numbers, numbers_len, TARGET_SUM);
+  Triplet triplet = triplet_with_sum(numbers, numbers_len, TARGET_SUM);
   printf("%d\n", triplet.a * triplet.b * triplet.c);
 
   free(numbers);
