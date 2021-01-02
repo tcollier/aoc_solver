@@ -76,6 +76,10 @@ def rust_cmd(file):
     return f"./{file}"
 
 
+def scala_cmd(file):
+    return f"scala {file}"
+
+
 def typescript_build(file):
     shell_out(f"yarn tsc {file}")
     return file.replace(".ts", "")
@@ -99,6 +103,7 @@ LANGUAGES = {
     "python": LanguageConfig("py", python_cmd),
     "ruby": LanguageConfig("rb", ruby_cmd),
     "rust": LanguageConfig("rs", rust_cmd, rust_build),
+    "scala": LanguageConfig("scala", scala_cmd),
     "typescript": LanguageConfig("ts", typescript_cmd, typescript_build),
 }
 language_list = ", ".join([l for l in LANGUAGES.keys()])
