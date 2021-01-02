@@ -3,7 +3,6 @@ import os
 
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [int(l.rstrip()) for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
 class BitVector(object):
@@ -19,6 +18,17 @@ class BitVector(object):
 
     def test(self, value):
         return self.bits[value >> self.SHIFTER] & 1 << (value & self.MASK) > 0
+
+    def sorted_values(self):
+        values = []
+        for i, bits in enumerate(self.bits):
+            num = i * self.NUM_BITS
+            while bits:
+                if bits & 1:
+                    values.append(num)
+                num += 1
+                bits >>= 1
+        return values
 
 
 def pair_with_sum(numbers, bit_vec, sum):
@@ -42,14 +52,14 @@ def triple_with_sum(arr, sum):
     raise Exception(f"Triplet with sum {sum} not found")
 
 
-INPUT.sort()
-
 bit_vec = BitVector(2020)
-for num in INPUT:
-    bit_vec.set(num)
+for line in open(f"{CWD}/input.txt", "r").readlines():
+    bit_vec.set(int(line.rstrip()))
 
-pair = pair_with_sum(INPUT, bit_vec, 2020)
+numbers = bit_vec.sorted_values()
+
+pair = pair_with_sum(numbers, bit_vec, 2020)
 print(pair[0] * pair[1])
 
-trip = triple_with_sum(INPUT, 2020)
+trip = triple_with_sum(numbers, 2020)
 print(trip[0] * trip[1] * trip[2])

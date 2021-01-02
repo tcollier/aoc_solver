@@ -1,6 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define BV_TYPE unsigned long int
+#define BV_BITS 64 // sizeof(BV_TYPE) * 8
+#define BV_MASK BV_BITS - 1
+#define BV_SHIFTER 6  // log base 2 of BV_BITS
+#define BV_BUCKETS 32 // (2020 >> SHIFTER) + 1
+
+#define TARGET_SUM 2020
+
+typedef enum
+{
+  false,
+  true
+} bool;
+
 struct Pair
 {
   int a, b;
@@ -11,41 +25,53 @@ struct Triplet
   int a, b, c;
 };
 
-struct Pair pair_with_sum(int *numbers, int numbers_len, int sum)
+void bit_vec_set(BV_TYPE *bv, int n)
+{
+  bv[n >> BV_SHIFTER] |= ((BV_TYPE)1 << (n & BV_MASK));
+}
+
+bool bit_vec_test(BV_TYPE *bv, int n)
+{
+  return (bv[n >> BV_SHIFTER] & (BV_TYPE)1 << (n & BV_MASK)) > 0;
+}
+
+void bit_vec_values(BV_TYPE *bv, int bv_len, int *values)
+{
+  int i, j, num;
+  i = 0;
+  for (j = 0; j < BV_BUCKETS; j++)
+  {
+    BV_TYPE bits = bv[j];
+    num = BV_BITS * j;
+    while (bits > 0)
+    {
+      if (bits & 1)
+      {
+        values[i] = num;
+        i++;
+      }
+      bits >>= 1;
+      num++;
+    }
+  }
+}
+
+struct Pair pair_with_sum(int *numbers, int numbers_len, BV_TYPE *bv, int sum)
 {
   struct Pair pair;
   int i;
-  int bv[32];
-
-  for (i = 1; i < numbers_len; i++)
-  {
-    bv[numbers[i] >> 6] |= 1 << (numbers[i] & 63);
-  }
   for (i = 0; i < numbers_len - 1; i++)
   {
-    int remainder = sum - numbers[i];
-    if (bv[remainder >> 6] >> (remainder & 63) & 1)
+    int diff = sum - numbers[i];
+    if (bit_vec_test(bv, diff))
     {
       pair.a = numbers[i];
-      pair.b = remainder;
+      pair.b = diff;
       return pair;
     }
   }
   pair.a = pair.b = -1;
   return pair;
-}
-
-int compare(const void *a, const void *b)
-{
-  int int_a = *((int *)a);
-  int int_b = *((int *)b);
-
-  if (int_a == int_b)
-    return 0;
-  else if (int_a < int_b)
-    return -1;
-  else
-    return 1;
 }
 
 struct Triplet triplet_with_sum(int *numbers, int numbers_len, int sum)
@@ -81,38 +107,42 @@ struct Triplet triplet_with_sum(int *numbers, int numbers_len, int sum)
 
 int main()
 {
-  int numbers[200];
   FILE *fp;
   char *line = NULL;
   size_t len = 0;
   ssize_t read;
+  int numbers_len = 0;
   fp = fopen("2020/01/input.txt", "r");
   if (fp == NULL)
     exit(EXIT_FAILURE);
 
-  int index = 0;
+  BV_TYPE *bv = malloc(BV_BUCKETS * sizeof(BV_TYPE));
   while ((read = getline(&line, &len, fp)) != -1)
   {
-    numbers[index] = 0;
+    int num = 0;
     for (int i = 0; i < read - 1; i++)
     {
-      numbers[index] *= 10;
-      numbers[index] += line[i] - '0';
+      num *= 10;
+      num += line[i] - '0';
     }
-    index++;
+    numbers_len++;
+    bit_vec_set(bv, num);
   }
 
   fclose(fp);
   if (line)
     free(line);
 
-  qsort(numbers, 200, sizeof(int), compare);
+  int *numbers = malloc(numbers_len * sizeof(int));
+  bit_vec_values(bv, 64, numbers);
 
-  struct Pair pair = pair_with_sum(numbers, 200, 2020);
+  struct Pair pair = pair_with_sum(numbers, numbers_len, bv, TARGET_SUM);
   printf("%d\n", pair.a * pair.b);
 
-  struct Triplet triplet = triplet_with_sum(numbers, 200, 2020);
+  struct Triplet triplet = triplet_with_sum(numbers, numbers_len, TARGET_SUM);
   printf("%d\n", triplet.a * triplet.b * triplet.c);
 
+  free(numbers);
+  free(bv);
   exit(EXIT_SUCCESS);
 }
