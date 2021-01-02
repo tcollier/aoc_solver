@@ -14,24 +14,21 @@ struct Triplet
 struct Pair pair_with_sum(int *numbers, int numbers_len, int sum)
 {
   struct Pair pair;
-  int i = 0;
-  int j = numbers_len - 1;
-  while (i < j)
+  int i;
+  int bv[32];
+
+  for (i = 1; i < numbers_len; i++)
   {
-    int total = numbers[i] + numbers[j];
-    if (total == sum)
+    bv[numbers[i] >> 6] |= 1 << (numbers[i] & 63);
+  }
+  for (i = 0; i < numbers_len - 1; i++)
+  {
+    int remainder = sum - numbers[i];
+    if (bv[remainder >> 6] >> (remainder & 63) & 1)
     {
       pair.a = numbers[i];
-      pair.b = numbers[j];
+      pair.b = remainder;
       return pair;
-    }
-    else if (total < sum)
-    {
-      i++;
-    }
-    else
-    {
-      j--;
     }
   }
   pair.a = pair.b = -1;
