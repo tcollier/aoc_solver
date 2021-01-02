@@ -12,8 +12,7 @@ def valid_part1(min, max, char, pwd):
             num_char += 1
             if num_char > max:
                 return False
-    if num_char >= min:
-        return True
+    return num_char >= min
 
 
 def valid_part2(pos1, pos2, char, pwd):
