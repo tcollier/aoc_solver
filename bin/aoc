@@ -3,6 +3,13 @@
 import argparse
 import glob
 import os
+import sys
+
+if not os.environ.get("PYTHONPATH"):
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.environ.setdefault("PYTHONPATH", root_dir)
+    exit(os.system(" ".join(sys.argv)))
+
 
 from datetime import datetime
 
@@ -19,7 +26,7 @@ parser = argparse.ArgumentParser(
     )
 )
 
-default_year = os.environ.get("YEAR", current_day.year)
+default_year = os.environ.get("YEAR", str(current_day.year))
 parser.add_argument(
     "-y",
     "--year",
@@ -27,7 +34,7 @@ parser.add_argument(
     default=default_year,
 )
 
-default_day = os.environ.get("DAY", current_day.day)
+default_day = os.environ.get("DAY", str(current_day.day))
 parser.add_argument(
     "-d",
     "--day",
@@ -35,7 +42,7 @@ parser.add_argument(
     default=default_day,
 )
 
-default_language = os.environ.get("LANGUAGE")
+default_language = (os.environ.get("LANGUAGE") or "").split(" ")
 if default_language:
     language_helper = f"default: {default_language}"
 else:
