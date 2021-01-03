@@ -84,6 +84,10 @@ def _status(language, year, day, label, color):
     return f"{color}{label} [{day_language}]{Color.ENDC}"
 
 
+def format_attempt(language, year, day):
+    return _status(language, year, day, "TRY ", Color.WARNING)
+
+
 def format_building(language, year, day):
     return _status(language, year, day, "COMP", Color.GREY)
 
@@ -104,11 +108,19 @@ def format_diff(expected, actual):
     exp_parts = expected.split("\n")
     act_parts = actual.split("\n")
     table = [[""], ["Expected"], ["Actual"]]
-    if exp_parts[0] != act_parts[0]:
+    if len(act_parts) < 1:
+        table[0].append("Part 1")
+        table[1].append(exp_parts[0])
+        table[2].append("")
+    elif exp_parts[0] != act_parts[0]:
         table[0].append("Part 1")
         table[1].append(exp_parts[0])
         table[2].append(act_parts[0])
-    if exp_parts[1] != act_parts[1]:
+    if len(act_parts) < 2:
+        table[0].append("Part 2")
+        table[1].append(exp_parts[1])
+        table[2].append("")
+    elif exp_parts[1] != act_parts[1]:
         table[0].append("Part 2")
         table[1].append(exp_parts[1])
         table[2].append(act_parts[1])

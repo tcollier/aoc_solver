@@ -8,6 +8,7 @@ from datetime import datetime
 
 from lib.format import (
     Color,
+    format_attempt,
     format_building,
     format_diff,
     format_failure,
@@ -199,9 +200,11 @@ def solve(language, year, day, save=False):
                 else:
                     print("  ")  # Overwrite the spinner and add new line
             else:
-                print(format_failure(l, year, day))
+                print(format_failure(l, year, day), end="  \n")
                 print(format_diff(expected, actual))
         else:
+            print("\033[A")
+            print(format_attempt(l, year, day), end="  \n")
             print(actual.rstrip())
             if save:
                 open(outfile, "w").write(actual)
