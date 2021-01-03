@@ -53,7 +53,7 @@ def _find_solution(filename):
         return None
 
 
-def _time_cmd(cmd, pipe):
+def _time_with_spinner(cmd, pipe):
     def fn():
         start_time = datetime.now()
         timing_info = json.loads(shell_out(f"{cmd} --time"))
@@ -64,18 +64,82 @@ def _time_cmd(cmd, pipe):
     fn_with_spinner(fn, pipe)
 
 
-def _solve(cmd, pipe):
+def _solve_with_spinner(cmd, pipe):
     def fn():
         return shell_out(cmd)
 
     fn_with_spinner(fn, pipe)
 
 
-def _build(config, filename, pipe):
+def _build_with_spinner(config, filename, pipe):
     def fn():
         return config.cmd_fn(config.build_fn(filename))
 
     fn_with_spinner(fn, pipe)
+
+
+def _build(config, filename, language, year, day):
+    if not config.has_build_step():
+        return config.cmd_fn(config.build_fn(filename))
+
+    print(format_building(language, year, day), end=" ", flush=True)
+    try:
+        cmd = concurrent_with_spinner(_build_with_spinner, config, filename)
+        print("\033[A")
+        return cmd
+    except ShellException as e:
+        print("\033[A")
+        print(format_failure(language, year, day), end="  \n")
+        print(e.stderr, end="")
+        raise e
+
+
+def _run(cmd, language, year, day):
+    print(format_running(language, year, day), end=" ", flush=True)
+    try:
+        actual = concurrent_with_spinner(_solve_with_spinner, cmd)
+        print("\033[A")  # Move cursor back to start of line
+        return actual
+    except ShellException as e:
+        print("\033[A")
+        print(format_failure(language, year, day), end="  \n")
+        print(e.stderr)
+        raise e
+
+
+def _handle_attempt(language, year, day, actual, save):
+    print("\033[A")
+    print(format_attempt(language, year, day), end="  \n")
+    print(actual.rstrip())
+    if save:
+        outfile = _output_file(year, day)
+        open(outfile, "w").write(actual)
+        print(f"Saved result to {outfile}")
+
+
+def _handle_success(config, cmd, language, year, day):
+    print(
+        format_success(language, year, day),
+        end=" " if config.timing else "",
+        flush=True,
+    )
+    if not config.timing:
+        print("  ")  # Overwrite the spinner and add new line
+        return
+    try:
+        timing_info = concurrent_with_spinner(_time_with_spinner, cmd)
+        print("\033[A")
+        print(f"{format_success(language, year, day)} {timing_info}")
+    except ShellException as e:
+        print("\033[A")
+        print(format_failure(language, year, day), end="  \n")
+        print(e.stderr)
+        raise e
+
+
+def _handle_bad_output(language, year, day, expected, actual):
+    print(format_failure(language, year, day), end="  \n")
+    print(format_diff(expected, actual))
 
 
 def solve(languages, year, day, save=False):
@@ -89,56 +153,17 @@ def solve(languages, year, day, save=False):
     for l, filename in _find_files(languages, year, day):
         found = True
         config = language_config(l)
-        if config.has_build_step():
-            print(format_building(l, year, day), end=" ", flush=True)
-            try:
-                cmd = concurrent_with_spinner(_build, config, filename)
-                print("\033[A")
-            except ShellException as e:
-                print("\033[A")
-                print(format_failure(l, year, day), end="  \n")
-                print(e.stderr, end="")
-                continue
-        else:
-            cmd = config.cmd_fn(config.build_fn(filename))
-        print(format_running(l, year, day), end=" ", flush=True)
         try:
-            actual = concurrent_with_spinner(_solve, cmd)
-            print("\033[A")  # Move cursor back to start of line
-        except ShellException as e:
-            print("\033[A")
-            print(format_failure(l, year, day), end="  \n")
-            print(e.stderr)
-            continue
-        if expected:
-            if actual == expected:
-                print(
-                    format_success(l, year, day),
-                    end=" " if config.timing else "",
-                    flush=True,
-                )
-                if config.timing:
-                    try:
-                        timing_info = concurrent_with_spinner(_time_cmd, cmd)
-                        print("\033[A")
-                        print(f"{format_success(l, year, day)} {timing_info}")
-                    except ShellException as e:
-                        print("\033[A")
-                        print(format_failure(l, year, day), end="  \n")
-                        print(e.stderr)
-                        continue
-                else:
-                    print("  ")  # Overwrite the spinner and add new line
+            cmd = _build(config, filename, l, year, day)
+            actual = _run(cmd, l, year, day)
+            if not expected:
+                _handle_attempt(l, year, day, actual, save)
+            elif actual == expected:
+                _handle_success(config, cmd, l, year, day)
             else:
-                print(format_failure(l, year, day), end="  \n")
-                print(format_diff(expected, actual))
-        else:
-            print("\033[A")
-            print(format_attempt(l, year, day), end="  \n")
-            print(actual.rstrip())
-            if save:
-                open(outfile, "w").write(actual)
-                print(f"Saved result to {outfile}")
+                _handle_bad_output(l, year, day, expect, actual)
+        except:
+            continue
     if not found and languages:
         for l in languages:
             print(f"{format_failure(l, year, day)} (no {l} source code found)")
