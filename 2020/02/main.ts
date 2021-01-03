@@ -1,6 +1,6 @@
 const fs = require('fs');
 
-const loadRules = (): string[] =>
+const loadData = (): string[] =>
   fs.readFileSync('./2020/02/input.txt', 'utf8').split("\n");
 
 
@@ -33,8 +33,8 @@ const countValid = (rules: string[], validator: Function): number => {
   return count;
 }
 
-const part1Result = () => countValid(loadRules(), validPart1)
+const part1Result = (rules: string[]) => countValid(rules, validPart1)
 
-const part2Result = () => countValid(loadRules(), validPart2)
+const part2Result = (rules: string[]) => countValid(rules, validPart2)
 
-export { part1Result, part2Result }
+export { loadData, part1Result, part2Result }

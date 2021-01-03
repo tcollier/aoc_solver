@@ -1,5 +1,7 @@
-const part1Result = (): string => "Hello"
+const loadData = (): string[] => ["Hello", "World!"]
 
-const part2Result = (): string => "World!"
+const part1Result = (words: string[]): string => words[0]
 
-export { part1Result, part2Result }
+const part2Result = (words: string[]): string => words[1]
+
+export { loadData, part1Result, part2Result }

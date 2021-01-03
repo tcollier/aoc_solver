@@ -35,18 +35,18 @@ const tripletWithSum = (numbers: number[], sum: number): Triplet => {
   throw new Error(`No triplet with sum ${sum} found`);
 }
 
-const loadNumbers = (): number[] =>
+const loadData = (): number[] =>
   fs.readFileSync('./2020/01/input.txt', 'utf8').split("\n").map(l => parseInt(l));
 
-const part1Result = (): number => {
-  const pair = pairWithSum(loadNumbers(), 2020);
+const part1Result = (numbers: number[]): number => {
+  const pair = pairWithSum(numbers, 2020);
   return pair[0] * pair[1];
 
 }
 
-const part2Result = (): number => {
-  const triplet = tripletWithSum(loadNumbers(), 2020);
+const part2Result = (numbers: number[]): number => {
+  const triplet = tripletWithSum(numbers, 2020);
   return triplet[0] * triplet[1] * triplet[2];
 }
 
-export { part1Result, part2Result }
+export { loadData, part1Result, part2Result }
