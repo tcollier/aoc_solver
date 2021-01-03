@@ -1,12 +1,25 @@
 import scala.io.Source
 import scala.collection.immutable.Set
 
+import tcollier.Executor;
+import tcollier.Solution;
+
 class SumNotPossible(s: String) extends RuntimeException {
 
 }
 
-object Main {
-  def pairWithSum(numbers: Array[Int], sum: Int): (Int, Int) = {
+class Day1Solution(val numbers: Array[Int], val sum: Int) extends Solution {
+  def part1Answer(): String = {
+    val pair = pairWithSum()
+    return String.valueOf(pair._1 * pair._2)
+  }
+
+  def part2Answer(): String = {
+    val triplet = tripletWithSum()
+    return String.valueOf(triplet._1 * triplet._2 * triplet._3)
+  }
+
+  def pairWithSum(): (Int, Int) = {
     val others: Set[Int] = numbers.toSet
     for (number <- numbers)
       if (others(sum - number))
@@ -14,7 +27,7 @@ object Main {
     throw new SumNotPossible(s"Cannot find pair with sum $sum")
   }
 
-  def tripletWithSum(numbers: Array[Int], sum: Int): (Int, Int, Int) = {
+  def tripletWithSum(): (Int, Int, Int) = {
     val sorted = numbers.sortWith(_ < _)
     for (i <- 0 to sorted.length - 3) {
       var j: Int = i + 1
@@ -32,7 +45,10 @@ object Main {
     }
     throw new SumNotPossible(s"Cannot find triplet with sum $sum")
   }
+}
 
+
+object Main {
   def main(args: Array[String]): Unit = {
     var numbers: Array[Int] = new Array[Int](200)
     val source = Source.fromFile("2020/01/input.txt")
@@ -42,11 +58,7 @@ object Main {
       i += 1
     }
     source.close()
-
-    val pair = pairWithSum(numbers, 2020)
-    println(pair._1 * pair._2)
-
-    val triplet = tripletWithSum(numbers, 2020)
-    println(triplet._1 * triplet._2 * triplet._3)
+    val executor: Executor = new Executor(new Day1Solution(numbers, 2020));
+    executor.run(args);
   }
 }
