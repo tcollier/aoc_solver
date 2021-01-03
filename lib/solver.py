@@ -138,7 +138,7 @@ def solve(language, year, day, save=False):
             print(actual.rstrip())
             if save:
                 open(outfile, "w").write(actual)
-                print(f"Saved reault to {outfile}")
+                print(f"Saved result to {outfile}")
     if not found and language:
         for l in language:
             print(f"{format_failure(l, year, day)} (no {l} source code found)")
