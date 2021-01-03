@@ -198,18 +198,19 @@ def shell_out(cmd):
 
 
 def format_decimal(number):
-    parts = str(round(number, 4)).split(".")
-    return ".".join([parts[0].rjust(3, " "), parts[1].rjust(4, "0")])
+    parts = str(round(number, 2)).split(".")
+    return ".".join([parts[0].rjust(3, " "), parts[1].rjust(2, "0")])
 
 
 def format_duration(duration):
-    if duration < 1000:
-        color = Color.OKGREEN if duration < 1 else Color.OKCYAN
-        return f"{color}{format_decimal(duration)} μs{Color.ENDC}"
+    if duration < 1:
+        return f"{Color.OKGREEN}{format_decimal(duration * 1000)} ns{Color.ENDC}"
+    elif duration < 1000:
+        return f"{Color.OKCYAN}{format_decimal(duration)} μs{Color.ENDC}"
     elif duration < 1000000:
         return f"{format_decimal(duration / 1000)} ms"
     else:
-        return f"{Color.WARNING}{format_decimal(duration / 1000000)} sc{Color.ENDC}"
+        return f"{Color.WARNING}{format_decimal(duration / 1000000)} s{Color.ENDC}"
 
 
 def format_language(language):
@@ -233,11 +234,13 @@ def format_timing_info(timing_info, duration):
     part2_avg_time = (
         timing_info["part2"]["duration"] / timing_info["part2"]["iterations"]
     )
+    part2_spacer = " " if part1_avg_time >= 1000000 else ""
+    overhead_spacer = " " if part2_avg_time >= 1000000 else ""
     return ", ".join(
         [
             f"part1: {format_duration(part1_avg_time)}",
-            f"part2: {format_duration(part2_avg_time)}",
-            f"overhead: {format_duration(overhead)}",
+            f"{part2_spacer}part2: {format_duration(part2_avg_time)}",
+            f"{overhead_spacer}overhead: {format_duration(overhead)}",
         ]
     )
 
