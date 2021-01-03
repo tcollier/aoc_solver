@@ -2,6 +2,7 @@ import json
 import multiprocessing
 import os
 import time
+import traceback
 
 from datetime import datetime
 
@@ -15,7 +16,7 @@ from lib.format import (
     format_timing,
 )
 from lib.languages import language_config, all_languages
-from lib.shell import shell_out
+from lib.shell import ShellException, shell_out
 
 
 def _find_files(language, year, day):
@@ -58,7 +59,7 @@ def _find_solution(filename):
 #   3. Recv `True` message to indicate spinner is finished
 #
 def _concurrent_spinner(pipe):
-    spinners = ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"]
+    spinners = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
     index = 0
     pipe.recv()
     waiting = True
@@ -100,7 +101,10 @@ def _concurrent_time_cmd(cmd):
 
 def _solve(cmd, pipe):
     pipe.send(True)  # Tell spinner to start
-    actual = shell_out(cmd)
+    try:
+        actual = shell_out(cmd)
+    except ShellException as e:
+        actual = e
     pipe.send(True)  # Tell spinner to stop
     pipe.recv()  # Wait for spinner to finish
     pipe.send(actual)
@@ -117,12 +121,18 @@ def _concurrent_solve(cmd):
     actual = pipe2.recv()
     pipe1.close()
     pipe2.close()
-    return actual
+    if isinstance(actual, Exception):
+        raise actual
+    else:
+        return actual
 
 
 def _build(config, filename, pipe):
     pipe.send(True)
-    cmd = config.cmd_fn(config.build_fn(filename))
+    try:
+        cmd = config.cmd_fn(config.build_fn(filename))
+    except ShellException as e:
+        cmd = e
     pipe.send(True)
     pipe.recv()
     pipe.send(cmd)
@@ -139,7 +149,10 @@ def _concurrent_build(config, filename):
     cmd = pipe2.recv()
     pipe1.close()
     pipe2.close()
-    return cmd
+    if isinstance(cmd, Exception):
+        raise cmd
+    else:
+        return cmd
 
 
 def solve(language, year, day, save=False):
@@ -155,13 +168,25 @@ def solve(language, year, day, save=False):
         config = language_config(l)
         if config.has_build_step():
             print(format_building(l, year, day), end=" ", flush=True)
-            cmd = _concurrent_build(config, filename)
-            print("\033[A")
+            try:
+                cmd = _concurrent_build(config, filename)
+                print("\033[A")
+            except ShellException as e:
+                print("\033[A")
+                print(format_failure(l, year, day), end="  \n")
+                print(e.stderr, end="")
+                continue
         else:
             cmd = config.cmd_fn(config.build_fn(filename))
         print(format_running(l, year, day), end=" ", flush=True)
-        actual = _concurrent_solve(cmd)
-        print("\033[A")  # Move cursor back to start of line
+        try:
+            actual = _concurrent_solve(cmd)
+            print("\033[A")  # Move cursor back to start of line
+        except ShellException as e:
+            print("\033[A")
+            print(format_failure(l, year, day), end="  \n")
+            print(e.stderr)
+            continue
         if expected:
             if actual == expected:
                 print(
