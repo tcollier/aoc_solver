@@ -5,7 +5,15 @@ import time
 
 from datetime import datetime
 
-from lib.format import format_diff, format_failure, format_success, format_timing
+from lib.format import (
+    Color,
+    format_building,
+    format_diff,
+    format_failure,
+    format_running,
+    format_success,
+    format_timing,
+)
 from lib.languages import language_config, all_languages
 from lib.shell import shell_out
 
@@ -43,19 +51,16 @@ def _find_solution(filename):
         return None
 
 
-def _time_cmd(cmd, pipe):
-    start_time = datetime.now()
-    timing_info = json.loads(shell_out(f"{cmd} --time"))
-    duration = datetime.now() - start_time
-    pipe.send(True)
-    pipe.recv()
-    print(format_timing(timing_info, duration))
-    pipe.close()
-
-
+# The spinner expects the following pipe messages to be recv'd/sent
+#
+#   1. Send `True` message to tell spinner to start
+#   2. Send `True` message to tell spinner to stop
+#   3. Recv `True` message to indicate spinner is finished
+#
 def _concurrent_spinner(pipe):
     spinners = ["/", "-", "\\", "|"]
     index = 0
+    pipe.recv()
     waiting = True
     print(" ", end="")
     while waiting:
@@ -68,6 +73,19 @@ def _concurrent_spinner(pipe):
     pipe.send(True)
 
 
+def _time_cmd(cmd, pipe):
+    timing_str = "timing"
+    print(f"{Color.GREY}{timing_str}{Color.ENDC} ", end="", flush=True)
+    pipe.send(True)  # Tell spinner to start
+    start_time = datetime.now()
+    timing_info = json.loads(shell_out(f"{cmd} --time"))
+    duration = datetime.now() - start_time
+    pipe.send(True)  # Tell spinner to stop
+    pipe.recv()  # Wait for spinner to finish
+    print("\b" * (len(timing_str) + 1), end="")
+    print(format_timing(timing_info, duration))
+
+
 def _concurrent_time_cmd(cmd):
     pipe1, pipe2 = multiprocessing.Pipe(True)
     tproc = multiprocessing.Process(target=_time_cmd, args=(cmd, pipe1))
@@ -76,6 +94,52 @@ def _concurrent_time_cmd(cmd):
     wproc.start()
     wproc.join()
     tproc.join()
+    pipe1.close()
+    pipe2.close()
+
+
+def _solve(cmd, pipe):
+    pipe.send(True)  # Tell spinner to start
+    actual = shell_out(cmd)
+    pipe.send(True)  # Tell spinner to stop
+    pipe.recv()  # Wait for spinner to finish
+    pipe.send(actual)
+
+
+def _concurrent_solve(cmd):
+    pipe1, pipe2 = multiprocessing.Pipe(True)
+    tproc = multiprocessing.Process(target=_solve, args=(cmd, pipe1))
+    tproc.start()
+    wproc = multiprocessing.Process(target=_concurrent_spinner, args=(pipe2,))
+    wproc.start()
+    wproc.join()
+    tproc.join()
+    actual = pipe2.recv()
+    pipe1.close()
+    pipe2.close()
+    return actual
+
+
+def _build(config, filename, pipe):
+    pipe.send(True)
+    cmd = config.cmd_fn(config.build_fn(filename))
+    pipe.send(True)
+    pipe.recv()
+    pipe.send(cmd)
+
+
+def _concurrent_build(config, filename):
+    pipe1, pipe2 = multiprocessing.Pipe(True)
+    tproc = multiprocessing.Process(target=_build, args=(config, filename, pipe1))
+    tproc.start()
+    wproc = multiprocessing.Process(target=_concurrent_spinner, args=(pipe2,))
+    wproc.start()
+    wproc.join()
+    tproc.join()
+    cmd = pipe2.recv()
+    pipe1.close()
+    pipe2.close()
+    return cmd
 
 
 def solve(language, year, day, save=False):
@@ -89,8 +153,15 @@ def solve(language, year, day, save=False):
     for l, filename in _find_files(language, year, day):
         found = True
         config = language_config(l)
-        cmd = config.cmd_fn(config.build_fn(filename))
-        actual = shell_out(cmd)
+        if config.has_build_step():
+            print(format_building(l, year, day), end=" ", flush=True)
+            cmd = _concurrent_build(config, filename)
+            print("\033[A")
+        else:
+            cmd = config.cmd_fn(config.build_fn(filename))
+        print(format_running(l, year, day), end=" ", flush=True)
+        actual = _concurrent_solve(cmd)
+        print("\033[A")  # Move cursor back to start of line
         if expected:
             if actual == expected:
                 print(
@@ -100,6 +171,8 @@ def solve(language, year, day, save=False):
                 )
                 if config.timing:
                     _concurrent_time_cmd(cmd)
+                else:
+                    print("  ")  # Overwrite the spinner and add new line
             else:
                 print(format_failure(l, year, day))
                 print(format_diff(expected, actual))
@@ -110,4 +183,4 @@ def solve(language, year, day, save=False):
                 print(f"Saved reault to {outfile}")
     if not found and language:
         for l in language:
-            print(f"{format_failure(l, year, day)} (no source code found {l})")
+            print(f"{format_failure(l, year, day)} (no {l} source code found)")

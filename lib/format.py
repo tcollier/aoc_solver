@@ -6,6 +6,7 @@ class Color(object):
     OKGREEN = "\033[92m"
     WARNING = "\033[93m"
     FAIL = "\033[91m"
+    GREY = "\033[90m"
     ENDC = "\033[0m"
     BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
@@ -78,14 +79,25 @@ def _table(table, row_colors):
     return string
 
 
-def format_success(language, year, day):
+def _status(language, year, day, label, color):
     day_language = f"{year}/{day.rjust(2, '0')} {_language(language)}"
-    return f"PASS [{day_language}]"
+    return f"{color}{label} [{day_language}]{Color.ENDC}"
+
+
+def format_building(language, year, day):
+    return _status(language, year, day, "COMP", Color.OKCYAN)
+
+
+def format_running(language, year, day):
+    return _status(language, year, day, "EXEC", Color.GREY)
+
+
+def format_success(language, year, day):
+    return _status(language, year, day, "PASS", Color.OKGREEN)
 
 
 def format_failure(language, year, day):
-    day_language = f"{year}/{day.rjust(2, '0')} {_language(language)}"
-    return f"{Color.FAIL}FAIL [{day_language}]{Color.ENDC}"
+    return _status(language, year, day, "FAIL", Color.FAIL)
 
 
 def format_diff(expected, actual):

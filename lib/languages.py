@@ -109,6 +109,9 @@ class LanguageConfig(object):
         self.build_fn = build_fn
         self.timing = timing
 
+    def has_build_step(self):
+        return self.build_fn != noop_build
+
 
 LANGUAGES = {
     "c": LanguageConfig("c", c_cmd, c_build, timing=False),
