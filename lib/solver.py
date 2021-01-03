@@ -41,7 +41,7 @@ def find_solution(filename):
         return None
 
 
-def solve(language, year, day, save):
+def solve(language, year, day, save=False):
     outfile = output_file(year, day)
     expected = find_solution(outfile)
     if expected and save:

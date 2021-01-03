@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
+import glob
 import os
 
 from datetime import datetime
@@ -47,12 +48,27 @@ parser.add_argument(
     default=default_language,
 )
 parser.add_argument(
+    "--all", help=f"run all challenge days in all languages", action="store_true"
+)
+parser.add_argument(
     "--save", help=f"save the programs output to output.txt", action="store_true"
 )
 
 args = parser.parse_args()
 
 try:
-    solve(args.language, args.year, args.day, args.save)
+    if args.all:
+        if args.save:
+            print("Cannot use `--save` with `--all`")
+            exit(1)
+        years = glob.glob("2*")
+        years.sort()
+        for year in years:
+            days = glob.glob(f"{year}/*")
+            days.sort()
+            for day in days:
+                solve(None, year, day.split("/")[-1])
+    else:
+        solve(args.language, args.year, args.day, args.save)
 except Exception as e:
     print(e)
