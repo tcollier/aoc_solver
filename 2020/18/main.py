@@ -1,8 +1,12 @@
 import os
 import re
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
+
 
 OPERATORS = {
     "+": lambda a, b: a + b,
@@ -93,12 +97,24 @@ def part2_eval_line(line):
     return eval_without_parens(chars)
 
 
-def print_ans(input, eval_fn):
+def count_total_bags(input, eval_fn):
     total = 0
     for line in input:
         total += eval_fn(line)
-    print(total)
+    return total
 
 
-print_ans(INPUT, part1_eval_line)
-print_ans(INPUT, part2_eval_line)
+def part1_solution(input):
+    return count_total_bags(input, part1_eval_line)
+
+
+def part2_solution(input):
+    return count_total_bags(input, part2_eval_line)
+
+
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

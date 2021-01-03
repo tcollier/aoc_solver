@@ -1,8 +1,12 @@
 import os
 import re
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
+
 
 BIT_LEN = 36
 
@@ -19,7 +23,7 @@ def parse_mask_part1(raw):
     return zeros_mask, ones_mask
 
 
-def print_part1_ans(input):
+def part1_solution(input):
     values = {}
     for line in input:
         match = re.match(r"^(.+) = (.+)$", line)
@@ -32,7 +36,7 @@ def print_part1_ans(input):
     total = 0
     for value in values.values():
         total += value
-    print(total)
+    return total
 
 
 def parse_mask_part2(raw):
@@ -59,7 +63,7 @@ def store_part_2(values, addr, floating_masks, value, index=0):
     store_part_2(values, addr_with_1, floating_masks, value, index + 1)
 
 
-def print_part2_ans(input):
+def part2_solution(input):
     values = {}
     for line in input:
         match = re.match(r"^(.+) = (.+)$", line)
@@ -72,8 +76,12 @@ def print_part2_ans(input):
     total = 0
     for value in values.values():
         total += value
-    print(total)
+    return total
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

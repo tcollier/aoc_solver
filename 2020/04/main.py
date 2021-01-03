@@ -1,8 +1,12 @@
 import os
 import re
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
+
 
 REQUIRED_FIELDS = ["byr", "iyr", "eyr", "hgt", "hcl", "ecl", "pid"]
 
@@ -44,7 +48,7 @@ def part2_validation(field, val):
     return PART2_VALIDATION[field](val)
 
 
-def print_ans(input, validation_fn):
+def count_valid(input, validation_fn):
     needed_fields = set(REQUIRED_FIELDS)
     num_valid = 0
     for line in input:
@@ -60,8 +64,20 @@ def print_ans(input, validation_fn):
                 needed_fields.remove(field)
     if not needed_fields:
         num_valid += 1
-    print(num_valid)
+    return num_valid
 
 
-print_ans(INPUT, part1_validation)
-print_ans(INPUT, part2_validation)
+def part1_solution(input):
+    return count_valid(input, part1_validation)
+
+
+def part2_solution(input):
+    return count_valid(input, part2_validation)
+
+
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

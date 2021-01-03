@@ -1,7 +1,10 @@
 import os
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
 def run(instructions, fail_on_loop):
@@ -26,11 +29,11 @@ def run(instructions, fail_on_loop):
     return acc
 
 
-def print_part1_ans(input):
-    print(run(input, False))
+def part1_solution(input):
+    return run(input, False)
 
 
-def print_part2_ans(input):
+def part2_solution(input):
     for i in range(len(input)):
         orig = input[i]
         if orig[0:3] == "jmp":
@@ -41,12 +44,15 @@ def print_part2_ans(input):
             continue
 
         try:
-            print(run(input, True))
-            break
+            return run(input, True)
         except:
             pass
         input[i] = orig
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

@@ -1,8 +1,11 @@
 import functools
 import os
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
 def parse_input(input):
@@ -20,17 +23,21 @@ def num_trees(grid, down_steps, right_steps):
     return num_trees
 
 
-def print_part1_ans(input):
-    print(num_trees(parse_input(input), 1, 3))
+def part1_solution(input):
+    return num_trees(parse_input(input), 1, 3)
 
 
-def print_part2_ans(input):
+def part2_solution(input):
     slopes = [(1, 1), (1, 3), (1, 5), (1, 7), (2, 1)]
     grid = parse_input(input)
     num_trees_list = [num_trees(grid, s[0], s[1]) for s in slopes]
     product = functools.reduce(lambda a, b: a * b, num_trees_list)
-    print(product)
+    return product
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

@@ -1,10 +1,13 @@
 import os
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [int(l.rstrip()) for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
-def print_part1_ans(input):
+def part1_solution(input):
     input = [n for n in input]
     input.append(0)
     input.sort()
@@ -16,10 +19,10 @@ def print_part1_ans(input):
             num_1_diff += 1
         elif diff == 3:
             num_3_diff += 1
-    print(num_1_diff * num_3_diff)
+    return num_1_diff * num_3_diff
 
 
-def print_part2_ans(input):
+def part2_solution(input):
     input = [n for n in input]
     input.append(0)
     input.sort()
@@ -29,8 +32,12 @@ def print_part2_ans(input):
         for j in range(max(0, i - 3), i):
             if input[i] - input[j] <= 3:
                 counts[i] += counts[j]
-    print(counts[-1])
+    return counts[-1]
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+executor = Executor(
+    [int(l.rstrip()) for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

@@ -1,8 +1,6 @@
-# Mine
-INPUT = "198753462"
+import sys
 
-# Sample
-# INPUT = "389125467"
+from lib.executor import Executor
 
 
 def generate_circle(labels, num_cups):
@@ -55,22 +53,30 @@ def output_part1(cups, _):
     while curr != 0:
         labels.append(str(curr + 1))
         curr = cups[curr]
-    print("".join(labels))
+    return "".join(labels)
 
 
 def output_part2(cups, head):
-    print((cups[0] + 1) * (cups[cups[0]] + 1))
+    return (cups[0] + 1) * (cups[cups[0]] + 1)
 
 
-def print_ans(labels, num_cups, num_moves, output_fn):
+def play(labels, num_cups, num_moves):
     cups, head = generate_circle(labels, num_cups)
     for move_num in range(num_moves):
         head = move(cups, head, move_num + 1)
         head = cups[head]
-    output_fn(cups, head)
+    return cups, head
 
 
-labels = [int(c) for c in INPUT]
+def part1_solution(labels):
+    cups, head = play(labels, num_cups=9, num_moves=100)
+    return output_part1(cups, head)
 
-print_ans(labels, num_cups=9, num_moves=100, output_fn=output_part1)
-print_ans(labels, num_cups=1000000, num_moves=10000000, output_fn=output_part2)
+
+def part2_solution(labels):
+    cups, head = play(labels, num_cups=1000000, num_moves=10000000)
+    return output_part2(cups, head)
+
+
+executor = Executor([1, 9, 8, 7, 5, 3, 4, 6, 2], part1_solution, part2_solution)
+executor(sys.argv)

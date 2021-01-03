@@ -1,5 +1,8 @@
 import math
 import os
+import sys
+
+from lib.executor import Executor
 
 
 CWD = os.path.dirname(os.path.abspath(__file__))
@@ -52,14 +55,27 @@ def triple_with_sum(arr, sum):
     raise Exception(f"Triplet with sum {sum} not found")
 
 
-bit_vec = BitVector(2020)
-for line in open(f"{CWD}/input.txt", "r").readlines():
-    bit_vec.set(int(line.rstrip()))
+def part1_solution(input):
+    bit_vec = BitVector(2020)
+    for num in input:
+        bit_vec.set(num)
+    numbers = bit_vec.sorted_values()
+    pair = pair_with_sum(numbers, bit_vec, 2020)
+    return pair[0] * pair[1]
 
-numbers = bit_vec.sorted_values()
 
-pair = pair_with_sum(numbers, bit_vec, 2020)
-print(pair[0] * pair[1])
+def part2_solution(input):
+    bit_vec = BitVector(2020)
+    for num in input:
+        bit_vec.set(num)
+    numbers = bit_vec.sorted_values()
+    trip = triple_with_sum(numbers, 2020)
+    return trip[0] * trip[1] * trip[2]
 
-trip = triple_with_sum(numbers, 2020)
-print(trip[0] * trip[1] * trip[2])
+
+executor = Executor(
+    [int(l.rstrip()) for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

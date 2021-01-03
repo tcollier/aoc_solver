@@ -1,4 +1,4 @@
-INPUT = File.readlines(File.join(File.dirname(__FILE__), 'input.txt')).map(&:rstrip)
+require_relative '../../lib/executor'
 
 module Part1Validator
   def self.valid?(min, max, char, pwd)
@@ -20,5 +20,11 @@ def count_valid(input, validator)
   end
 end
 
-puts count_valid(INPUT, Part1Validator)
-puts count_valid(INPUT, Part2Validator)
+part1_proc = Proc.new { |input| count_valid(input, Part1Validator) }
+part2_proc = Proc.new { |input| count_valid(input, Part2Validator) }
+executor = Executor.new(
+  File.readlines(File.join(File.dirname(__FILE__), 'input.txt')).map(&:rstrip),
+  part1_proc,
+  part2_proc
+)
+executor.run(ARGV)

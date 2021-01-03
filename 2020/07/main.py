@@ -1,8 +1,11 @@
 import os
 import re
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
 def parse_rule(line):
@@ -16,7 +19,7 @@ def parse_rule(line):
     return container, contents
 
 
-def print_part1_ans(input):
+def part1_solution(input):
     bags = {}
     for line in input:
         container, contents = parse_rule(line)
@@ -34,7 +37,7 @@ def print_part1_ans(input):
         for next_bag in bags[bag]:
             if next_bag not in options:
                 bags_to_try.append(next_bag)
-    print(len(options))
+    return len(options)
 
 
 def count_bags(bags, color):
@@ -44,13 +47,17 @@ def count_bags(bags, color):
     return total
 
 
-def print_part2_ans(input):
+def part2_solution(input):
     bags = {}
     for line in input:
         container, contents = parse_rule(line)
         bags[container] = contents
-    print(count_bags(bags, "shiny gold") - 1)
+    return count_bags(bags, "shiny gold") - 1
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

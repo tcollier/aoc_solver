@@ -1,11 +1,16 @@
 import java.lang.StringBuilder;
 import java.util.Arrays;
 
+import tcollier.Executor;
+import tcollier.Solution;
+
 class Game {
+  private int numRounds;
   private int[] cups;
   private int head;
 
-  public Game(int[] labels, int numCups) {
+  public Game(int[] labels, int numCups, int numRounds) {
+    this.numRounds = numRounds;
     this.cups = new int[numCups];
 
     if (numCups > labels.length) {
@@ -26,7 +31,13 @@ class Game {
     }
   }
 
-  public void move() {
+  public void play() {
+    for (int i = 0; i < this.numRounds; i++) {
+      this.move();
+    }
+  }
+
+  private void move() {
     int cup1 = this.cups[this.head];
     int cup2 = this.cups[cup1];
     int cup3 = this.cups[cup2];
@@ -63,26 +74,47 @@ class Game {
   }
 }
 
+class Day23Solution implements Solution {
+  private Game game1;
+  private Game game2;
+
+  public Day23Solution(Game game1, Game game2) {
+    this.game1 = game1;
+    this.game2 = game2;
+  }
+
+  public String part1Answer() {
+    this.game1.play();
+    StringBuilder str = new StringBuilder();
+    int curr = this.game1.labelAt(0);
+    while (curr != 1) {
+      str.append(curr);
+      curr = this.game1.labelAt(curr - 1);
+    }
+    return str.toString();
+  }
+
+  public String part2Answer() {
+    this.game2.play();
+    return String.valueOf((long)this.game2.labelAt(0) * (long)this.game2.labelAt(this.game2.labelAt(0) - 1));
+  }
+}
+
 class Main {
   private static final int[] labels = {1, 9, 8, 7, 5, 3, 4, 6, 2};
 
   public static void main(String[] args) {
-    Game game1 = new Game(labels, 9);
-    for (int i = 0; i < 100; i++) {
-      game1.move();
+    try {
+      Executor executor = new Executor(
+        new Day23Solution(
+          new Game(labels, 9, 100),
+          new Game(labels, 1000000, 10000000)
+        )
+      );
+      executor.run(args);
+    } catch (Exception e) {
+      System.out.println(e);
+      e.printStackTrace();
     }
-    StringBuilder str = new StringBuilder();
-    int curr = game1.labelAt(0);
-    while (curr != 1) {
-      str.append(curr);
-      curr = game1.labelAt(curr - 1);
-    }
-    System.out.println(str.toString());
-
-    Game game2 = new Game(labels, 1000000);
-    for (int i = 0; i < 10000000; i++) {
-      game2.move();
-    }
-    System.out.println((long)game2.labelAt(0) * (long)game2.labelAt(game2.labelAt(0) - 1));
   }
 }

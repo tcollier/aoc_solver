@@ -1,3 +1,5 @@
+require_relative '../../lib/executor'
+
 class Integer
   def /(other)
     self + other
@@ -8,6 +10,9 @@ class Integer
   end
 end
 
-puts eval(File.read(File.join(File.dirname(__FILE__), 'input.txt')).chomp.gsub(/\+/, '/').gsub("\n", '+'))
-
-puts eval(File.read(File.join(File.dirname(__FILE__), 'input.txt')).chomp.gsub(/\+/, '**').gsub("\n", '+'))
+part1_proc = Proc.new { |data| eval(data.chomp.gsub(/\+/, '/').gsub("\n", '+')) }
+part2_proc = Proc.new { |data| eval(data.chomp.gsub(/\+/, '**').gsub("\n", '+')) }
+executor = Executor.new(
+  File.read(File.join(File.dirname(__FILE__), 'input.txt')), part1_proc, part2_proc
+)
+executor.run(ARGV)

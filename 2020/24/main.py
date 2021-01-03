@@ -1,7 +1,10 @@
 import os
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 SE = 1 - 1j
 SW = -1 - 1j
@@ -28,10 +31,6 @@ def initial_flip(input):
         else:
             tiles.add(tile)
     return tiles
-
-
-def print_part1_ans(input):
-    print(len(initial_flip(input)))
 
 
 def neighbors(tile):
@@ -64,12 +63,20 @@ def tick(tiles):
     return next_tiles
 
 
-def print_part2_ans(input):
+def part1_solution(input):
+    return len(initial_flip(input))
+
+
+def part2_solution(input):
     tiles = initial_flip(input)
     for _ in range(100):
         tiles = tick(tiles)
-    print(len(tiles))
+    return len(tiles)
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

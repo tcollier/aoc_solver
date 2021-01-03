@@ -1,6 +1,6 @@
 require 'set'
 
-INPUT = File.readlines(File.join(File.dirname(__FILE__), 'input.txt')).map(&:to_i)
+require_relative '../../lib/executor'
 
 def pair_with_sum(numbers, sum)
   others = Set.new(numbers[1..-1])
@@ -31,8 +31,19 @@ def triplet_with_sum(numbers, sum)
   raise "No triplet with sum #{sum} found"
 end
 
-pair = pair_with_sum(INPUT, 2020)
-puts pair[0] * pair[1]
+part1_proc = Proc.new do |input|
+  pair = pair_with_sum(input, 2020)
+  pair[0] * pair[1]
+end
 
-triplet = triplet_with_sum(INPUT, 2020)
-puts triplet[0] * triplet[1] * triplet[2]
+part2_proc = Proc.new do |input|
+  triplet = triplet_with_sum(input, 2020)
+  triplet[0] * triplet[1] * triplet[2]
+end
+
+executor = Executor.new(
+  File.readlines(File.join(File.dirname(__FILE__), 'input.txt')).map(&:to_i),
+  part1_proc,
+  part2_proc
+)
+executor.run(ARGV)

@@ -1,7 +1,9 @@
-INPUT = [14, 3, 1, 0, 9, 5]
+import sys
+
+from lib.executor import Executor
 
 
-def print_ans(input, num_rounds):
+def play(input, num_rounds):
     last_usage = [-1] * num_rounds
     for i in range(len(input) - 1):
         last_usage[input[i]] = i
@@ -13,8 +15,16 @@ def print_ans(input, num_rounds):
             curr_num = 0
         last_usage[prev_num] = i - 1
         prev_num = curr_num
-    print(curr_num)
+    return curr_num
 
 
-print_ans(INPUT, 2020)
-print_ans(INPUT, 30000000)
+def part1_solution(input):
+    return play(input, 2020)
+
+
+def part2_solution(input):
+    return play(input, 30000000)
+
+
+executor = Executor([14, 3, 1, 0, 9, 5], part1_solution, part2_solution)
+executor(sys.argv)

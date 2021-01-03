@@ -1,11 +1,12 @@
 import math
 import os
 import re
+import sys
 
 from collections import deque
+from lib.executor import Executor
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
 def play_part1(hand1, hand2):
@@ -44,7 +45,7 @@ def play_part2(hand1, hand2):
     return len(hand1) > 0
 
 
-def print_ans(input, play_fn):
+def play(input, play_fn):
     hands = []
     curr_hand = deque()
     for line in input:
@@ -60,8 +61,20 @@ def print_ans(input, play_fn):
     score = 0
     for i in range(len(winning_hand)):
         score += (i + 1) * winning_hand[len(winning_hand) - i - 1]
-    print(score)
+    return score
 
 
-print_ans(INPUT, play_part1)
-print_ans(INPUT, play_part2)
+def part1_solution(input):
+    return play(input, play_part1)
+
+
+def part2_solution(input):
+    return play(input, play_part2)
+
+
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

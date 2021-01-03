@@ -1,8 +1,11 @@
 import os
 import re
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
 def parse_input(input):
@@ -46,7 +49,7 @@ def valid_numbers(parts):
     return valid_nums
 
 
-def print_part1_ans(input):
+def part1_solution(input):
     invalid_sum = 0
     data = parse_input(input)
     valid_nums = valid_numbers(data["parts"])
@@ -54,10 +57,10 @@ def print_part1_ans(input):
         for num in ticket:
             if num >= len(valid_nums) or not valid_nums[num]:
                 invalid_sum += num
-    print(invalid_sum)
+    return invalid_sum
 
 
-def print_part2_ans(input):
+def part2_solution(input):
     valid_tickets = []
     data = parse_input(input)
     valid_nums = valid_numbers(data["parts"])
@@ -101,8 +104,12 @@ def print_part2_ans(input):
     for i, part in enumerate(part_order):
         if re.match(r"departure", part):
             product *= my_ticket[i]
-    print(product)
+    return product
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

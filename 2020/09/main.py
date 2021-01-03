@@ -1,7 +1,11 @@
 import os
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [int(l.rstrip()) for l in open(f"{CWD}/input.txt", "r").readlines()]
+
 
 POOL_SIZE = 25
 
@@ -20,11 +24,11 @@ def first_invalid_number(input):
         number_pool.add(input[i])
 
 
-def print_part1_ans(input,):
-    print(first_invalid_number(input)[1])
+def part1_solution(input,):
+    return first_invalid_number(input)[1]
 
 
-def print_part2_ans(input):
+def part2_solution(input):
     max_index, target_num = first_invalid_number(input)
     for i in range(max_index):
         sum = input[i]
@@ -33,11 +37,14 @@ def print_part2_ans(input):
             if sum == target_num:
                 elems = input[i : j + 1]
                 elems.sort()
-                print(elems[0] + elems[-1])
-                return
+                return elems[0] + elems[-1]
             elif sum > target_num:
                 break
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+executor = Executor(
+    [int(l.rstrip()) for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

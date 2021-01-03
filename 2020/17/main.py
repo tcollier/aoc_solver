@@ -1,8 +1,11 @@
-from collections import deque
 import os
+import sys
+
+from collections import deque
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
 class Board3D(object):
@@ -139,19 +142,23 @@ class Board4D(object):
         return Board4D(new_hcubes)
 
 
-def print_part1_ans(input):
+def part1_solution(input):
     board = Board3D.from_input(input)
     for _ in range(6):
         board = board.iterate()
-    print(board.active_cubes())
+    return board.active_cubes()
 
 
-def print_part2_ans(input):
+def part2_solution(input):
     board = Board4D.from_input(input)
     for _ in range(6):
         board = board.iterate()
-    print(board.active_cubes())
+    return board.active_cubes()
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

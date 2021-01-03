@@ -1,7 +1,11 @@
 import os
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
+
 
 DIRECTIONS = [-1 - 1j, -1j, 1 - 1j, -1, 1, -1 + 1j, 1j, 1 + 1j]
 
@@ -49,7 +53,7 @@ def iterate(occupied, floor, max_seat, visible_threshold, occupiend_count_fn):
     return next_occupied
 
 
-def print_ans(input, visible_threshold, occupied_count_fn):
+def count_occupied(input, visible_threshold, occupied_count_fn):
     occupied = set()
     floor = set()
     for row, line in enumerate(input):
@@ -72,8 +76,20 @@ def print_ans(input, visible_threshold, occupied_count_fn):
             break
         prev_occupied = occupied
 
-    print(len(occupied))
+    return len(occupied)
 
 
-print_ans(INPUT, 4, part1_occupied_count)
-print_ans(INPUT, 5, part2_occupied_count)
+def part1_solution(input):
+    return count_occupied(input, 4, part1_occupied_count)
+
+
+def part2_solution(input):
+    return count_occupied(input, 5, part2_occupied_count)
+
+
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

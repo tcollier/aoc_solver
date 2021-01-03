@@ -1,7 +1,11 @@
 import os
+import sys
+
+from lib.executor import Executor
+
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
+
 
 DIRECTIONS = ["E", "S", "W", "N"]
 
@@ -33,14 +37,14 @@ def part1_apply_instruction(point, dir_index, instruction):
     return point, dir_index
 
 
-def print_part1_ans(input):
+def part1_solution(input):
     point = 0
     dir_index = 0
     for instruction in input:
         point, dir_index = part1_apply_instruction(
             point, dir_index, instruction.rstrip()
         )
-    print(round(abs(point.real) + abs(point.imag)))
+    return round(abs(point.real) + abs(point.imag))
 
 
 def part2_apply_instruction(ship, waypoint, instruction):
@@ -60,13 +64,17 @@ def part2_apply_instruction(ship, waypoint, instruction):
     return ship, waypoint
 
 
-def print_part2_ans(input):
+def part2_solution(input):
     ship = 0
     waypoint = 10 + 1j
     for instruction in input:
         ship, waypoint = part2_apply_instruction(ship, waypoint, instruction.rstrip())
-    print(round(abs(ship.real) + abs(ship.imag)))
+    return round(abs(ship.real) + abs(ship.imag))
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

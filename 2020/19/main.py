@@ -1,8 +1,10 @@
 import os
 import re
+import sys
+
+from lib.executor import Executor
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
 def build_regex(rules, rule_num, repeats=0):
@@ -25,7 +27,7 @@ def build_regex(rules, rule_num, repeats=0):
         return f"{''.join(outputs)}"
 
 
-def print_ans(input, custom_rules={}):
+def count_valid_strings(input, custom_rules={}):
     def parse_rule(r):
         if re.match("^[0-9]+$", r):
             return int(r)
@@ -49,8 +51,20 @@ def print_ans(input, custom_rules={}):
             rules[rule_num] = parts
         elif re.match(regex, line):
             num_valid_strings += 1
-    print(num_valid_strings)
+    return num_valid_strings
 
 
-print_ans(INPUT)
-print_ans(INPUT, {8: "42 | 42 8", 11: "42 31 | 42 11 31"})
+def part1_solution(input):
+    return count_valid_strings(input)
+
+
+def part2_solution(input):
+    return count_valid_strings(input, {8: "42 | 42 8", 11: "42 31 | 42 11 31"})
+
+
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

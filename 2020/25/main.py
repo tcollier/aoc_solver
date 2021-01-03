@@ -1,3 +1,7 @@
+import sys
+
+from lib.executor import Executor
+
 # My input
 CARD_PUBLIC_KEY = 15113849
 DOOR_PUBLIC_KEY = 4206373
@@ -28,8 +32,13 @@ def encrypt(pubkey, loop_size):
     return value
 
 
-def print_part1_ans(pubkey1, pubkey2):
-    print(encrypt(pubkey2, loop_size(pubkey1)))
+def part1_solution(_):
+    return encrypt(CARD_PUBLIC_KEY, loop_size(DOOR_PUBLIC_KEY))
 
 
-print_part1_ans(CARD_PUBLIC_KEY, DOOR_PUBLIC_KEY)
+def part2_solution(_):
+    return ""
+
+
+executor = Executor(None, part1_solution, part2_solution)
+executor(sys.argv)

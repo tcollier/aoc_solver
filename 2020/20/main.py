@@ -1,9 +1,11 @@
 import math
 import os
 import re
+import sys
+
+from lib.executor import Executor
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
 def rotate_matrix(matrix):
@@ -100,13 +102,13 @@ def group_pieces(tiles):
     return grouped
 
 
-def print_part1_ans(input):
+def corners_product(input):
     tiles = parse_tiles(input)
     grouped = group_pieces(tiles)
     product = 1
     for tile_num in grouped["corners"].keys():
         product *= tile_num
-    print(product)
+    return product
 
 
 def join_puzzle(puzzle):
@@ -216,7 +218,7 @@ def all_rotations(orig):
     return images
 
 
-def print_part2_ans(input):
+def count_non_moster_hashes(input):
     tiles = parse_tiles(input)
     pieces = group_pieces(tiles)
     puzzle = assemble_puzzle(pieces, int(math.sqrt(len(tiles) / 2)))
@@ -227,8 +229,20 @@ def print_part2_ans(input):
         monster_count = count_monsters(image, monster)
         if monster_count > 0:
             break
-    print(count_hashes(image) - monster_count * count_hashes(MONSTER))
+    return count_hashes(image) - monster_count * count_hashes(MONSTER)
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+def part1_solution(input):
+    return corners_product(input)
+
+
+def part2_solution(input):
+    return count_non_moster_hashes(input)
+
+
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)

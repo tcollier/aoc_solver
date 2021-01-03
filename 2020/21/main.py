@@ -1,8 +1,10 @@
 import os
 import re
+import sys
+
+from lib.executor import Executor
 
 CWD = os.path.dirname(os.path.abspath(__file__))
-INPUT = [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()]
 
 
 def get_allergens(input):
@@ -32,24 +34,28 @@ def get_allergens(input):
     return allergens, foods
 
 
-def print_part1_ans(input):
+def part1_solution(input):
     allergens, foods = get_allergens(input)
     allergen_names = set(allergens.values())
     safe_ingredients_count = 0
     for food in foods:
         safe_ingredients_count += len(food - allergen_names)
-    print(safe_ingredients_count)
+    return safe_ingredients_count
 
 
-def print_part2_ans(input):
+def part2_solution(input):
     allergens, _ = get_allergens(input)
     allergen_list = list(allergens.keys())
     allergen_list.sort()
     ingredients = []
     for allergen in allergen_list:
         ingredients.append(allergens[allergen])
-    print(",".join(ingredients))
+    return ",".join(ingredients)
 
 
-print_part1_ans(INPUT)
-print_part2_ans(INPUT)
+executor = Executor(
+    [l.rstrip() for l in open(f"{CWD}/input.txt", "r").readlines()],
+    part1_solution,
+    part2_solution,
+)
+executor(sys.argv)
