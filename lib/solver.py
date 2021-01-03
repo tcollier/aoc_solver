@@ -1,11 +1,11 @@
 import json
-import multiprocessing
 import os
 import time
 import traceback
 
 from datetime import datetime
 
+from lib.concurrency import concurrent_with_spinner, fn_with_spinner
 from lib.format import (
     Color,
     format_attempt,
@@ -53,56 +53,6 @@ def _find_solution(filename):
         return None
 
 
-# The spinner expects the following pipe messages to be recv'd/sent
-#
-#   1. Send `True` message to tell spinner to start
-#   2. Send `True` message to tell spinner to stop
-#   3. Recv `True` message to indicate spinner is finished
-#
-def _concurrent_spinner(pipe):
-    spinners = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
-    index = 0
-    pipe.recv()
-    waiting = True
-    print(" ", end="")
-    while waiting:
-        print(f"\b{spinners[index]}", end="", flush=True)
-        index = (index + 1) % len(spinners)
-        if pipe.poll(0.08):
-            pipe.recv()
-            waiting = False
-    print("\b", end="")
-    pipe.send(True)
-
-
-def _fn_with_spinner(fn, pipe):
-    pipe.send(True)  # Tell spinner to start
-    try:
-        result = fn()
-    except ShellException as e:
-        result = e
-    pipe.send(True)  # Tell spinner to stop
-    pipe.recv()  # Wait for spinner to finish
-    pipe.send(result)
-
-
-def _concurrent_with_spinner(fn, *args):
-    pipe1, pipe2 = multiprocessing.Pipe(True)
-    fn_proc = multiprocessing.Process(target=fn, args=(*args, pipe1))
-    fn_proc.start()
-    spinner_proc = multiprocessing.Process(target=_concurrent_spinner, args=(pipe2,))
-    spinner_proc.start()
-    spinner_proc.join()
-    fn_proc.join()
-    result = pipe2.recv()
-    pipe1.close()
-    pipe2.close()
-    if isinstance(result, Exception):
-        raise result
-    else:
-        return result
-
-
 def _time_cmd(cmd, pipe):
     def fn():
         start_time = datetime.now()
@@ -111,21 +61,21 @@ def _time_cmd(cmd, pipe):
         return format_timing(timing_info, duration)
 
     print(f"{Color.GREY}timing{Color.ENDC} ", end="", flush=True)
-    _fn_with_spinner(fn, pipe)
+    fn_with_spinner(fn, pipe)
 
 
 def _solve(cmd, pipe):
     def fn():
         return shell_out(cmd)
 
-    _fn_with_spinner(fn, pipe)
+    fn_with_spinner(fn, pipe)
 
 
 def _build(config, filename, pipe):
     def fn():
         return config.cmd_fn(config.build_fn(filename))
 
-    _fn_with_spinner(fn, pipe)
+    fn_with_spinner(fn, pipe)
 
 
 def solve(language, year, day, save=False):
@@ -142,7 +92,7 @@ def solve(language, year, day, save=False):
         if config.has_build_step():
             print(format_building(l, year, day), end=" ", flush=True)
             try:
-                cmd = _concurrent_with_spinner(_build, config, filename)
+                cmd = concurrent_with_spinner(_build, config, filename)
                 print("\033[A")
             except ShellException as e:
                 print("\033[A")
@@ -153,7 +103,7 @@ def solve(language, year, day, save=False):
             cmd = config.cmd_fn(config.build_fn(filename))
         print(format_running(l, year, day), end=" ", flush=True)
         try:
-            actual = _concurrent_with_spinner(_solve, cmd)
+            actual = concurrent_with_spinner(_solve, cmd)
             print("\033[A")  # Move cursor back to start of line
         except ShellException as e:
             print("\033[A")
@@ -169,7 +119,7 @@ def solve(language, year, day, save=False):
                 )
                 if config.timing:
                     try:
-                        timing_info = _concurrent_with_spinner(_time_cmd, cmd)
+                        timing_info = concurrent_with_spinner(_time_cmd, cmd)
                         print("\033[A")
                         print(f"{format_success(l, year, day)} {timing_info}")
                     except ShellException as e:
