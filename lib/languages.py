@@ -121,4 +121,14 @@ LANGUAGES = {
     "scala": LanguageConfig("scala", scala_cmd, scala_build, timing=False),
     "typescript": LanguageConfig("ts", typescript_cmd, typescript_build),
 }
-language_list = ", ".join([l for l in LANGUAGES.keys()])
+
+
+def language_config(language):
+    if language in LANGUAGES:
+        return LANGUAGES[language]
+    else:
+        raise Exception(f"Unknown language {language}")
+
+
+def all_languages():
+    return [l for l in LANGUAGES.keys()]

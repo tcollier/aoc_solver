@@ -1,4 +1,4 @@
-from lib.languages import LANGUAGES
+from lib.languages import all_languages
 
 
 class Color(object):
@@ -29,7 +29,7 @@ def _duration(duration):
 
 def _language(language):
     max = 0
-    for l in LANGUAGES.keys():
+    for l in all_languages():
         if len(l) > max:
             max = len(l)
     return language.ljust(max, " ")
@@ -119,10 +119,11 @@ def format_timing(timing_info, duration):
     part2_spacer = " " if part1_avg_time >= 1000000 else ""
     overhead_spacer = " " if part2_avg_time >= 1000000 else ""
     end_spacer = " " if overhead >= 1000000 else ""
-    return ", ".join(
+    contents = ", ".join(
         [
             f"part1: {_duration(part1_avg_time)}",
             f"{part2_spacer}part2: {_duration(part2_avg_time)}",
             f"{overhead_spacer}overhead: {_duration(overhead)}{end_spacer}",
         ]
     )
+    return f"({contents})"
