@@ -58,7 +58,7 @@ def _find_solution(filename):
 #   3. Recv `True` message to indicate spinner is finished
 #
 def _concurrent_spinner(pipe):
-    spinners = ["/", "-", "\\", "|"]
+    spinners = ["⣾", "⣽", "⣻", "⢿", "⡿", "⣟", "⣯", "⣷"]
     index = 0
     pipe.recv()
     waiting = True
@@ -66,7 +66,7 @@ def _concurrent_spinner(pipe):
     while waiting:
         print(f"\b{spinners[index]}", end="", flush=True)
         index = (index + 1) % len(spinners)
-        if pipe.poll(0.1):
+        if pipe.poll(0.08):
             pipe.recv()
             waiting = False
     print("\b", end="")

@@ -85,11 +85,11 @@ def _status(language, year, day, label, color):
 
 
 def format_building(language, year, day):
-    return _status(language, year, day, "COMP", Color.OKCYAN)
+    return _status(language, year, day, "COMP", Color.GREY)
 
 
 def format_running(language, year, day):
-    return _status(language, year, day, "EXEC", Color.GREY)
+    return _status(language, year, day, "EXEC", Color.OKCYAN)
 
 
 def format_success(language, year, day):
