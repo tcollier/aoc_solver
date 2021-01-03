@@ -78,7 +78,7 @@ def _build(config, filename, pipe):
     fn_with_spinner(fn, pipe)
 
 
-def solve(language, year, day, save=False):
+def solve(languages, year, day, save=False):
     outfile = _output_file(year, day)
     expected = _find_solution(outfile)
     if expected and save:
@@ -86,7 +86,7 @@ def solve(language, year, day, save=False):
             f"Cannot save results when {outfile} alread exists, please delete it"
         )
     found = False
-    for l, filename in _find_files(language, year, day):
+    for l, filename in _find_files(languages, year, day):
         found = True
         config = language_config(l)
         if config.has_build_step():
@@ -139,6 +139,6 @@ def solve(language, year, day, save=False):
             if save:
                 open(outfile, "w").write(actual)
                 print(f"Saved result to {outfile}")
-    if not found and language:
-        for l in language:
+    if not found and languages:
+        for l in languages:
             print(f"{format_failure(l, year, day)} (no {l} source code found)")

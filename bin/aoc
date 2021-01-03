@@ -4,12 +4,12 @@ import argparse
 import glob
 import os
 import sys
-import traceback
 
 if not os.environ.get("PYTHONPATH"):
     root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     os.environ.setdefault("PYTHONPATH", root_dir)
-    exit(os.system(" ".join(sys.argv)))
+    code = os.system(" ".join(sys.argv))
+    sys.exit(code // 256)
 
 
 from datetime import datetime
@@ -73,5 +73,6 @@ try:
                 solve(args.language, year, day.split("/")[-1])
     else:
         solve(args.language, args.year, args.day, args.save)
-except:
-    traceback.print_exc()
+except Exception as e:
+    print(e)
+    sys.exit(1)
