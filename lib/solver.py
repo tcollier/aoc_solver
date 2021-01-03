@@ -76,16 +76,18 @@ def _concurrent_spinner(pipe):
 
 
 def _time_cmd(cmd, pipe):
-    timing_str = "timing"
-    print(f"{Color.GREY}{timing_str}{Color.ENDC} ", end="", flush=True)
+    print(f"{Color.GREY}timing{Color.ENDC} ", end="", flush=True)
     pipe.send(True)  # Tell spinner to start
-    start_time = datetime.now()
-    timing_info = json.loads(shell_out(f"{cmd} --time"))
-    duration = datetime.now() - start_time
+    try:
+        start_time = datetime.now()
+        timing_info = json.loads(shell_out(f"{cmd} --time"))
+        duration = datetime.now() - start_time
+        formatted = format_timing(timing_info, duration)
+    except ShellException as e:
+        formatted = e
     pipe.send(True)  # Tell spinner to stop
     pipe.recv()  # Wait for spinner to finish
-    print("\b" * (len(timing_str) + 1), end="")
-    print(format_timing(timing_info, duration))
+    pipe.send(formatted)
 
 
 def _concurrent_time_cmd(cmd):
@@ -96,8 +98,13 @@ def _concurrent_time_cmd(cmd):
     wproc.start()
     wproc.join()
     tproc.join()
+    formatted = pipe2.recv()
     pipe1.close()
     pipe2.close()
+    if isinstance(formatted, ShellException):
+        raise formatted
+    else:
+        return formatted
 
 
 def _solve(cmd, pipe):
@@ -196,7 +203,15 @@ def solve(language, year, day, save=False):
                     flush=True,
                 )
                 if config.timing:
-                    _concurrent_time_cmd(cmd)
+                    try:
+                        timing_info = _concurrent_time_cmd(cmd)
+                        print("\033[A")
+                        print(f"{format_success(l, year, day)} {timing_info}")
+                    except ShellException as e:
+                        print("\033[A")
+                        print(format_failure(l, year, day), end="  \n")
+                        print(e.stderr)
+                        continue
                 else:
                     print("  ")  # Overwrite the spinner and add new line
             else:
