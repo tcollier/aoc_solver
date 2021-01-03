@@ -9,7 +9,17 @@ import subprocess
 
 from datetime import datetime
 
-TIMING_ITERATIONS = 10
+
+class Color(object):
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
 
 
 def noop_build(file):
@@ -193,11 +203,11 @@ def format_decimal(number):
 
 def format_duration(duration):
     if duration < 1000:
-        return f"{format_decimal(duration)} μs"
+        return f"{Color.OKGREEN}{format_decimal(duration)} μs{Color.ENDC}"
     elif duration < 1000000:
         return f"{format_decimal(duration / 1000)} ms"
     else:
-        return f"{format_decimal(duration / 1000000)} sc"
+        return f"{Color.WARNING}{format_decimal(duration / 1000000)} sc{Color.ENDC}"
 
 
 def format_language(language):
@@ -253,7 +263,7 @@ def solve(args):
                     f"PASS [{day_language}] ({format_timing_info(timing_info, duration)})"
                 )
             else:
-                print(f"FAIL [{day_language}]")
+                print(f"{Color.FAIL}FAIL [{day_language}]{Color.ENDC}")
                 print("Expected:")
                 print(expected)
                 print("Actual:")
