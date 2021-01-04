@@ -28,7 +28,7 @@ def fn_with_spinner(fn, pipe):
     pipe.send(True)  # Tell spinner to start
     try:
         result = fn()
-    except ShellException as e:
+    except Exception as e:
         result = e
     pipe.send(True)  # Tell spinner to stop
     pipe.recv()  # Wait for spinner to finish

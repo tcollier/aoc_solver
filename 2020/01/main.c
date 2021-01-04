@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "../../lib/lib.h"
 
 #define BV_TYPE unsigned long int
 #define BV_BITS 64 // sizeof(BV_TYPE) * 8
@@ -7,6 +8,7 @@
 #define BV_SHIFTER 6  // log base 2 of BV_BITS
 #define BV_BUCKETS 32 // (2020 >> SHIFTER) + 1
 
+#define INPUT_LENGTH 200
 #define TARGET_SUM 2020
 
 typedef enum
@@ -35,10 +37,9 @@ bool bit_vec_test(BV_TYPE *bv, int n)
   return (bv[n >> BV_SHIFTER] & (BV_TYPE)1 << (n & BV_MASK)) > 0;
 }
 
-void bit_vec_values(BV_TYPE *bv, int bv_len, int *values)
+void bit_vec_values(BV_TYPE *bv, int *values)
 {
-  int i, j, num;
-  i = 0;
+  int i = 0, j, num;
   for (j = 0; j < BV_BUCKETS; j++)
   {
     BV_TYPE bits = bv[j];
@@ -56,31 +57,55 @@ void bit_vec_values(BV_TYPE *bv, int bv_len, int *values)
   }
 }
 
-Pair pair_with_sum(int *numbers, int numbers_len, BV_TYPE *bv, int sum)
+void bit_vec_from_input(BV_TYPE *bv, char **input, int num_values)
 {
+  for (int i = 0; i < BV_BUCKETS; i++)
+    bv[i] = 0;
+  for (int i = 0; i < num_values; i++)
+  {
+    int n = 0;
+    for (int c = 0; input[i][c] != '\n'; c++)
+    {
+      n *= 10;
+      n += input[i][c] - '0';
+    }
+    bit_vec_set(bv, n);
+  }
+}
+
+Pair pair_with_sum(BV_TYPE *bv, int sum)
+{
+  int *numbers = malloc(INPUT_LENGTH * sizeof(int));
+  bit_vec_values(bv, numbers);
+
   Pair pair;
   int i;
-  for (i = 0; i < numbers_len - 1; i++)
+  for (i = 0; i < INPUT_LENGTH - 1; i++)
   {
     int diff = sum - numbers[i];
     if (bit_vec_test(bv, diff))
     {
       pair.a = numbers[i];
       pair.b = diff;
+      free(numbers);
       return pair;
     }
   }
   pair.a = pair.b = -1;
+  free(numbers);
   return pair;
 }
 
-Triplet triplet_with_sum(int *numbers, int numbers_len, int sum)
+Triplet triplet_with_sum(BV_TYPE *bv, int sum)
 {
+  int *numbers = malloc(INPUT_LENGTH * sizeof(int));
+  bit_vec_values(bv, numbers);
+
   Triplet triplet;
-  for (int i = 0; i < numbers_len - 2; i++)
+  for (int i = 0; i < INPUT_LENGTH - 2; i++)
   {
     int j = i + 1;
-    int k = numbers_len - 1;
+    int k = INPUT_LENGTH - 1;
     while (j < k)
     {
       int total = numbers[i] + numbers[j] + numbers[k];
@@ -89,6 +114,7 @@ Triplet triplet_with_sum(int *numbers, int numbers_len, int sum)
         triplet.a = numbers[i];
         triplet.b = numbers[j];
         triplet.c = numbers[k];
+        free(numbers);
         return triplet;
       }
       else if (total < sum)
@@ -102,47 +128,49 @@ Triplet triplet_with_sum(int *numbers, int numbers_len, int sum)
     }
   }
   triplet.a = triplet.b = triplet.c = -1;
+  free(numbers);
   return triplet;
 }
 
-int main()
+char *part1_result(char *data[])
 {
-  FILE *fp;
-  char *line = NULL;
-  size_t len = 0;
-  ssize_t read;
-  int numbers_len = 0;
-  fp = fopen("2020/01/input.txt", "r");
-  if (fp == NULL)
-    exit(EXIT_FAILURE);
-
   BV_TYPE *bv = malloc(BV_BUCKETS * sizeof(BV_TYPE));
-  while ((read = getline(&line, &len, fp)) != -1)
-  {
-    int num = 0;
-    for (int i = 0; i < read - 1; i++)
-    {
-      num *= 10;
-      num += line[i] - '0';
-    }
-    numbers_len++;
-    bit_vec_set(bv, num);
-  }
-
-  fclose(fp);
-  if (line)
-    free(line);
-
-  int *numbers = malloc(numbers_len * sizeof(int));
-  bit_vec_values(bv, 64, numbers);
-
-  Pair pair = pair_with_sum(numbers, numbers_len, bv, TARGET_SUM);
-  printf("%d\n", pair.a * pair.b);
-
-  Triplet triplet = triplet_with_sum(numbers, numbers_len, TARGET_SUM);
-  printf("%d\n", triplet.a * triplet.b * triplet.c);
-
-  free(numbers);
+  bit_vec_from_input(bv, data, INPUT_LENGTH);
+  Pair pair = pair_with_sum(bv, TARGET_SUM);
   free(bv);
-  exit(EXIT_SUCCESS);
+  int product = pair.a * pair.b;
+  int num_digits = 1;
+  for (; product > 9; num_digits++)
+    product /= 10;
+
+  char *result = malloc(sizeof(char) * (num_digits + 1));
+  sprintf(result, "%d", pair.a * pair.b);
+  return result;
+}
+
+char *part2_result(char *data[])
+{
+  BV_TYPE *bv = malloc(BV_BUCKETS * sizeof(BV_TYPE));
+  bit_vec_from_input(bv, data, INPUT_LENGTH);
+  Triplet triplet = triplet_with_sum(bv, TARGET_SUM);
+  free(bv);
+  int product = triplet.a * triplet.b * triplet.c;
+  int num_digits = 1;
+  for (; product > 9; num_digits++)
+    product /= 10;
+
+  char *result = malloc(sizeof(char) * (num_digits + 1));
+  sprintf(result, "%d", triplet.a * triplet.b * triplet.c);
+  return result;
+}
+
+int main(int argc, char *argv[])
+{
+  char *data[INPUT_LENGTH];
+  load_input("2020/01/input.txt", data);
+  executor(data, part1_result, part2_result, argc, argv);
+  for (int i = 0; i < INPUT_LENGTH; i++)
+  {
+    free(data[i]);
+  }
 }

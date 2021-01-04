@@ -92,6 +92,11 @@ def _build(config, filename, language, year, day):
         print(format_failure(language, year, day), end="  \n")
         print(e.stderr, end="")
         raise e
+    except Exception as e:
+        print("\033[A")
+        print(format_failure(language, year, day), end="  \n")
+        traceback.print_exc()
+        raise e
 
 
 def _run(cmd, language, year, day):
@@ -104,6 +109,11 @@ def _run(cmd, language, year, day):
         print("\033[A")
         print(format_failure(language, year, day), end="  \n")
         print(e.stderr)
+        raise e
+    except Exception as e:
+        print("\033[A")
+        print(format_failure(language, year, day), end="  \n")
+        traceback.print_exc()
         raise e
 
 
@@ -135,6 +145,11 @@ def _handle_success(config, cmd, language, year, day):
         print(format_failure(language, year, day), end="  \n")
         print(e.stderr)
         raise e
+    except Exception as e:
+        print("\033[A")
+        print(format_failure(language, year, day), end="  \n")
+        traceback.print_exc()
+        raise e
 
 
 def _handle_bad_output(language, year, day, expected, actual):
@@ -161,7 +176,7 @@ def solve(languages, year, day, save=False):
             elif actual == expected:
                 _handle_success(config, cmd, l, year, day)
             else:
-                _handle_bad_output(l, year, day, expect, actual)
+                _handle_bad_output(l, year, day, expected, actual)
         except:
             continue
     if not found and languages:

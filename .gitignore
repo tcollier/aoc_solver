@@ -4,3 +4,4 @@ main_rs
 main.jar
 *.class
 *.js
+*.o

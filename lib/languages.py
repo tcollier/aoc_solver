@@ -10,7 +10,8 @@ def noop_build(file):
 
 def c_build(file):
     bin_file = file.replace(".", "_")
-    shell_out(f"gcc -o {bin_file} {file}")
+    lib_files = glob.glob("lib/*.c")
+    shell_out(f"gcc -o {bin_file} {file} {' '.join(lib_files)}")
     return bin_file
 
 
@@ -114,7 +115,7 @@ class LanguageConfig(object):
 
 
 LANGUAGES = {
-    "c": LanguageConfig("c", c_cmd, c_build, timing=False),
+    "c": LanguageConfig("c", c_cmd, c_build),
     "golang": LanguageConfig("go", golang_cmd, golang_build, timing=False),
     "java": LanguageConfig("java", java_cmd, java_build),
     "lisp": LanguageConfig("lisp", lisp_cmd, timing=False),
