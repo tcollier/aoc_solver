@@ -17,7 +17,6 @@ from datetime import datetime
 from lib.solver import solve
 from lib.format import format_failure, format_success, format_timing
 from lib.languages import all_languages
-from lib.shell import shell_out
 
 
 current_day = datetime.utcnow()
@@ -73,6 +72,8 @@ try:
                 solve(args.language, year, day.split("/")[-1])
     else:
         solve(args.language, args.year, args.day, args.save)
+except KeyboardInterrupt as e:
+    sys.exit(1)
 except Exception as e:
     print(e)
     sys.exit(1)

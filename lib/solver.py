@@ -177,6 +177,8 @@ def solve(languages, year, day, save=False):
                 _handle_success(config, cmd, l, year, day)
             else:
                 _handle_bad_output(l, year, day, expected, actual)
+        except KeyboardInterrupt as e:
+            raise e
         except:
             continue
     if not found and languages:
