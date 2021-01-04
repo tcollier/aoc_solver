@@ -2,13 +2,12 @@ from lib.languages import all_languages
 
 
 class Color(object):
-    OKCYAN = "\033[96m"
-    OKGREEN = "\033[92m"
-    WARNING = "\033[93m"
-    FAIL = "\033[91m"
+    CYAN = "\033[96m"
+    GREEN = "\033[92m"
+    YELLOW = "\033[93m"
+    RED = "\033[91m"
     GREY = "\033[90m"
     ENDC = "\033[0m"
-    BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
 
 
@@ -19,13 +18,13 @@ def _decimal(number):
 
 def _duration(duration):
     if duration < 1:
-        return f"{Color.OKGREEN}{_decimal(duration * 1000)} ns{Color.ENDC}"
+        return f"{Color.GREEN}{_decimal(duration * 1000)} ns{Color.ENDC}"
     elif duration < 1000:
-        return f"{Color.OKCYAN}{_decimal(duration)} μs{Color.ENDC}"
+        return f"{_decimal(duration)} μs"
     elif duration < 1000000:
-        return f"{_decimal(duration / 1000)} ms"
+        return f"{Color.YELLOW}{_decimal(duration / 1000)} ms{Color.ENDC}"
     else:
-        return f"{Color.WARNING}{_decimal(duration / 1000000)} s{Color.ENDC}"
+        return f"{Color.RED}{_decimal(duration / 1000000)} s{Color.ENDC}"
 
 
 def _language(language):
@@ -85,7 +84,7 @@ def _status(language, year, day, label, color):
 
 
 def format_attempt(language, year, day):
-    return _status(language, year, day, "TRY ", Color.WARNING)
+    return _status(language, year, day, "TRY ", Color.YELLOW)
 
 
 def format_building(language, year, day):
@@ -93,15 +92,15 @@ def format_building(language, year, day):
 
 
 def format_running(language, year, day):
-    return _status(language, year, day, "EXEC", Color.OKCYAN)
+    return _status(language, year, day, "EXEC", Color.CYAN)
 
 
 def format_success(language, year, day):
-    return _status(language, year, day, "PASS", Color.OKGREEN)
+    return _status(language, year, day, "PASS", Color.GREEN)
 
 
 def format_failure(language, year, day):
-    return _status(language, year, day, "FAIL", Color.FAIL)
+    return _status(language, year, day, "FAIL", Color.RED)
 
 
 def format_diff(expected, actual):
@@ -124,7 +123,7 @@ def format_diff(expected, actual):
         table[0].append("Part 2")
         table[1].append(exp_parts[1])
         table[2].append(act_parts[1])
-    return _table(table, {1: Color.OKCYAN, 2: Color.WARNING})
+    return _table(table, {1: Color.CYAN, 2: Color.YELLOW})
 
 
 def format_timing(timing_info, duration):
