@@ -76,7 +76,7 @@ def ruby_cmd(file):
 
 def rust_build(file):
     bin_file = file.replace(".", "_")
-    shell_out(f"rustc -o {bin_file} {file}")
+    shell_out(f"rustc -o {bin_file} {file} -L ./lib")
     return bin_file
 
 
