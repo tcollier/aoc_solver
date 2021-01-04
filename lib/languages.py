@@ -121,7 +121,7 @@ LANGUAGES = {
     "lisp": LanguageConfig("lisp", lisp_cmd, timing=False),
     "python": LanguageConfig("py", python_cmd),
     "ruby": LanguageConfig("rb", ruby_cmd),
-    "rust": LanguageConfig("rs", rust_cmd, rust_build, timing=False),
+    "rust": LanguageConfig("rs", rust_cmd, rust_build),
     "scala": LanguageConfig("scala", scala_cmd, scala_build),
     "typescript": LanguageConfig("ts", typescript_cmd, typescript_build),
 }
