@@ -9,6 +9,10 @@ from lib.shell import ShellException, shell_out
 from lib.solver_event import SolverEvent
 
 
+class TerminationException(Exception):
+    pass
+
+
 class LanguageSolver(object):
     def __init__(self, conn, language, year, day, filename):
         self.conn = conn
@@ -19,14 +23,24 @@ class LanguageSolver(object):
         self.config = language_config(language)
 
     def __call__(self, expected, outfile):
+        self._check_terminate()
         cmd = self._build()
+        self._check_terminate()
         actual = self._solve(cmd)
+        self._check_terminate()
         if not expected:
             self._handle_output(actual, outfile)
         elif actual == expected:
             self._handle_success(cmd)
         else:
             self._handle_invalid_output(expected, actual)
+
+    def _check_terminate(self):
+        if self.conn.poll():
+            cmd = self.conn.recv()
+            _args = self.conn.recv()
+            if cmd == SolverEvent.TERMINATE:
+                raise TerminationException()
 
     def _dispatch(self, event, args={}):
         args["language"] = self.language
@@ -134,6 +148,8 @@ class Solver(object):
                 solver(self.expected, self.outfile if self.save else None)
             except KeyboardInterrupt as e:
                 raise e
+            except TerminationException:
+                break
             except:
                 continue
         if not found and languages:

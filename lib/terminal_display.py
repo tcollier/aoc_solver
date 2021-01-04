@@ -313,7 +313,7 @@ class TerminalDisplay(object):
             return
         self.spinner_conn, conn = Pipe()
         spinner = Spinner(conn)
-        self.spinner_proc = Process(target=spinner.start)
+        self.spinner_proc = Process(target=spinner.start, name="Spinner")
         self.spinner_proc.start()
 
     def stop_spinner(self):
@@ -335,6 +335,7 @@ class TerminalDisplay(object):
                     HANDLERS[cmd](self, args)
                 elif cmd == SolverEvent.TERMINATE:
                     running = False
+                    self.stop_spinner()
                     if "error" in args:
                         print(args["error"])
                 else:
