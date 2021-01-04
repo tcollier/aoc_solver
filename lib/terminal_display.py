@@ -210,6 +210,8 @@ def _handle_build_failed(display, args):
     language, year, day = _split_args(args)
     print("\033[A")
     print(format_failure(language, year, day), end="  \n")
+    if "stdout" in args:
+        print(args["stdout"], end="")
     if "stderr" in args:
         print(args["stderr"], end="")
 

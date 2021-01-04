@@ -3,13 +3,14 @@ import subprocess
 
 
 class ShellException(Exception):
-    def __init__(self, message, stderr):
+    def __init__(self, message, stdout, stderr):
         self.message = message
+        self.stdout = stdout
         self.stderr = stderr
         super(ShellException, self).__init__(message)
 
     def __reduce__(self):
-        return (ShellException, (self.message, self.stderr))
+        return (ShellException, (self.message, self.stdout, self.stderr))
 
 
 def shell_out(cmd):
@@ -32,8 +33,12 @@ def shell_out(cmd):
             while line:
                 stderr += line
                 line = process.stderr.readline()
+            line = process.stdout.readline()
+            while line:
+                stdout += line
+                line = process.stdout.readline()
             raise ShellException(
-                f"Command '{cmd}' exited with status code {return_code}", stderr
+                f"Command '{cmd}' exited with status code {return_code}", stdout, stderr
             )
         else:
             stdout += process.stdout.readline()

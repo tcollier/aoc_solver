@@ -96,7 +96,6 @@ class Context(object):
             self.procs.append(proc)
 
     def shutdown(self, signal=None, error=None):
-        print("SHUTDOWN CALLED")
         while self.conns:
             conn = self.conns.pop()
             conn.send(SolverEvent.TERMINATE)
@@ -139,9 +138,7 @@ ContextManager.add_proc(display_proc)
 
 
 def sig_handler(signal, _frame):
-    print(f"HANDLING SIGNAL {signal}")
     ContextManager.shutdown(signal=signal)
-    print("SHUTTING DOWN")
     sys.exit(ExitCode.for_signal(signal))
 
 
@@ -159,12 +156,12 @@ try:
                 solver = Solver(solver_conn, year, day.split("/")[-1])
                 ContextManager.add_proc(
                     Process(target=solver, args=(args.language,), name="AoC-solver"),
-                    True,
+                    join=True,
                 )
     else:
         solver = Solver(solver_conn, args.year, args.day, args.save)
         ContextManager.add_proc(
-            Process(target=solver, args=(args.language,), name="AoC-solver"), True
+            Process(target=solver, args=(args.language,), name="AoC-solver"), join=True
         )
     ContextManager.shutdown()
 except ValueError as e:

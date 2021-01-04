@@ -9,6 +9,20 @@ from lib.shell import ShellException, shell_out
 from lib.solver_event import SolverEvent
 
 
+def _check_terminate(conn):
+    if conn.poll():
+        cmd = conn.recv()
+        _args = conn.recv()
+        if cmd == SolverEvent.TERMINATE:
+            raise TerminationException()
+
+
+def _shell_out(conn, cmd):
+    _check_terminate(conn)
+    unwrapped = cmd() if callable(cmd) else cmd
+    return shell_out(unwrapped)
+
+
 class TerminationException(Exception):
     pass
 
@@ -23,24 +37,20 @@ class LanguageSolver(object):
         self.config = language_config(language)
 
     def __call__(self, expected, outfile):
-        self._check_terminate()
-        cmd = self._build()
-        self._check_terminate()
-        actual = self._solve(cmd)
-        self._check_terminate()
+        commands = self.config.commands(self.filename)
+        if commands.compiler:
+            self._build(commands.compiler)
+        actual = self._solve(commands.exec)
         if not expected:
             self._handle_output(actual, outfile)
-        elif actual == expected:
-            self._handle_success(cmd)
-        else:
+        elif actual != expected:
             self._handle_invalid_output(expected, actual)
-
-    def _check_terminate(self):
-        if self.conn.poll():
-            cmd = self.conn.recv()
-            _args = self.conn.recv()
-            if cmd == SolverEvent.TERMINATE:
-                raise TerminationException()
+        else:
+            self._dispatch(SolverEvent.SOLVE_SUCCEEDED)
+            if self.config.timing:
+                self._handle_timing(commands.time)
+            else:
+                self._dispatch(SolverEvent.TIMING_SKIPPED)
 
     def _dispatch(self, event, args={}):
         args["language"] = self.language
@@ -49,30 +59,26 @@ class LanguageSolver(object):
         self.conn.send(event)
         self.conn.send(args)
 
-    def _build(self):
-        def curried_build():
-            return self.config.cmd_fn(self.config.build_fn(self.filename))
-
-        if not self.config.has_build_step():
-            return curried_build()
-
+    def _build(self, compiler_cmds):
         self._dispatch(SolverEvent.BUILD_START)
         try:
-            cmd = curried_build()
+            for cmd in compiler_cmds:
+                _shell_out(self.conn, cmd)
             self._dispatch(SolverEvent.BUILD_END)
-            return cmd
         except ShellException as e:
-            self._dispatch(SolverEvent.BUILD_FAILED, {"stderr": e.stderr})
+            # Include stdout since node writes error messages to stdout
+            self._dispatch(
+                SolverEvent.BUILD_FAILED, {"stdout": e.stdout, "stderr": e.stderr}
+            )
             raise e
         except Exception as e:
             self._dispatch(SolverEvent.BUILD_FAILED)
-            traceback.print_exc()
             raise e
 
     def _solve(self, cmd):
         self._dispatch(SolverEvent.SOLVE_START)
         try:
-            actual = shell_out(cmd)
+            actual = _shell_out(self.conn, cmd)
             self._dispatch(SolverEvent.SOLVE_END)
             return actual
         except ShellException as e:
@@ -80,7 +86,6 @@ class LanguageSolver(object):
             raise e
         except Exception as e:
             self._dispatch(SolverEvent.SOLVE_ERRED)
-            traceback.print_exc()
             raise e
 
     def _handle_output(self, actual, outfile):
@@ -89,15 +94,11 @@ class LanguageSolver(object):
             open(outfile, "w").write(actual)
             self._dispatch(SolverEvent.OUTPUT_SAVED, {"file": outfile})
 
-    def _handle_success(self, cmd):
-        self._dispatch(SolverEvent.SOLVE_SUCCEEDED)
-        if not self.config.timing:
-            self._dispatch(SolverEvent.TIMING_SKIPPED)
-            return
+    def _handle_timing(self, cmd):
         self._dispatch(SolverEvent.TIMING_START)
         try:
             start_time = datetime.now()
-            timing_info = json.loads(shell_out(f"{cmd} --time"))
+            timing_info = json.loads(_shell_out(self.conn, cmd))
             duration = datetime.now() - start_time
             self._dispatch(
                 SolverEvent.TIMING_END, {"info": timing_info, "duration": duration}
@@ -107,7 +108,6 @@ class LanguageSolver(object):
             raise e
         except Exception as e:
             self._dispatch(SolverEvent.TIMING_FAILED)
-            traceback.print_exc()
             raise e
 
     def _handle_invalid_output(self, expected, actual):
@@ -146,11 +146,15 @@ class Solver(object):
                     self.conn, language, self.year, self.day, filename
                 )
                 solver(self.expected, self.outfile if self.save else None)
+            except ShellException:
+                continue
             except KeyboardInterrupt as e:
                 raise e
             except TerminationException:
                 break
             except:
+                print()
+                traceback.print_exc()
                 continue
         if not found and languages:
             for language in languages:
