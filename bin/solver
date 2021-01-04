@@ -1,0 +1,128 @@
+#!/usr/bin/env python
+
+import os
+import sys
+
+
+class ExitCode(object):
+    INVALID_ARGS = 2
+    SIGNAL_BASE = 128
+    SIGINT = SIGNAL_BASE + 2
+    UNKNOWN_ERROR = 255
+
+
+if not os.environ.get("PYTHONPATH"):
+    root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    os.environ.setdefault("PYTHONPATH", root_dir)
+    code = os.system(" ".join(sys.argv))
+    sys.exit(code // 256)
+
+import argparse
+import glob
+
+from datetime import datetime
+from multiprocessing import Pipe, Process
+
+from lib.languages import all_languages
+from lib.solver import Solver
+from lib.solver_event import SolverEvent
+from lib.terminal_display import TerminalDisplay
+
+
+current_day = datetime.utcnow()
+parser = argparse.ArgumentParser(
+    description=(
+        "Run Advent of Code solution for a given year/day in the chosen language"
+    )
+)
+
+default_year = os.environ.get("YEAR", str(current_day.year))
+parser.add_argument(
+    "-y",
+    "--year",
+    help=f"competition year (default: {default_year})",
+    default=default_year,
+)
+
+default_day = os.environ.get("DAY", str(current_day.day))
+parser.add_argument(
+    "-d",
+    "--day",
+    help=f"competition day (default: {default_day})",
+    default=default_day,
+)
+
+language_helper = f"available languages: {', '.join(all_languages())}"
+parser.add_argument(
+    "-l",
+    "--language",
+    nargs="+",
+    help=f"programming language of the solution to run ({language_helper})",
+)
+parser.add_argument(
+    "--all", help=f"run all challenge days in all languages", action="store_true"
+)
+parser.add_argument(
+    "--save", help=f"save the programs output to output.txt", action="store_true"
+)
+
+
+def validate_args(args):
+    if args.language:
+        unknown = list(set(args.language) - set(all_languages()))
+        if unknown:
+            raise ValueError(
+                f"Unrecognized language(s): {', '.join(unknown)} (available: {', '.join(all_languages())})"
+            )
+    if args.save:
+        if args.all:
+            raise ValueError("Cannot use `--save` with `--all`")
+        elif Solver.has_solution(args.year, args.day):
+            raise ValueError(
+                f"Cannot save results when output already saved, please delete existing file"
+            )
+
+
+args = parser.parse_args()
+display_conn, solver_conn = Pipe(False)
+
+display = TerminalDisplay(display_conn)
+display_proc = Process(target=display)
+display_proc.start()
+
+try:
+    validate_args(args)
+    if args.all:
+        years = glob.glob("2*")
+        years.sort()
+        for year in years:
+            days = glob.glob(f"{year}/[012]?")
+            days.sort()
+            for day in days:
+                solver = Solver(solver_conn, year, day.split("/")[-1])
+                solver_proc = Process(target=solver, args=(args.language,))
+                solver_proc.start()
+                solver_proc.join()
+    else:
+        solver = Solver(solver_conn, args.year, args.day, args.save)
+        solver_proc = Process(target=solver, args=(args.language,))
+        solver_proc.start()
+        solver_proc.join()
+    solver_conn.send(SolverEvent.TERMINATE)
+    solver_conn.send({})
+except ValueError as e:
+    solver_conn.send(SolverEvent.TERMINATE)
+    solver_conn.send({"error": e})
+    sys.exit(ExitCode.INVALID_ARGS)
+except KeyboardInterrupt as e:
+    solver_conn.send(SolverEvent.TERMINATE)
+    solver_conn.send({})
+    sys.exit(ExitCode.SIGINT)
+except Exception as e:
+    solver_conn.send(SolverEvent.TERMINATE)
+    solver_conn.send({"error": e})
+    sys.exit(ExitCode.UNKNOWN_ERROR)
+finally:
+    display_proc.join()
+    display_conn.close()
+    solver_conn.close()
