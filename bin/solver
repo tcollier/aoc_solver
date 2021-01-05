@@ -49,6 +49,7 @@ if not actual_path or actual_path != expected_path:
 import argparse
 import glob
 import signal
+import time
 
 from datetime import datetime
 from multiprocessing import Pipe, Process
@@ -138,12 +139,9 @@ class Context(object):
     def add_conn(self, conn):
         self.conns.append(conn)
 
-    def add_proc(self, proc, join=False):
+    def add_proc(self, proc):
         proc.start()
-        if join:
-            proc.join()
-        else:
-            self.procs.append(proc)
+        self.procs.append(proc)
 
     def shutdown(self, signal=None, error=None):
         """
@@ -178,8 +176,8 @@ class ContextManager(object):
         cls._context.add_conn(conn)
 
     @classmethod
-    def add_proc(cls, proc, join=False):
-        cls._context.add_proc(proc, join)
+    def add_proc(cls, proc):
+        cls._context.add_proc(proc)
 
     @classmethod
     def shutdown(cls, signal=None, error=None):
@@ -242,14 +240,18 @@ try:
     for year, day in days_to_solve(args):
         # Spin up the solver for the given year/day
         solver = Solver(solver_conn, year, day)
-        ContextManager.add_proc(
-            Process(
-                target=solver,
-                args=(os.getpid(), args.language, args.save),
-                name="AoC-solver",
-            ),
-            join=True,
+        solver_proc = Process(
+            target=solver,
+            args=(os.getpid(), args.language, args.save),
+            name="AoC-solver",
         )
+        ContextManager.add_proc(solver_proc)
+        while solver_proc.is_alive():
+            # If the display process dies for whatever reason (SIGKILL?), then
+            # we should just shutdown.
+            if not display_proc.is_alive():
+                ContextManager.shutdown()
+            time.sleep(0.01)
     ContextManager.shutdown()
 except ValueError as e:
     ContextManager.shutdown(error=e)
