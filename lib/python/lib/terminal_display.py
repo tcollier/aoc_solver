@@ -15,26 +15,38 @@ class Color(object):
     UNDERLINE = "\033[4m"
 
 
+TABLE_CELL_PADDING = 2
+
+
 class Spinner(object):
     CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
 
     def __init__(self):
         self.index = 0
+        # Add empty space as a placeholder for the spinner.
         print(" ", end="")
 
     def tick(self):
-        print(f"\b{self.CHARS[self.index]}", end="", flush=True)
         self.index = (self.index + 1) % len(self.CHARS)
+        print(f"\b{self.CHARS[self.index]}", end="", flush=True)
 
     def stop(self):
         print("\b", end="", flush=True)
 
 
+def _colorize(color, string):
+    return f"{color}{string}{Color.ENDC}"
+
+
+def _colorized_width(color):
+    return len(color) + len(Color.ENDC)
+
+
 def _table_header(value, width):
     if not value:
         return " " * (width)
-    underlined = f"{Color.UNDERLINE}{value}{Color.ENDC}"
-    width += len(Color.UNDERLINE) + len(Color.ENDC)
+    underlined = _colorize(Color.UNDERLINE, value)
+    width += _colorized_width(Color.UNDERLINE)
     lpad = " " * ((width - len(underlined)) // 2)
     rpad = " " * (width - len(underlined) - len(lpad))
     return f"{lpad}{underlined}{rpad}"
@@ -42,8 +54,8 @@ def _table_header(value, width):
 
 def _table_cell(value, width, color):
     if color:
-        colored = f"{color}{value}{Color.ENDC}"
-        width += len(color) + len(Color.ENDC)
+        colored = _colorize(color, value)
+        width += _colorized_width(color)
     else:
         colored = value
 
@@ -52,7 +64,7 @@ def _table_cell(value, width, color):
         justified = colored.rjust(width, " ")
     except:
         justified = colored.ljust(width, " ")
-    return f"{justified}"
+    return justified
 
 
 def _table(table, row_colors):
@@ -68,7 +80,7 @@ def _table(table, row_colors):
                 string += _table_header(table[row][col], col_width[col])
             else:
                 string += _table_cell(table[row][col], col_width[col], row_colors[row])
-            string += "  " if col < len(table[row]) - 1 else ""
+            string += (" " * TABLE_CELL_PADDING) if col < len(table[row]) - 1 else ""
         string += "\n"
     return string
 
@@ -92,13 +104,13 @@ def _duration(duration):
     :param duration: time in microseconds
     """
     if duration < 1:
-        return f"{Color.GREEN}{_decimal(duration * 1000)} ns{Color.ENDC}"
+        return _colorize(Color.GREEN, f"{_decimal(duration * 1000)} ns")
     elif duration < 1000:
         return f"{_decimal(duration)} μs"
     elif duration < 1000000:
-        return f"{Color.YELLOW}{_decimal(duration / 1000)} ms{Color.ENDC}"
+        return _colorize(Color.YELLOW, f"{_decimal(duration / 1000)} ms")
     else:
-        return f"{Color.RED}{_decimal(duration / 1000000)} s{Color.ENDC}"
+        return _colorize(Color.RED, f"{_decimal(duration / 1000000)} s")
 
 
 def _language(language):
@@ -118,7 +130,7 @@ def _status(label, color, language, year, day):
     Generic formatter for the solver's status of running the language/day
     """
     day_language = f"{year}/{day.rjust(2, '0')} {_language(language)}"
-    return f"{color}{label.ljust(4, ' ')} [{day_language}]{Color.ENDC}"
+    return _colorize(color, f"{label.ljust(4, ' ')} [{day_language}]")
 
 
 def _attempt(language, year, day):
@@ -188,10 +200,6 @@ def _timing(timing_info, duration):
         ]
     )
     return f"({contents})"
-
-
-def _colorize(color, string):
-    return f"{color}{string}{Color.ENDC}"
 
 
 def _split_args(args):
