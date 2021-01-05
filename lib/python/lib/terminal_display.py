@@ -16,24 +16,17 @@ class Color(object):
 
 class Spinner(object):
     CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
-    FPS = 12
 
-    def __init__(self, conn):
-        self.conn = conn
-        self.index = 0
-
-    def start(self):
+    def __init__(self):
         self.index = 0
         print(" ", end="")
-        while True:
-            print(f"\b{self.CHARS[self.index]}", end="", flush=True)
-            self.index = (self.index + 1) % len(self.CHARS)
-            if self.conn.poll(1 / self.FPS):
-                self.conn.recv()
-                break
+
+    def tick(self):
+        print(f"\b{self.CHARS[self.index]}", end="", flush=True)
+        self.index = (self.index + 1) % len(self.CHARS)
+
+    def stop(self):
         print("\b", end="", flush=True)
-        self.conn.send(True)
-        self.conn.close()
 
 
 def _decimal(number):
@@ -305,32 +298,27 @@ HANDLERS = {
 
 
 class TerminalDisplay(object):
+    REFRESH_RATE = 12  # Frames Per Second
+
     def __init__(self, conn):
         self.conn = conn
-        self.spinner_conn = None
-        self.spinner_proc = None
+        self.spinner = None
 
     def start_spinner(self):
-        if self.spinner_conn:
+        if self.spinner:
             return
-        self.spinner_conn, conn = Pipe()
-        spinner = Spinner(conn)
-        self.spinner_proc = Process(target=spinner.start, name="Spinner", daemon=True)
-        self.spinner_proc.start()
+        self.spinner = Spinner()
 
     def stop_spinner(self):
-        if not self.spinner_conn:
+        if not self.spinner:
             return
-        self.spinner_conn.send(True)
-        self.spinner_conn.recv()
-        self.spinner_proc.join()
-        self.spinner_conn.close()
-        self.spinner_conn = None
+        self.spinner.stop()
+        self.spinner = None
 
     def __call__(self):
         running = True
         while running:
-            if self.conn.poll(0.01):
+            if self.conn.poll(1 / self.REFRESH_RATE):
                 cmd = self.conn.recv()
                 args = self.conn.recv()
                 if cmd in HANDLERS:
@@ -342,3 +330,5 @@ class TerminalDisplay(object):
                         print(args["error"])
                 else:
                     _handle_invalid_command(cmd, args)
+            if self.spinner:
+                self.spinner.tick()
