@@ -5,26 +5,20 @@ import traceback
 from datetime import datetime
 
 from lib.languages import language_config, all_languages
-from lib.shell import ShellException, shell_out
+from lib.shell import ShellException, TerminationException, shell_out
 from lib.solver_event import SolverEvent
 
 
-def _check_terminate(conn):
-    if conn.poll():
+def _shell_out(conn, cmd):
+    def should_terminate():
+        if not conn.poll(0):
+            return False
         cmd = conn.recv()
         _args = conn.recv()
-        if cmd == SolverEvent.TERMINATE:
-            raise TerminationException()
+        return cmd == SolverEvent.TERMINATE
 
-
-def _shell_out(conn, cmd):
-    _check_terminate(conn)
     unwrapped = cmd() if callable(cmd) else cmd
-    return shell_out(unwrapped)
-
-
-class TerminationException(Exception):
-    pass
+    return shell_out(unwrapped, should_terminate)
 
 
 class LanguageSolver(object):

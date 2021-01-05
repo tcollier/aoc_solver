@@ -1,46 +1,48 @@
 import shlex
 import subprocess
+import time
+
+
+class TerminationException(Exception):
+    pass
 
 
 class ShellException(Exception):
-    def __init__(self, message, stdout, stderr):
-        self.message = message
+    def __init__(self, exitcode, stdout, stderr):
+        self.exitcode = exitcode
         self.stdout = stdout
         self.stderr = stderr
-        super(ShellException, self).__init__(message)
 
     def __reduce__(self):
-        return (ShellException, (self.message, self.stdout, self.stderr))
+        return (ShellException, (self.exitcode, self.stdout, self.stderr))
 
 
-def shell_out(cmd):
+def _read_output(stream):
+    output = ""
+    line = stream.readline()
+    while line:
+        output += line
+        line = stream.readline()
+    return output
+
+
+def shell_out(cmd, should_terminate):
     process = subprocess.Popen(
         shlex.split(cmd),
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         universal_newlines=True,
     )
-    stdout = ""
-    stderr = ""
     while True:
-        stdout += process.stdout.readline()
-        stderr += process.stderr.readline()
-        return_code = process.poll()
-        if return_code is None:
-            continue
-        elif return_code > 0:
-            line = process.stderr.readline()
-            while line:
-                stderr += line
-                line = process.stderr.readline()
-            line = process.stdout.readline()
-            while line:
-                stdout += line
-                line = process.stdout.readline()
-            raise ShellException(
-                f"Command '{cmd}' exited with status code {return_code}", stdout, stderr
-            )
+        exitcode = process.poll()
+        if exitcode is None:
+            if should_terminate():
+                raise TerminationException()
+            time.sleep(0.01)
+        elif exitcode > 0:
+            stdout = _read_output(process.stdout)
+            stderr = _read_output(process.stderr)
+            raise ShellException(exitcode, stdout, stderr)
         else:
-            stdout += process.stdout.readline()
-        break
-    return stdout
+            break
+    return _read_output(process.stdout)
