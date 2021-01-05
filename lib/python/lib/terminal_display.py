@@ -315,7 +315,7 @@ class TerminalDisplay(object):
             return
         self.spinner_conn, conn = Pipe()
         spinner = Spinner(conn)
-        self.spinner_proc = Process(target=spinner.start, name="Spinner")
+        self.spinner_proc = Process(target=spinner.start, name="Spinner", daemon=True)
         self.spinner_proc.start()
 
     def stop_spinner(self):

@@ -1,18 +1,7 @@
 #!/usr/bin/env python
 
-import argparse
-import glob
 import os
-import signal
 import sys
-
-from datetime import datetime
-from multiprocessing import Pipe, Process
-
-from lib.languages import all_languages
-from lib.solver import Solver
-from lib.solver_event import SolverEvent
-from lib.terminal_display import TerminalDisplay
 
 
 class ExitCode(object):
@@ -24,6 +13,28 @@ class ExitCode(object):
     @classmethod
     def for_signal(cls, signal):
         return cls.SIGNAL_BASE + signal
+
+
+root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+expected_path = os.path.join(root_dir, "lib", "python")
+actual_path = os.environ.get("PYTHONPATH") and os.path.abspath(
+    os.environ.get("PYTHONPATH")
+)
+if not actual_path or actual_path != expected_path:
+    print(f"Please set PYTHONPATH to {expected_path}")
+    sys.exit(ExitCode.INVALID_ARGS)
+
+import argparse
+import glob
+import signal
+
+from datetime import datetime
+from multiprocessing import Pipe, Process
+
+from lib.languages import all_languages
+from lib.solver import Solver
+from lib.solver_event import SolverEvent
+from lib.terminal_display import TerminalDisplay
 
 
 current_day = datetime.utcnow()
