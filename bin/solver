@@ -1,5 +1,23 @@
 #!/usr/bin/env python
 
+"""
+usage: solver [-h] [-y YEAR] [-d DAY] [-l LANGUAGE [LANGUAGE ...]] [--all]
+              [--save]
+
+Run Advent of Code solution for a given year/day in the chosen language
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -y YEAR, --year YEAR  competition year (default: <current year in UTC>)
+  -d DAY, --day DAY     competition day (default: <current day of month in UTC>)
+  -l LANGUAGE [LANGUAGE ...], --language LANGUAGE [LANGUAGE ...]
+                        programming language of the solution to run (available
+                        languages: c, golang, java, lisp, python, ruby, rust,
+                        scala, typescript)
+  --all                 run all challenge days in all languages
+  --save                save the programs output to output.txt
+"""
+
 import os
 import sys
 
@@ -15,13 +33,17 @@ class ExitCode(object):
         return cls.SIGNAL_BASE + signal
 
 
+# Verify PYTHONPATH is set correctly so that local packages will load
+# correctly. If the path is not set, print a useful message tellin the
+# user how to set it.
 root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 expected_path = os.path.join(root_dir, "lib", "python")
 actual_path = os.environ.get("PYTHONPATH") and os.path.abspath(
     os.environ.get("PYTHONPATH")
 )
 if not actual_path or actual_path != expected_path:
-    print(f"Please set PYTHONPATH to {expected_path}")
+    print(f"Please set PYTHONPATH needs to be set to the root of this repository, e.g.")
+    print(f"PYTHONPATH={expected_path} {' '.join(sys.argv)}")
     sys.exit(ExitCode.INVALID_ARGS)
 
 import argparse
@@ -36,27 +58,31 @@ from lib.solver import Solver
 from lib.solver_event import SolverEvent
 from lib.terminal_display import TerminalDisplay
 
+# Current day in UTC is a decent default value, since new challenges are released
+# at midnight EST. This give the user a couple hours before the start time to set
+# up and test any boiler plate code and give time the morning after to continue
+# working on it.
+default_day = datetime.utcnow()
 
-current_day = datetime.utcnow()
 parser = argparse.ArgumentParser(
     description=(
         "Run Advent of Code solution for a given year/day in the chosen language"
     )
 )
 
-default_year = os.environ.get("YEAR", str(current_day.year))
+default_year = os.environ.get("YEAR", str(default_day.year))
 parser.add_argument(
     "-y",
     "--year",
-    help=f"competition year (default: {default_year})",
+    help=f"competition year (default: {default_year}, override by setting $YEAR)",
     default=default_year,
 )
 
-default_day = os.environ.get("DAY", str(current_day.day))
+default_day = os.environ.get("DAY", str(default_day.day))
 parser.add_argument(
     "-d",
     "--day",
-    help=f"competition day (default: {default_day})",
+    help=f"competition day (default: {default_day}, override by setting $DAY)",
     default=default_day,
 )
 
@@ -75,23 +101,36 @@ parser.add_argument(
 )
 
 
-def validate_args(args):
+def argument_error(args):
+    """
+    There are certain combinations of arguments we want to disallow, but argparse
+    doesn't provide easy ways to do this. So this function adds additional
+    argument validations.
+
+    :param args: parsed arguments from argparse
+    """
     if args.language:
         unknown = list(set(args.language) - set(all_languages()))
         if unknown:
-            raise ValueError(
-                f"Unrecognized language(s): {', '.join(unknown)} (available: {', '.join(all_languages())})"
-            )
+            unknown_str = ", ".join(unknown)
+            all_str = ", ".join(all_languages())
+            return f"Unrecognized language(s): {unknown_str} (available: {all_str})"
     if args.save:
         if args.all:
-            raise ValueError("Cannot use `--save` with `--all`")
+            return "Cannot use `--save` with `--all`"
         elif Solver.has_solution(args.year, args.day):
-            raise ValueError(
-                f"Cannot save results when output already saved, please delete existing file"
+            return (
+                "Cannot save results when output already saved, "
+                "please delete existing file"
             )
 
 
 class Context(object):
+    """
+    Container for all connections and processes managed in the file. Provides
+    an easy way to clean up these resources when exiting the script.
+    """
+
     def __init__(self):
         self.conns = []
         self.procs = []
@@ -107,6 +146,10 @@ class Context(object):
             self.procs.append(proc)
 
     def shutdown(self, signal=None, error=None):
+        """
+        Send a TERMINATE event to all connections and join all processes
+        to properly shutdown all resources.
+        """
         while self.conns:
             conn = self.conns.pop()
             conn.send(SolverEvent.TERMINATE)
@@ -123,6 +166,11 @@ class Context(object):
 
 
 class ContextManager(object):
+    """
+    The class provides access to a global Context so we can shutdown from
+    anywhere in this script.
+    """
+
     _context = Context()
 
     @classmethod
@@ -138,16 +186,6 @@ class ContextManager(object):
         cls._context.shutdown(signal, error)
 
 
-args = parser.parse_args()
-display_conn, solver_conn = Pipe(True)
-ContextManager.add_conn(display_conn)
-ContextManager.add_conn(solver_conn)
-
-display = TerminalDisplay(display_conn)
-display_proc = Process(target=display, name="AoC-display")
-ContextManager.add_proc(display_proc)
-
-
 def sig_handler(signal, _frame):
     ContextManager.shutdown(signal=signal)
     sys.exit(ExitCode.for_signal(signal))
@@ -155,22 +193,55 @@ def sig_handler(signal, _frame):
 
 signal.signal(signal.SIGQUIT, sig_handler)
 
-try:
-    validate_args(args)
+
+args = parser.parse_args()
+error_message = argument_error(args)
+if error_message:
+    print(error_message)
+    sys.exit(ExitCode.INVALID_ARGS)
+
+
+def days_to_solve(args):
+    """
+    :yield year, day: Yields each year/day combination that the arguments
+    dictate need to be solved.
+    """
     if args.all:
         years = glob.glob("2*")
         years.sort()
         for year in years:
-            days = glob.glob(f"{year}/[012]?")
+            days = glob.glob(f"{year}/[0123][0123456789]")
             days.sort()
             for day in days:
-                solver = Solver(solver_conn, year, day.split("/")[-1])
-                ContextManager.add_proc(
-                    Process(target=solver, args=(args.language,), name="AoC-solver"),
-                    join=True,
-                )
+                yield year, day.split("/")[-1]
     else:
-        solver = Solver(solver_conn, args.year, args.day, args.save)
+        yield args.year, args.day
+
+
+###
+# The solver engine and display logic run in two separate process and
+# communicate with each other through a pipe. The engine emits events
+# through the pipe (e.g. timing failed) and the display process receives
+# the events and updates accordingly. This file manages the pipe
+# connections and processes.
+###
+
+try:
+    # Create the pipe connections used by the two process to communicate
+    # with each other and add them to the context manager for easy clean
+    # up when shutting down.
+    display_conn, solver_conn = Pipe(True)
+    ContextManager.add_conn(display_conn)
+    ContextManager.add_conn(solver_conn)
+
+    # Spin up the display process.
+    display = TerminalDisplay(display_conn)
+    display_proc = Process(target=display, name="AoC-display")
+    ContextManager.add_proc(display_proc)
+
+    for year, day in days_to_solve(args):
+        # Spin up the solver for the given year/day
+        solver = Solver(solver_conn, year, day)
         ContextManager.add_proc(
             Process(target=solver, args=(args.language,), name="AoC-solver"), join=True
         )
