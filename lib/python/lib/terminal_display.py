@@ -317,6 +317,11 @@ class TerminalDisplay(object):
         self.spinner = None
 
     def __call__(self, parent_pid):
+        """
+        :param parent_pid: Process ID of the parent that spawned the terminal
+        display. Keep tabs on it so we can exit if it mysteriously vanishes,
+        e.g. with a SIGKILL
+        """
         running = True
         while running:
             if self.conn.poll(1 / self.REFRESH_RATE):
