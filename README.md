@@ -1,6 +1,6 @@
 # Advent of Code
 
-This repository is my collection of solutions for [Advent of Code](https://adventofcode.com/) coding challenges. I've tackled challenges using [various languages](#language-support) and have added several utilities for building, running, and timing (yes, performance matters!) my solutions.
+This repository is my collection of solutions for [Advent of Code](https://adventofcode.com/) coding challenges. I've tackled challenges using [various languages](doc/languages.md) and have added several utilities for building, running, and timing (yes, performance matters!) my solutions.
 
 ## Structure
 
@@ -22,7 +22,7 @@ For example, you can find the following solutions (along with my input and corre
 
 ## Solver Script
 
-I added a script that helps me compile and run my solutions. Once the correct solution is known and saved to `output.txt`, the script will validate the output (to avoid regressions when refactoring) and time the solution. In order to leverage the timing features of the solver script, the solution must be implemented using a [language-specific executor](#language-support).
+I added a script that helps me compile and run my solutions. Once the correct solution is known and saved to `output.txt`, the script will validate the output (to avoid regressions when refactoring) and time the solution. In order to leverage the timing features of the solver script, the solution must be implemented using a [language-specific executor](doc/languages.md).
 
 With basic usage, you can easily compile (if necessary) and run your solutions
 
@@ -37,17 +37,17 @@ See [Script](doc/script.md) documentation for more details and examples.
 
 ## Language Support
 
-Below is a list of currently supported langauges, see the [Language Support](docs/languages.md) documetation for more details
+Below is a list of currently supported langauges, see the [Language Support](doc/languages.md) documetation for more details
 
-- [C](docs/languages.md#c)
-- [Golang](docs/languages.md#golang)
-- [Java](docs/languages.md#java)
-- [Lisp](docs/languages.md#list)
-- [Python](docs/languages.md#python)
-- [Ruby](docs/languages.md#ruby)
-- [Rust](docs/languages.md#rust)
-- [Scala](docs/languages.md#scala)
-- [Typescript](docs/languages.md#typescript)
+- [C](doc/languages.md#c)
+- [Golang](doc/languages.md#golang)
+- [Java](doc/languages.md#java)
+- [Lisp](doc/languages.md#lisp)
+- [Python](doc/languages.md#python)
+- [Ruby](doc/languages.md#ruby)
+- [Rust](doc/languages.md#rust)
+- [Scala](doc/languages.md#scala)
+- [Typescript](doc/languages.md#typescript)
 
 ## Playground
 

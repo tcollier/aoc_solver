@@ -1,6 +1,6 @@
 ## Solver Script
 
-I added a script that helps me compile and run my solutions. Once the correct solution is known and saved to `output.txt`, the script will validate the output (to avoid regressions when refactoring) and time the solution. In order to leverage the timing features of the solver script, the solution must be implemented using a [language-specific executor](#language-support).
+I added a script that helps me compile and run my solutions. Once the correct solution is known and saved to `output.txt`, the script will validate the output (to avoid regressions when refactoring) and time the solution. In order to leverage the timing features of the solver script, the solution must be implemented using a [language-specific executor](languages.md).
 
 ### Usage
 
@@ -49,7 +49,7 @@ Saved result to 2020/01/output.txt
 
 #### Exampe: run solution with saved correct solution
 
-Once the solution output is saved, rerunning the script (without the `--save` flag) will validate the correctness of the new output and print out timing information. In order to leverage the timing features of the solver script, the solution must be implemented using a [language-specific executor](#language-support).
+Once the solution output is saved, rerunning the script (without the `--save` flag) will validate the correctness of the new output and print out timing information. In order to leverage the timing features of the solver script, the solution must be implemented using a [language-specific executor](languages.md).
 
 ```
 % ./bin/solver --save
