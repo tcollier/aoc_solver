@@ -179,6 +179,10 @@ def _split_args(args):
     return args["language"], args["year"], args["day"]
 
 
+def _cursor_reset():
+    print("\033[A")
+
+
 def _handle_invalid_command(cmd, args):
     print(_colorize(Color.RED, f"Invalid command {cmd} with arguments {args}"))
 
@@ -196,13 +200,13 @@ def _handle_build_start(display, args):
 
 def _handle_build_end(display, args):
     display.stop_spinner()
-    print("\033[A")
+    _cursor_reset()
 
 
 def _handle_build_failed(display, args):
     display.stop_spinner()
     language, year, day = _split_args(args)
-    print("\033[A")
+    _cursor_reset()
     print(format_failure(language, year, day), end="  \n")
     if "stdout" in args:
         print(args["stdout"], end="")
@@ -218,13 +222,13 @@ def _handle_solve_start(display, args):
 
 def _handle_solve_end(display, args):
     display.stop_spinner()
-    print("\033[A")
+    _cursor_reset()
 
 
 def _handle_solve_erred(display, args):
     display.stop_spinner()
     language, year, day = _split_args(args)
-    print("\033[A")
+    _cursor_reset()
     print(format_failure(language, year, day), end="  \n")
     if "stderr" in args:
         print(args["stderr"], end="")
@@ -266,14 +270,14 @@ def _handle_timing_end(display, args):
     display.stop_spinner()
     language, year, day = _split_args(args)
     timing_info = format_timing(args["info"], args["duration"])
-    print("\033[A")
+    _cursor_reset()
     print(f"{format_success(language, year, day)} {timing_info}")
 
 
 def _handle_timing_failed(display, args):
     display.stop_spinner()
     language, year, day = _split_args(args)
-    print("\033[A")
+    _cursor_reset()
     print(format_failure(language, year, day), end="  \n")
     if "stderr" in args:
         print(args["stderr"], end="")
