@@ -207,7 +207,7 @@ def days_to_solve(args):
     dictate need to be solved.
     """
     if args.all:
-        years = glob.glob("2*")
+        years = glob.glob("20??")
         years.sort()
         for year in years:
             days = glob.glob(f"{year}/[0123][0123456789]")
