@@ -9,18 +9,6 @@ from lib.shell import ShellException, TerminationException, shell_out
 from lib.solver_event import SolverEvent
 
 
-def _shell_out(conn, cmd):
-    def should_terminate():
-        if not conn.poll(0):
-            return False
-        cmd = conn.recv()
-        _args = conn.recv()
-        return cmd == SolverEvent.TERMINATE
-
-    unwrapped = cmd() if callable(cmd) else cmd
-    return shell_out(unwrapped, should_terminate)
-
-
 class LanguageSolver(object):
     def __init__(self, conn, language, year, day, filename):
         self.conn = conn
@@ -53,11 +41,22 @@ class LanguageSolver(object):
         self.conn.send(event)
         self.conn.send(args)
 
+    def _shell_out(self, cmd):
+        def should_terminate():
+            if not self.conn.poll(0):
+                return False
+            cmd = self.conn.recv()
+            _args = self.conn.recv()
+            return cmd == SolverEvent.TERMINATE
+
+        unwrapped = cmd() if callable(cmd) else cmd
+        return shell_out(unwrapped, should_terminate)
+
     def _build(self, compiler_cmds):
         self._dispatch(SolverEvent.BUILD_START)
         try:
             for cmd in compiler_cmds:
-                _shell_out(self.conn, cmd)
+                self._shell_out(cmd)
             self._dispatch(SolverEvent.BUILD_END)
         except ShellException as e:
             # Include stdout since node writes error messages to stdout
@@ -72,7 +71,7 @@ class LanguageSolver(object):
     def _solve(self, cmd):
         self._dispatch(SolverEvent.SOLVE_START)
         try:
-            actual = _shell_out(self.conn, cmd)
+            actual = self._shell_out(cmd)
             self._dispatch(SolverEvent.SOLVE_END)
             return actual
         except ShellException as e:
@@ -92,7 +91,7 @@ class LanguageSolver(object):
         self._dispatch(SolverEvent.TIMING_START)
         try:
             start_time = datetime.now()
-            timing_info = json.loads(_shell_out(self.conn, cmd))
+            timing_info = json.loads(self._shell_out(cmd))
             duration = datetime.now() - start_time
             self._dispatch(
                 SolverEvent.TIMING_END, {"info": timing_info, "duration": duration}
