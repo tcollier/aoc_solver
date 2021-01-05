@@ -118,11 +118,11 @@ def _status(label, color, language, year, day):
     Generic formatter for the solver's status of running the language/day
     """
     day_language = f"{year}/{day.rjust(2, '0')} {_language(language)}"
-    return f"{color}{label} [{day_language}]{Color.ENDC}"
+    return f"{color}{label.ljust(4, ' ')} [{day_language}]{Color.ENDC}"
 
 
 def _attempt(language, year, day):
-    return _status("TRY ", Color.YELLOW, language, year, day)
+    return _status("TRY", Color.YELLOW, language, year, day)
 
 
 def _building(language, year, day):
