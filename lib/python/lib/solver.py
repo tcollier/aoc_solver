@@ -28,10 +28,10 @@ class LanguageSolver(object):
         self.year = year
         self.day = day
         self.filename = filename
-        self.config = language_config(language)
 
     def __call__(self, expected, outfile):
-        commands = self.config.commands(self.filename)
+        config = language_config(self.language)
+        commands = config.commands(self.filename)
         if commands.compiler:
             self._build(commands.compiler)
         actual = self._solve(commands.exec)
@@ -41,7 +41,7 @@ class LanguageSolver(object):
             self._handle_invalid_output(expected, actual)
         else:
             self._dispatch(SolverEvent.SOLVE_SUCCEEDED)
-            if self.config.timing:
+            if config.timing:
                 self._handle_timing(commands.time)
             else:
                 self._dispatch(SolverEvent.TIMING_SKIPPED)
@@ -122,7 +122,7 @@ class Solver(object):
         self.year = year
         self.day = day
         self.save = save
-        self.outfile = os.path.join(year, day.zfill(2), "output.txt")
+        self.outfile = os.path.join(year, padded_day, "output.txt")
         self.expected = None
         if os.path.isfile(self.outfile):
             self.expected = "".join(open(self.outfile, "r").readlines())
