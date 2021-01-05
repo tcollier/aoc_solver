@@ -239,11 +239,9 @@ try:
 
     for year, day in days_to_solve(args):
         # Spin up the solver for the given year/day
-        solver = Solver(solver_conn, year, day)
+        solver = Solver(solver_conn, year, day, args.save)
         solver_proc = Process(
-            target=solver,
-            args=(os.getpid(), args.language, args.save),
-            name="AoC-solver",
+            target=solver, args=(os.getpid(), args.language), name="AoC-solver",
         )
         ContextManager.add_proc(solver_proc)
         while solver_proc.is_alive():
