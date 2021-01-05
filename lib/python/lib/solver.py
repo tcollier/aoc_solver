@@ -61,11 +61,11 @@ class LanguageSolver(object):
         return shell_out(unwrapped, should_terminate)
 
     def _build(self, compiler_cmds):
-        self._dispatch(SolverEvent.BUILD_START)
+        self._dispatch(SolverEvent.BUILD_STARTED)
         try:
             for cmd in compiler_cmds:
                 self._shell_out(cmd)
-            self._dispatch(SolverEvent.BUILD_END)
+            self._dispatch(SolverEvent.BUILD_FINISHED)
         except ShellException as e:
             # Include stdout since node writes error messages to stdout
             self._dispatch(
@@ -77,16 +77,16 @@ class LanguageSolver(object):
             raise e
 
     def _solve(self, cmd):
-        self._dispatch(SolverEvent.SOLVE_START)
+        self._dispatch(SolverEvent.SOLVE_STARTED)
         try:
             actual = self._shell_out(cmd)
-            self._dispatch(SolverEvent.SOLVE_END)
+            self._dispatch(SolverEvent.SOLVE_FINISHED)
             return actual
         except ShellException as e:
-            self._dispatch(SolverEvent.SOLVE_ERRED, {"stderr": e.stderr})
+            self._dispatch(SolverEvent.SOLVE_FAILED, {"stderr": e.stderr})
             raise e
         except Exception as e:
-            self._dispatch(SolverEvent.SOLVE_ERRED)
+            self._dispatch(SolverEvent.SOLVE_FAILED)
             raise e
 
     def _handle_output(self, actual, outfile):
@@ -96,13 +96,13 @@ class LanguageSolver(object):
             self._dispatch(SolverEvent.OUTPUT_SAVED, {"file": outfile})
 
     def _handle_timing(self, cmd):
-        self._dispatch(SolverEvent.TIMING_START)
+        self._dispatch(SolverEvent.TIMING_STARTED)
         try:
             start_time = datetime.now()
             timing_info = json.loads(self._shell_out(cmd))
             duration = datetime.now() - start_time
             self._dispatch(
-                SolverEvent.TIMING_END, {"info": timing_info, "duration": duration}
+                SolverEvent.TIMING_FINISHED, {"info": timing_info, "duration": duration}
             )
         except ShellException as e:
             self._dispatch(SolverEvent.TIMING_FAILED, {"stderr": e.stderr})
@@ -113,7 +113,7 @@ class LanguageSolver(object):
 
     def _handle_invalid_output(self, expected, actual):
         self._dispatch(
-            SolverEvent.SOLVE_FAILED, {"expected": expected, "actual": actual}
+            SolverEvent.SOLVE_INCORRECT, {"expected": expected, "actual": actual}
         )
 
 

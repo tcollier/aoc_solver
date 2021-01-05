@@ -183,127 +183,12 @@ def _cursor_reset():
     print("\033[A")
 
 
-def _handle_invalid_command(cmd, args):
-    print(_colorize(Color.RED, f"Invalid command {cmd} with arguments {args}"))
-
-
-def _handle_missing_src(_, args):
-    language, year, day = _split_args(args)
-    print(f"{format_failure(language, year, day)} (no source code found)")
-
-
-def _handle_build_start(display, args):
-    language, year, day = _split_args(args)
-    print(format_building(language, year, day), end=" ", flush=True)
-    display.start_spinner()
-
-
-def _handle_build_end(display, args):
-    display.stop_spinner()
-    _cursor_reset()
-
-
-def _handle_build_failed(display, args):
-    display.stop_spinner()
-    language, year, day = _split_args(args)
-    _cursor_reset()
-    print(format_failure(language, year, day), end="  \n")
-    if "stdout" in args:
-        print(args["stdout"], end="")
-    if "stderr" in args:
-        print(args["stderr"], end="")
-
-
-def _handle_solve_start(display, args):
-    language, year, day = _split_args(args)
-    print(format_solving(language, year, day), end=" ", flush=True)
-    display.start_spinner()
-
-
-def _handle_solve_end(display, args):
-    display.stop_spinner()
-    _cursor_reset()
-
-
-def _handle_solve_erred(display, args):
-    display.stop_spinner()
-    language, year, day = _split_args(args)
-    _cursor_reset()
-    print(format_failure(language, year, day), end="  \n")
-    if "stderr" in args:
-        print(args["stderr"], end="")
-
-
-def _handle_solve_attempted(_, args):
-    language, year, day = _split_args(args)
-    print(format_attempt(language, year, day), end="  \n")
-    print(args["actual"].rstrip())
-
-
-def _handle_solve_succeeded(_, args):
-    language, year, day = _split_args(args)
-    print(
-        format_success(language, year, day), end=" ", flush=True,
-    )
-
-
-def _handle_solved_failed(_, args):
-    language, year, day = _split_args(args)
-    print(format_failure(language, year, day), end="  \n")
-    print(format_diff(args["expected"], args["actual"]))
-
-
-def _handle_output_saved(_, args):
-    print(f"Saved result to {args['file']}")
-
-
-def _handle_timing_start(display, args):
-    print(_colorize(Color.GREY, "timing"), end=" ")
-    display.start_spinner()
-
-
-def _handle_timing_skipped(_, args):
-    print("  ")  # Overwrite the spinner and add new line
-
-
-def _handle_timing_end(display, args):
-    display.stop_spinner()
-    language, year, day = _split_args(args)
-    timing_info = format_timing(args["info"], args["duration"])
-    _cursor_reset()
-    print(f"{format_success(language, year, day)} {timing_info}")
-
-
-def _handle_timing_failed(display, args):
-    display.stop_spinner()
-    language, year, day = _split_args(args)
-    _cursor_reset()
-    print(format_failure(language, year, day), end="  \n")
-    if "stderr" in args:
-        print(args["stderr"], end="")
-
-
-HANDLERS = {
-    SolverEvent.MISSING_SRC: _handle_missing_src,
-    SolverEvent.BUILD_START: _handle_build_start,
-    SolverEvent.BUILD_END: _handle_build_end,
-    SolverEvent.BUILD_FAILED: _handle_build_failed,
-    SolverEvent.SOLVE_START: _handle_solve_start,
-    SolverEvent.SOLVE_END: _handle_solve_end,
-    SolverEvent.SOLVE_SUCCEEDED: _handle_solve_succeeded,
-    SolverEvent.SOLVE_ERRED: _handle_solve_erred,
-    SolverEvent.SOLVE_ATTEMPTED: _handle_solve_attempted,
-    SolverEvent.SOLVE_FAILED: _handle_solved_failed,
-    SolverEvent.OUTPUT_SAVED: _handle_output_saved,
-    SolverEvent.TIMING_START: _handle_timing_start,
-    SolverEvent.TIMING_SKIPPED: _handle_timing_skipped,
-    SolverEvent.TIMING_END: _handle_timing_end,
-    SolverEvent.TIMING_FAILED: _handle_timing_failed,
-}
-
-
 class TerminalDisplay(object):
-    REFRESH_RATE = 12  # Frames Per Second
+    # The refresh rate (in frames per second) that the event loop will update
+    # the display. The only animation to speak of is the spinner, so the
+    # primary effect of changing this value will be changing the speed that
+    # the spinner spins.
+    REFRESH_RATE_FPS = 15
 
     def __init__(self, conn):
         self.conn = conn
@@ -323,25 +208,127 @@ class TerminalDisplay(object):
     def __call__(self, parent_pid):
         """
         :param parent_pid: Process ID of the parent that spawned the terminal
-        display. Keep tabs on it so we can exit if it mysteriously vanishes,
+        self. Keep tabs on it so we can exit if it mysteriously vanishes,
         e.g. with a SIGKILL
         """
         running = True
         while running:
-            if self.conn.poll(1 / self.REFRESH_RATE):
+            if self.conn.poll(1 / self.REFRESH_RATE_FPS):
                 cmd = self.conn.recv()
                 args = self.conn.recv()
-                if cmd in HANDLERS:
-                    HANDLERS[cmd](self, args)
+                if cmd in self.HANDLERS:
+                    self.HANDLERS[cmd](self, args)
                 elif cmd == SolverEvent.TERMINATE:
                     running = False
                     self.stop_spinner()
                     if "error" in args:
                         print(args["error"])
                 else:
-                    _handle_invalid_command(cmd, args)
+                    self._invalid_command(cmd, args)
             if not is_process_running(parent_pid):
                 running = False
                 self.stop_spinner()
             if self.spinner:
                 self.spinner.tick()
+
+    def _invalid_command(self, cmd, args):
+        print(_colorize(Color.RED, f"Invalid command {cmd} with arguments {args}"))
+
+    def _missing_src(self, args):
+        language, year, day = _split_args(args)
+        print(f"{format_failure(language, year, day)} (no source code found)")
+
+    def _build_started(self, args):
+        language, year, day = _split_args(args)
+        print(format_building(language, year, day), end=" ", flush=True)
+        self.start_spinner()
+
+    def _build_finished(self, args):
+        self.stop_spinner()
+        _cursor_reset()
+
+    def _build_failed(self, args):
+        self.stop_spinner()
+        language, year, day = _split_args(args)
+        _cursor_reset()
+        print(format_failure(language, year, day), end="  \n")
+        if "stdout" in args:
+            print(args["stdout"], end="")
+        if "stderr" in args:
+            print(args["stderr"], end="")
+
+    def _solve_started(self, args):
+        language, year, day = _split_args(args)
+        print(format_solving(language, year, day), end=" ", flush=True)
+        self.start_spinner()
+
+    def _solve_finished(self, args):
+        self.stop_spinner()
+        _cursor_reset()
+
+    def _solve_failed(self, args):
+        self.stop_spinner()
+        language, year, day = _split_args(args)
+        _cursor_reset()
+        print(format_failure(language, year, day), end="  \n")
+        if "stderr" in args:
+            print(args["stderr"], end="")
+
+    def _solve_attempted(self, args):
+        language, year, day = _split_args(args)
+        print(format_attempt(language, year, day), end="  \n")
+        print(args["actual"].rstrip())
+
+    def _solve_succeeded(self, args):
+        language, year, day = _split_args(args)
+        print(
+            format_success(language, year, day), end=" ", flush=True,
+        )
+
+    def _solve_incorrect(self, args):
+        language, year, day = _split_args(args)
+        print(format_failure(language, year, day), end="  \n")
+        print(format_diff(args["expected"], args["actual"]))
+
+    def _output_saved(self, args):
+        print(f"Saved result to {args['file']}")
+
+    def _timing_started(self, args):
+        print(_colorize(Color.GREY, "timing"), end=" ")
+        self.start_spinner()
+
+    def _timing_skipped(self, args):
+        print("  ")  # Overwrite the spinner and add new line
+
+    def _timing_finished(self, args):
+        self.stop_spinner()
+        language, year, day = _split_args(args)
+        timing_info = format_timing(args["info"], args["duration"])
+        _cursor_reset()
+        print(f"{format_success(language, year, day)} {timing_info}")
+
+    def _timing_failed(self, args):
+        self.stop_spinner()
+        language, year, day = _split_args(args)
+        _cursor_reset()
+        print(format_failure(language, year, day), end="  \n")
+        if "stderr" in args:
+            print(args["stderr"], end="")
+
+    HANDLERS = {
+        SolverEvent.MISSING_SRC: _missing_src,
+        SolverEvent.BUILD_STARTED: _build_started,
+        SolverEvent.BUILD_FINISHED: _build_finished,
+        SolverEvent.BUILD_FAILED: _build_failed,
+        SolverEvent.SOLVE_STARTED: _solve_started,
+        SolverEvent.SOLVE_FINISHED: _solve_finished,
+        SolverEvent.SOLVE_SUCCEEDED: _solve_succeeded,
+        SolverEvent.SOLVE_FAILED: _solve_failed,
+        SolverEvent.SOLVE_ATTEMPTED: _solve_attempted,
+        SolverEvent.SOLVE_INCORRECT: _solve_incorrect,
+        SolverEvent.OUTPUT_SAVED: _output_saved,
+        SolverEvent.TIMING_STARTED: _timing_started,
+        SolverEvent.TIMING_SKIPPED: _timing_skipped,
+        SolverEvent.TIMING_FINISHED: _timing_finished,
+        SolverEvent.TIMING_FAILED: _timing_failed,
+    }
