@@ -236,14 +236,19 @@ try:
 
     # Spin up the display process.
     display = TerminalDisplay(display_conn)
-    display_proc = Process(target=display, name="AoC-display")
+    display_proc = Process(target=display, name="AoC-display", args=(os.getpid(),))
     ContextManager.add_proc(display_proc)
 
     for year, day in days_to_solve(args):
         # Spin up the solver for the given year/day
         solver = Solver(solver_conn, year, day)
         ContextManager.add_proc(
-            Process(target=solver, args=(args.language,), name="AoC-solver"), join=True
+            Process(
+                target=solver,
+                args=(os.getpid(), args.language, args.save),
+                name="AoC-solver",
+            ),
+            join=True,
         )
     ContextManager.shutdown()
 except ValueError as e:

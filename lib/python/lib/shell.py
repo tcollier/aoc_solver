@@ -1,3 +1,4 @@
+import os
 import shlex
 import subprocess
 import time
@@ -46,3 +47,11 @@ def shell_out(cmd, should_terminate):
         else:
             break
     return _read_output(process.stdout)
+
+
+def is_process_running(pid):
+    try:
+        os.kill(pid, 0)
+        return True
+    except OSError:
+        return False

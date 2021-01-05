@@ -5,12 +5,18 @@ import traceback
 from datetime import datetime
 
 from lib.languages import language_config, all_languages
-from lib.shell import ShellException, TerminationException, shell_out
+from lib.shell import (
+    ShellException,
+    TerminationException,
+    is_process_running,
+    shell_out,
+)
 from lib.solver_event import SolverEvent
 
 
 class LanguageSolver(object):
-    def __init__(self, conn, language, year, day, filename):
+    def __init__(self, parent_pid, conn, language, year, day, filename):
+        self.parent_pid = parent_pid
         self.conn = conn
         self.language = language
         self.year = year
@@ -43,6 +49,8 @@ class LanguageSolver(object):
 
     def _shell_out(self, cmd):
         def should_terminate():
+            if not is_process_running(self.parent_pid):
+                return True
             if not self.conn.poll(0):
                 return False
             cmd = self.conn.recv()
@@ -130,13 +138,13 @@ class Solver(object):
     def has_solution(cls, year, day):
         return os.path.isfile(os.path.join(year, day.zfill(2), "output.txt"))
 
-    def __call__(self, languages, save=False):
+    def __call__(self, parent_pid, languages, save=False):
         found = False
         for language, filename in self._find_files(languages):
             found = True
             try:
                 solver = LanguageSolver(
-                    self.conn, language, self.year, self.day, filename
+                    parent_pid, self.conn, language, self.year, self.day, filename
                 )
                 solver(self.expected, self.outfile if self.save else None)
             except ShellException:

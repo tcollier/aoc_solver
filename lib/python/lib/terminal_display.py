@@ -1,6 +1,7 @@
 from multiprocessing import Pipe, Process
 
 from lib.languages import all_languages
+from lib.shell import is_process_running
 from lib.solver_event import SolverEvent
 
 
@@ -315,7 +316,7 @@ class TerminalDisplay(object):
         self.spinner.stop()
         self.spinner = None
 
-    def __call__(self):
+    def __call__(self, parent_pid):
         running = True
         while running:
             if self.conn.poll(1 / self.REFRESH_RATE):
@@ -330,5 +331,8 @@ class TerminalDisplay(object):
                         print(args["error"])
                 else:
                     _handle_invalid_command(cmd, args)
+            if not is_process_running(parent_pid):
+                running = False
+                self.stop_spinner()
             if self.spinner:
                 self.spinner.tick()
