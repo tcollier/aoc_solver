@@ -30,31 +30,7 @@ class Spinner(object):
         print("\b", end="", flush=True)
 
 
-def _decimal(number):
-    parts = str(round(number, 2)).split(".")
-    return ".".join([parts[0].rjust(3, " "), parts[1].rjust(2, "0")])
-
-
-def _duration(duration):
-    if duration < 1:
-        return f"{Color.GREEN}{_decimal(duration * 1000)} ns{Color.ENDC}"
-    elif duration < 1000:
-        return f"{_decimal(duration)} μs"
-    elif duration < 1000000:
-        return f"{Color.YELLOW}{_decimal(duration / 1000)} ms{Color.ENDC}"
-    else:
-        return f"{Color.RED}{_decimal(duration / 1000000)} s{Color.ENDC}"
-
-
-def _language(language):
-    max = 0
-    for l in all_languages():
-        if len(l) > max:
-            max = len(l)
-    return language.ljust(max, " ")
-
-
-def _header(value, width):
+def _table_header(value, width):
     if not value:
         return " " * (width)
     underlined = f"{Color.UNDERLINE}{value}{Color.ENDC}"
@@ -64,7 +40,7 @@ def _header(value, width):
     return f"{lpad}{underlined}{rpad}"
 
 
-def _cell(value, width, color):
+def _table_cell(value, width, color):
     if color:
         colored = f"{color}{value}{Color.ENDC}"
         width += len(color) + len(Color.ENDC)
@@ -89,37 +65,80 @@ def _table(table, row_colors):
     for row in range(len(table)):
         for col in range(len(table[row])):
             if row == 0:
-                string += _header(table[row][col], col_width[col])
+                string += _table_header(table[row][col], col_width[col])
             else:
-                string += _cell(table[row][col], col_width[col], row_colors[row])
+                string += _table_cell(table[row][col], col_width[col], row_colors[row])
             string += "  " if col < len(table[row]) - 1 else ""
         string += "\n"
     return string
 
 
-def _status(language, year, day, label, color):
+def _decimal(number):
+    """
+    Format a decimal to be right justified with 2 digits to the right of
+    the decimal place and left padded with spaces to take up 3 characters
+    to the left.
+    """
+    parts = str(round(number, 2)).split(".")
+    return ".".join([parts[0].rjust(3, " "), parts[1].ljust(2, "0")])
+
+
+def _duration(duration):
+    """
+    Convert the duratino from microseconds to the unit that will allow the
+    number to be between 1 <= n < 1,000 and apply the unit (e.g. "ms") and
+    any colorization.
+
+    :param duration: time in microseconds
+    """
+    if duration < 1:
+        return f"{Color.GREEN}{_decimal(duration * 1000)} ns{Color.ENDC}"
+    elif duration < 1000:
+        return f"{_decimal(duration)} μs"
+    elif duration < 1000000:
+        return f"{Color.YELLOW}{_decimal(duration / 1000)} ms{Color.ENDC}"
+    else:
+        return f"{Color.RED}{_decimal(duration / 1000000)} s{Color.ENDC}"
+
+
+def _language(language):
+    """
+    Right pad the language name with spaces so that all languages will take up
+    the same width.
+    """
+    max = 0
+    for l in all_languages():
+        if len(l) > max:
+            max = len(l)
+    return language.ljust(max, " ")
+
+
+def _status(label, color, language, year, day):
+    """
+    Generic formatter for the solver's status of running the language/day
+    """
     day_language = f"{year}/{day.rjust(2, '0')} {_language(language)}"
     return f"{color}{label} [{day_language}]{Color.ENDC}"
 
 
 def _attempt(language, year, day):
-    return _status(language, year, day, "TRY ", Color.YELLOW)
+    return _status("TRY ", Color.YELLOW, language, year, day)
 
 
 def _building(language, year, day):
-    return _status(language, year, day, "COMP", Color.GREY)
+    return _status("COMP", Color.GREY, language, year, day)
 
 
 def _solving(language, year, day):
-    return _status(language, year, day, "EXEC", Color.CYAN)
+    return _status("EXEC", Color.CYAN, language, year, day)
 
 
 def _success(language, year, day):
-    return _status(language, year, day, "PASS", Color.GREEN)
+    return _status("PASS", Color.GREEN, language, year, day)
 
 
 def _failure(language, year, day):
-    return _status(language, year, day, "FAIL", Color.RED)
+    return _status("FAIL", Color.RED, language, year, day)
 
 
 def _diff(expected, actual):
