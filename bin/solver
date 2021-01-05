@@ -59,7 +59,7 @@ from lib.solver_event import SolverEvent
 from lib.terminal_display import TerminalDisplay
 
 # Current day in UTC is a decent default value, since new challenges are released
-# at midnight EST. This give the user a couple hours before the start time to set
+# at midnight EST. This gives the user a couple hours before the start time to set
 # up and test any boiler plate code and give time the morning after to continue
 # working on it.
 default_day = datetime.utcnow()
