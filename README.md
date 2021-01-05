@@ -4,7 +4,7 @@ This repository is my collection of solutions for [Advent of Code](https://adven
 
 ## Structure
 
-Solutions to daily challenges live in a subdirectory for the given challenge date (`YYYY/DD/`), some subdirectories contain solutions in multiple languages. The solver script only looks for solutions named `main.xxx` or `Main.xxx` (where `xxx` is the standard file extension for the language).
+Solutions to daily challenges live in a subdirectory for the given challenge date (`yyyy/dd/`), some subdirectories contain solutions in multiple languages. The solver script only looks for solutions named `main.xxx` or `Main.xxx` (where `xxx` is the standard file extension for the language).
 
 For consistency's sake, each solution prints out 2 lines, the first is the answer to part 1 and the second to part 2. Daily subdirectories may also contain a file with my input (`input.txt`) for the challenge and and a file with the correct anwsers (`output.txt`) for my given input. Some days have very simple input, in which case the input may be hard-coded in the source file.
 

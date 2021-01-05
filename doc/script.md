@@ -52,8 +52,18 @@ Saved result to 2020/01/output.txt
 Once the solution output is saved, rerunning the script (without the `--save` flag) will validate the correctness of the new output and print out timing information. In order to leverage the timing features of the solver script, the solution must be implemented using a [language-specific executor](languages.md).
 
 ```
-% ./bin/solver --save
+% ./bin/solver
 PASS [2020/01 typescript] (part1:   6.77 μs, part2:   4.96 μs, overhead:  46.06 ms)
 ```
 
 The executor running the solution invokes functions specific to each challenge part multiple times and reports on the average clock time taken per invocation (the `part1` and `part2` metrics). Additionally an `overhead` metric reports the total time taken to invoke the shell command minus time spent acutally computing the solution. This includes time spent booting the virtual machine or loading language libraries and can indicate why a "fast" solution might feel slow (I'm looking at you Scala!).
+
+If the computed solution does _not_ match `output.txt`, then a diff is shown
+
+```
+% ./bin/solver
+FAIL [2020/01 typescript]
+           Part 2
+Expected  84035952
+Actual    84035953
+```
