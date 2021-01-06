@@ -21,4 +21,5 @@ def factors(num)
   num
 end
 
-puts factors(232502487)
+num = 2338981840289282470
+puts factors(num).join(' * ') + " = #{num}"
