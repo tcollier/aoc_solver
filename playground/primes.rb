@@ -11,3 +11,14 @@ while num < 10_000_000
   puts num
   num *= 2
 end
+
+def factors(num)
+  (2..Math.sqrt(num).floor).each do |div|
+    if num % div == 0
+      return [div, *factors(num / div)]
+    end
+  end
+  num
+end
+
+puts factors(232502487)
