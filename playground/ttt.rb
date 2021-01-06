@@ -32,6 +32,5 @@ c|040.chr+c}.join(pk(15904))}.join(([N]*2).join(([(?-*2).chars.join(055.chr)]*3
                    "1").to_i))                   ;w=m(c,cmp=
                    gets.ord-49                   );;pb(w) if
                    !P.any?;n/=                   4;;c=S[c];;
-                   end;z.call(                   P);a(pk(19*
-                   7*37*15749*                   3,531826)<<
-                   M[w]);R=34&                   3;f=R-0xcab
+                   end;z.(P);a                   (pk(133*37*
+                   47247,4507*                   118)<<M[w])
