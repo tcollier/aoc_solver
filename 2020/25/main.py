@@ -40,5 +40,5 @@ def part2_solution(_):
     return ""
 
 
-executor = Executor(None, part1_solution, part2_solution)
+executor = Executor([], part1_solution, part2_solution)
 executor(sys.argv)

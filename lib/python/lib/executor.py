@@ -40,8 +40,11 @@ class Executor(object):
                 return duration < 100000
 
         i = 0
-        start_time = datetime.now()
-        while continue_timing(i, duration_us(datetime.now() - start_time)):
-            fn([v for v in self.data])
+        running_time = 0
+        while continue_timing(i, running_time):
+            data = [v for v in self.data]
+            start_time = datetime.now()
+            fn(data)
+            running_time += duration_us(datetime.now() - start_time)
             i += 1
-        return {"duration": duration_us(datetime.now() - start_time), "iterations": i}
+        return {"duration": running_time, "iterations": i}
