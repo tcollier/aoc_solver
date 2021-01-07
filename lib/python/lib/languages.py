@@ -16,7 +16,7 @@ def c_cmds(file):
     bin_file = file.replace(".", "_")
     cmds = Commands(f"./{bin_file}")
     lib_files = glob.glob("lib/*.c")
-    cmds.add_compiler_command(f"gcc -o {bin_file} {file} {' '.join(lib_files)}")
+    cmds.add_compiler_command(f"gcc -O3 -o {bin_file} {file} {' '.join(lib_files)}")
     return cmds
 
 
