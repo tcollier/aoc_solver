@@ -1,4 +1,4 @@
-require_relative '../../lib/executor'
+require_relative '../../lib/ruby/executor'
 
 part1_proc = Proc.new { |input| input[0] }
 part2_proc = Proc.new { |input| input[1] }

@@ -1,8 +1,8 @@
 require 'json'
 
 class Executor
-  def initialize(data, part1_proc, part2_proc)
-    @data = data
+  def initialize(input, part1_proc, part2_proc)
+    @input = input
     @part1_proc = part1_proc
     @part2_proc = part2_proc
   end
@@ -12,8 +12,8 @@ class Executor
   end
 
   def solve
-    puts @part1_proc.call(@data.dup)
-    puts @part2_proc.call(@data.dup)
+    puts @part1_proc.call(@input.dup)
+    puts @part2_proc.call(@input.dup)
   end
 
   private
@@ -35,11 +35,14 @@ class Executor
 
   def time_proc(fn)
     i = 0
-    start_time = Time.now.to_f
-    while continue_timing?(i, Time.now.to_f - start_time)
-      fn.call(@data.dup)
+    running_time = 0
+    while continue_timing?(i, running_time)
+      input = @input.dup
+      start_time = Time.now.to_f
+      fn.call(input)
+      running_time += Time.now.to_f - start_time
       i += 1
     end
-    {duration: ((Time.now.to_f - start_time) * 1_000_000).round, iterations: i}
+    {duration: running_time * 1_000_000, iterations: i}
   end
 end

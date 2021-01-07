@@ -1,4 +1,4 @@
-require_relative '../../lib/executor'
+require_relative '../../lib/ruby/executor'
 
 class Integer
   def /(other)

@@ -1,4 +1,4 @@
-require_relative '../../lib/executor'
+require_relative '../../lib/ruby/executor'
 
 module Part1Validator
   def self.valid?(min, max, char, pwd)

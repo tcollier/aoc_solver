@@ -1,6 +1,6 @@
 require 'set'
 
-require_relative '../../lib/executor'
+require_relative '../../lib/ruby/executor'
 
 def pair_with_sum(numbers, sum)
   others = Set.new(numbers[1..-1])

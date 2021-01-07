@@ -1,4 +1,4 @@
-require_relative '../../lib/executor'
+require_relative '../../lib/ruby/executor'
 
 def play(input, num_rounds)
   last_usage = Array.new(num_rounds) { -1 }

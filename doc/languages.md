@@ -137,7 +137,7 @@ A ruby executor exists, below is template code for using the executor
 
 ```ruby
 # main.rb
-require_relative '../../lib/executor'
+require_relative '../../lib/ruby/executor'
 
 part1_proc = Proc.new { |input| compute_part1_solution(input) }
 part2_proc = Proc.new { |input| compute_part2_solution(input) }
