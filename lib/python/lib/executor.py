@@ -16,8 +16,8 @@ class Executor(object):
             self._solve()
 
     def _solve(self):
-        print(self.part1_fn(self.data))
-        print(self.part2_fn(self.data))
+        print(self.part1_fn([v for v in self.data]))
+        print(self.part2_fn([v for v in self.data]))
 
     def _time(self):
         print(
@@ -42,6 +42,6 @@ class Executor(object):
         i = 0
         start_time = datetime.now()
         while continue_timing(i, duration_us(datetime.now() - start_time)):
-            fn(self.data)
+            fn([v for v in self.data])
             i += 1
         return {"duration": duration_us(datetime.now() - start_time), "iterations": i}

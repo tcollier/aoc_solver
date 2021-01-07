@@ -53,17 +53,18 @@ class Day1Solution implements Solution {
   }
 
   private int[] tripletWithSum() {
+    ArrayList<Integer> numbers = (ArrayList<Integer>)this.numbers.clone();
+    Collections.sort(numbers);
     int[] triplet = new int[3];
-    Collections.sort(this.numbers);
-    for (int i = 0; i < this.numbers.size() - 2; i++) {
+    for (int i = 0; i < numbers.size() - 2; i++) {
       int j = i + 1;
-      int k = this.numbers.size() - 1;
+      int k = numbers.size() - 1;
       while (j < k) {
-        int total = this.numbers.get(i) + this.numbers.get(j) + this.numbers.get(k);
-        if(total == this.sum) {
-          triplet[0] = this.numbers.get(i);
-          triplet[1] = this.numbers.get(j);
-          triplet[2] = this.numbers.get(k);
+        int total = numbers.get(i) + numbers.get(j) + numbers.get(k);
+        if(total == sum) {
+          triplet[0] = numbers.get(i);
+          triplet[1] = numbers.get(j);
+          triplet[2] = numbers.get(k);
           return triplet;
         } else if (total < this.sum) {
           j++;
