@@ -87,7 +87,7 @@ def rust_cmds(file):
 
 def scala_cmds(file):
     base_dir = os.path.dirname(file)
-    cmds = Commands(f"scala -classpath {base_dir}:./lib Main")
+    cmds = Commands(f"scala -optimize -classpath {base_dir}:./lib Main")
     cmds.add_compiler_command(f"scalac -d {base_dir} -classpath ./lib {file}")
     return cmds
 
