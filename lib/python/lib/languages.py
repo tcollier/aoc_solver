@@ -81,7 +81,7 @@ def ruby_cmds(file):
 def rust_cmds(file):
     bin_file = file.replace(".", "_")
     cmds = Commands(f"./{bin_file}")
-    cmds.add_compiler_command(f"rustc -o {bin_file} {file} -L ./lib")
+    cmds.add_compiler_command(f"rustc -C opt-level=3 -o {bin_file} {file} -L ./lib")
     return cmds
 
 
