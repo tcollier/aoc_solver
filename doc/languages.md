@@ -55,13 +55,13 @@ Support for golang is minimal. `solver` will compile and run a solution in `main
 A Java executor exists with the following signature
 
 ```java
-public interface Solution {
-  public String part1Answer();
-  public String part2Answer();
+public interface Solution<T> {
+  public String part1Answer(ArrayList<T>);
+  public String part2Answer(ArrayList<T>);
 }
 
 public class Executor {
-  public Executor(Solution solution);
+  public Executor(Solution<T> solution, ArrayList<T> input);
   public void run(String[] args);
 }
 ```
@@ -70,22 +70,20 @@ Below is template code for using the executor
 
 ```java
 // Main.java
+import java.util.ArrayList;
+
 import tcollier.Executor;
 import tcollier.Solution;
 
-class Day1Solution implements Solution {
-  private String[] data;
+class Day1Solution implements Solution<String> {
+  private ArrayList<String> input;
 
-  public Day0Solution(String[] data) {
-    this.data = data;
-  }
-
-  public String part1Answer() {
+  public String part1Answer(ArrayList<String> input) {
     // compute part 1 solution
     return solution
   }
 
-  public String part2Answer() {
+  public String part2Answer(ArrayList<String> input) {
     // compute part 2 solution
     return solution
   }
@@ -93,8 +91,8 @@ class Day1Solution implements Solution {
 
 class Main {
   public static void main(String[] args) {
-    String[] data = // load data
-    Executor executor = new Executor(new Day1Solution(data));
+    ArrayList<String> input = // load data
+    Executor executor = new Executor(new Day1Solution(), input);
     executor.run(args);
   }
 }

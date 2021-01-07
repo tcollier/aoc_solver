@@ -1,40 +1,39 @@
+import java.util.ArrayList;
 import java.util.BitSet;
 
 import tcollier.Executor;
 import tcollier.Solution;
 
-class Day15Solution implements Solution {
-  private int[] input;
+class Day15Solution implements Solution<Integer> {
   private int part1Rounds;
   private int part2Rounds;
 
-  public Day15Solution(int[] input, int part1Rounds, int part2Rounds) {
-    this.input = input;
+  public Day15Solution(int part1Rounds, int part2Rounds) {
     this.part1Rounds = part1Rounds;
     this.part2Rounds = part2Rounds;
   }
 
-  public String part1Answer() {
-    return String.valueOf(this.playGame(this.part1Rounds));
+  public String part1Answer(ArrayList<Integer> input) {
+    return String.valueOf(playGame(input, part1Rounds));
   }
 
-  public String part2Answer() {
-    return String.valueOf(this.playGame(this.part2Rounds));
+  public String part2Answer(ArrayList<Integer> input) {
+    return String.valueOf(playGame(input, part2Rounds));
   }
 
-  private int playGame(int numRounds) {
+  private int playGame(ArrayList<Integer> input, int numRounds) {
     int[] lastUsage = new int[numRounds];
     BitSet used = new BitSet();
 
-    for (int round = 0; round < input.length - 1; round++) {
-      lastUsage[input[round]] = round;
-      used.set(input[round]);
+    for (int round = 0; round < input.size() - 1; round++) {
+      lastUsage[input.get(round)] = round;
+      used.set(input.get(round));
     }
 
-    int prevNum = input[input.length - 1];
+    int prevNum = input.get(input.size() - 1);
     int currNum = -1;
 
-    for (int round = input.length; round < numRounds; round++) {
+    for (int round = input.size(); round < numRounds; round++) {
       if (used.get(prevNum)) {
         currNum = round - 1 - lastUsage[prevNum];
       } else {
@@ -50,11 +49,15 @@ class Day15Solution implements Solution {
 }
 
 class Main {
-  private final static int[] input = {14, 3, 1, 0, 9, 5};
+  private final static int[] rawInput = {14, 3, 1, 0, 9, 5};
 
   public static void main(String[] args) {
     try {
-      Executor executor = new Executor(new Day15Solution(input, 2020, 30000000));
+      ArrayList<Integer> input = new ArrayList<Integer>();
+      for (int i = 0; i < rawInput.length; i++) {
+        input.add(rawInput[i]);
+      }
+      Executor<Integer> executor = new Executor<Integer>(new Day15Solution(2020, 30000000), input);
       executor.run(args);
     } catch (Exception e) {
       System.out.println(e);

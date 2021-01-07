@@ -17,43 +17,40 @@ class SumNotPossible extends RuntimeException {
   }
 }
 
-class Day1Solution implements Solution {
-  private ArrayList<Integer> numbers;
+class Day1Solution implements Solution<Integer> {
   private int sum;
 
-  public Day1Solution(ArrayList<Integer> numbers, int sum) {
-    this.numbers = numbers;
+  public Day1Solution(int sum) {
     this.sum = sum;
   }
 
-  public String part1Answer() {
-    int[] pair = this.pairWithSum();
+  public String part1Answer(ArrayList<Integer> numbers) {
+    int[] pair = pairWithSum(numbers);
     return String.valueOf(pair[0] * pair[1]);
   }
 
-  public String part2Answer() {
-    int[] triplet = this.tripletWithSum();
+  public String part2Answer(ArrayList<Integer> numbers) {
+    int[] triplet = tripletWithSum(numbers);
     return String.valueOf(triplet[0] * triplet[1] * triplet[2]);
   }
 
-  private int[] pairWithSum() {
+  private int[] pairWithSum(ArrayList<Integer> numbers) {
     int[] pair = new int[2];
     HashSet<Integer> others = new HashSet<Integer>();
-    for (int i = 1; i < this.numbers.size(); i++) {
-      others.add(this.numbers.get(i));
+    for (int i = 1; i < numbers.size(); i++) {
+      others.add(numbers.get(i));
     }
-    for (int i = 0; i < this.numbers.size() - 1; i++) {
-      if(others.contains(this.sum - this.numbers.get(i))) {
-        pair[0] = this.numbers.get(i);
-        pair[1] = this.sum - this.numbers.get(i);
+    for (int i = 0; i < numbers.size() - 1; i++) {
+      if(others.contains(sum - numbers.get(i))) {
+        pair[0] = numbers.get(i);
+        pair[1] = sum - numbers.get(i);
         return pair;
       }
     }
     throw new SumNotPossible("Cannot find pair with sum");
   }
 
-  private int[] tripletWithSum() {
-    ArrayList<Integer> numbers = (ArrayList<Integer>)this.numbers.clone();
+  private int[] tripletWithSum(ArrayList<Integer> numbers) {
     Collections.sort(numbers);
     int[] triplet = new int[3];
     for (int i = 0; i < numbers.size() - 2; i++) {
@@ -66,7 +63,7 @@ class Day1Solution implements Solution {
           triplet[1] = numbers.get(j);
           triplet[2] = numbers.get(k);
           return triplet;
-        } else if (total < this.sum) {
+        } else if (total < sum) {
           j++;
         } else {
           k--;
@@ -81,7 +78,7 @@ class Main {
   public static void main(String[] args) {
     try {
       ArrayList<Integer> numbers = new InputLoader("2020/01/input.txt").getIntegers();
-      Executor executor = new Executor(new Day1Solution(numbers, 2020));
+      Executor<Integer> executor = new Executor<Integer>(new Day1Solution(2020), numbers);
       executor.run(args);
     } catch (Exception e) {
       System.out.println(e);

@@ -52,26 +52,20 @@ class Part2Validator implements Validator {
   }
 }
 
-class Day2Solution implements Solution {
+class Day2Solution implements Solution<String> {
   private static Pattern rulePattern = Pattern.compile("^(\\d+)-(\\d+) (\\w): (\\w+)");
 
-  private ArrayList<PasswordRule> rules;
-
-  public Day2Solution(ArrayList<String> rawRules) {
-    this.rules = parseRules(rawRules);
+  public String part1Answer(ArrayList<String> rawRules) {
+    return String.valueOf(countValid(rawRules, new Part1Validator()));
   }
 
-  public String part1Answer() {
-    return String.valueOf(countValid(new Part1Validator()));
+  public String part2Answer(ArrayList<String> rawRules) {
+    return String.valueOf(countValid(rawRules, new Part2Validator()));
   }
 
-  public String part2Answer() {
-    return String.valueOf(countValid(new Part2Validator()));
-  }
-
-  private int countValid(Validator validator) {
+  private int countValid(ArrayList<String> rawRules, Validator validator) {
     int count = 0;
-    Iterator<PasswordRule> it = this.rules.iterator();
+    Iterator<PasswordRule> it = parseRules(rawRules).iterator();
     while (it.hasNext()) {
       if (validator.isValid(it.next())) {
         count++;
@@ -101,7 +95,7 @@ class Main {
   public static void main(String[] args) {
     try {
       ArrayList<String> rawRules = new InputLoader("2020/02/input.txt").getStrings();
-      Executor executor = new Executor(new Day2Solution(rawRules));
+      Executor<String> executor = new Executor<String>(new Day2Solution(), rawRules);
       executor.run(args);
     } catch (Exception e) {
       System.out.println(e);

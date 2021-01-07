@@ -1,4 +1,5 @@
 import java.lang.StringBuilder;
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import tcollier.Executor;
@@ -9,112 +10,100 @@ class Game {
   private int[] cups;
   private int head;
 
-  public Game(int[] labels, int numCups, int numRounds) {
+  public Game(ArrayList<Integer> labels, int numCups, int numRounds) {
     this.numRounds = numRounds;
     this.cups = new int[numCups];
 
-    if (numCups > labels.length) {
-      this.head = numCups - 1;
+    if (numCups > labels.size()) {
+      head = numCups - 1;
     } else {
-      this.head = labels[labels.length - 1] - 1;
+      head = labels.get(labels.size() - 1) - 1;
     }
 
-    int curr = this.head;
+    int curr = head;
     int i = 0;
-    for (; i < labels.length; i++) {
-      this.cups[curr] = labels[i] - 1;
-      curr = labels[i] - 1;
+    for (; i < labels.size(); i++) {
+      cups[curr] = labels.get(i) - 1;
+      curr = labels.get(i) - 1;
     }
     for (; i < numCups; i++) {
-      this.cups[curr] = i;
+      cups[curr] = i;
       curr = i;
     }
   }
 
   public void play() {
-    for (int i = 0; i < this.numRounds; i++) {
-      this.move();
+    for (int i = 0; i < numRounds; i++) {
+      move();
     }
   }
 
   private void move() {
-    int cup1 = this.cups[this.head];
-    int cup2 = this.cups[cup1];
-    int cup3 = this.cups[cup2];
-    int cup4 = this.cups[cup3];
+    int cup1 = cups[head];
+    int cup2 = cups[cup1];
+    int cup3 = cups[cup2];
+    int cup4 = cups[cup3];
     int[] pickups = {cup2, cup3, cup4};
-    this.cups[cup1] = this.cups[cup4];
+    cups[cup1] = cups[cup4];
 
-    int dest = this.cups[this.head] - 1;
+    int dest = cups[head] - 1;
     if (dest < 0) {
-        dest = this.cups.length - 1;
+        dest = cups.length - 1;
     }
     while (dest == cup2 || dest == cup3 || dest == cup4) {
       dest -= 1;
       if (dest < 0) {
-        dest = this.cups.length - 1;
+        dest = cups.length - 1;
       }
     }
 
-    int tmp = this.cups[dest];
-    this.cups[dest] = cup2;
-    this.cups[cup2] = cup3;
-    this.cups[cup3] = cup4;
-    this.cups[cup4] = tmp;
+    int tmp = cups[dest];
+    cups[dest] = cup2;
+    cups[cup2] = cup3;
+    cups[cup3] = cup4;
+    cups[cup4] = tmp;
 
-    if (dest == this.head) {
-      this.head = cup4;
+    if (dest == head) {
+      head = cup4;
     }
 
-    this.head = this.cups[this.head];
+    head = cups[head];
   }
 
   public int labelAt(int index) {
-    return this.cups[index] + 1;
+    return cups[index] + 1;
   }
 }
 
-class Day23Solution implements Solution {
-  private Game game1;
-  private Game game2;
-
-  public Day23Solution(Game game1, Game game2) {
-    this.game1 = game1;
-    this.game2 = game2;
-  }
-
-  public String part1Answer() {
-    this.game1.play();
+class Day23Solution implements Solution<Integer> {
+  public String part1Answer(ArrayList<Integer> labels) {
+    Game game = new Game(labels, 9, 100);
+    game.play();
     StringBuilder str = new StringBuilder();
-    int curr = this.game1.labelAt(0);
+    int curr = game.labelAt(0);
     while (curr != 1) {
       str.append(curr);
-      curr = this.game1.labelAt(curr - 1);
+      curr = game.labelAt(curr - 1);
     }
     return str.toString();
   }
 
-  public String part2Answer() {
-    this.game2.play();
-    return String.valueOf((long)this.game2.labelAt(0) * (long)this.game2.labelAt(this.game2.labelAt(0) - 1));
+  public String part2Answer(ArrayList<Integer> labels) {
+    Game game = new Game(labels, 1000000, 10000000);
+    game.play();
+    return String.valueOf((long)game.labelAt(0) * (long)game.labelAt(game.labelAt(0) - 1));
   }
 }
 
 class Main {
-  private static final int[] labels = {1, 9, 8, 7, 5, 3, 4, 6, 2};
+  private static final int[] rawLabels = {1, 9, 8, 7, 5, 3, 4, 6, 2};
 
   public static void main(String[] args) {
-    try {
-      Executor executor = new Executor(
-        new Day23Solution(
-          new Game(labels, 9, 100),
-          new Game(labels, 1000000, 10000000)
-        )
-      );
-      executor.run(args);
-    } catch (Exception e) {
-      System.out.println(e);
-      e.printStackTrace();
+    ArrayList<Integer> labels = new ArrayList<Integer>();
+    for (int i = 0; i < rawLabels.length; i++) {
+      labels.add(rawLabels[i]);
     }
+    Executor<Integer> executor = new Executor<Integer>(new Day23Solution(), labels);
+    executor.run(args);
   }
 }

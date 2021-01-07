@@ -1,6 +1,7 @@
 package tcollier;
 
 import java.lang.StringBuilder;
+import java.util.ArrayList;
 
 class IterationTimer {
   private long durationInMillis;
@@ -13,31 +14,33 @@ class IterationTimer {
 
   public void appendJson(StringBuilder builder) {
     builder.append("{\"duration\":");
-    builder.append(this.durationInMillis * 1000);
+    builder.append(durationInMillis * 1000);
     builder.append(",\"iterations\":");
-    builder.append(this.iterations);
+    builder.append(iterations);
     builder.append("}");
   }
 }
 
-public class Executor {
-  private Solution solution;
+public class Executor<T> {
+  private Solution<T> solution;
+  private ArrayList<T> input;
 
-  public Executor(Solution solution) {
+  public Executor(Solution<T> solution, ArrayList<T> input) {
     this.solution = solution;
+    this.input = input;
   }
 
   public void run(String[] args) {
     if (args.length >= 1 && args[args.length - 1].equals("--time")) {
-      this.time();
+      time();
     } else {
-      this.solve();
+      solve();
     }
   }
 
   private void solve() {
-    System.out.println(this.solution.part1Answer());
-    System.out.println(this.solution.part2Answer());
+    System.out.println(solution.part1Answer((ArrayList<T>)input.clone()));
+    System.out.println(solution.part2Answer((ArrayList<T>)input.clone()));
   }
 
   private void time() {
@@ -62,14 +65,17 @@ public class Executor {
 
   private IterationTimer timeAnswer(int part) {
     int i = 0;
-    long startTime = System.currentTimeMillis();
-    for (; this.continueTiming(i, System.currentTimeMillis() - startTime); i++) {
+    long runningTime = 0;
+    for (; continueTiming(i, runningTime); i++) {
+      ArrayList<T> inputClone = (ArrayList<T>)input.clone();
+      long startTime = System.currentTimeMillis();
       if (part == 1) {
-        this.solution.part1Answer();
+        solution.part1Answer(inputClone);
       } else {
-        this.solution.part2Answer();
+        solution.part2Answer(inputClone);
       }
+      runningTime += System.currentTimeMillis() - startTime;
     }
-    return new IterationTimer(System.currentTimeMillis() - startTime, i);
+    return new IterationTimer(runningTime, i);
   }
 }

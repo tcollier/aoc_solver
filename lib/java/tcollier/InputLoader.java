@@ -32,13 +32,13 @@ public class InputLoader {
 
   public ArrayList<String> getStrings() throws FileNotFoundException, IOException {
     ArrayList<String> values = new ArrayList<String>();
-    this.addLinesToList(values, new StringParser());
+    addLinesToList(values, new StringParser());
     return values;
   }
 
   public ArrayList<Integer> getIntegers() throws FileNotFoundException, IOException {
     ArrayList<Integer> values = new ArrayList<Integer>();
-    this.addLinesToList(values, new IntegerParser());
+    addLinesToList(values, new IntegerParser());
     return values;
   }
 
