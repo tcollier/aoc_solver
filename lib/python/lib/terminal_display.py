@@ -235,7 +235,7 @@ class TerminalDisplay(object):
     def __call__(self, parent_pid):
         """
         :param parent_pid: Process ID of the parent that spawned the terminal
-        self. Keep tabs on it so we can exit if it mysteriously vanishes,
+        display. Keep tabs on it so we can exit if it mysteriously vanishes,
         e.g. with a SIGKILL
         """
         running = True

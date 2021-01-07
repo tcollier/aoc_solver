@@ -34,7 +34,7 @@ class ExitCode(object):
 
 
 # Verify PYTHONPATH is set correctly so that local packages will load
-# correctly. If the path is not set, print a useful message tellin the
+# correctly. If the path is not set, print a useful message telling the
 # user how to set it.
 root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 expected_path = os.path.join(root_dir, "lib", "python")
@@ -42,7 +42,9 @@ actual_path = os.environ.get("PYTHONPATH") and os.path.abspath(
     os.environ.get("PYTHONPATH")
 )
 if not actual_path or actual_path != expected_path:
-    print(f"Please set PYTHONPATH needs to be set to the root of this repository, e.g.")
+    print(
+        f"Please set PYTHONPATH to the lib/python/ directory of this repository, e.g."
+    )
     print(f"PYTHONPATH={expected_path} {' '.join(sys.argv)}")
     sys.exit(ExitCode.INVALID_ARGS)
 
