@@ -1,7 +1,4 @@
-from queue import PriorityQueue
-
 from lib.languages import all_languages
-from lib.shell import is_process_running
 from lib.solver_event import SolverEvent
 from lib.terminal_ui import CURSOR_RETURN, Animation, Box, BoxAlign, Color, Table, Text
 
@@ -9,21 +6,9 @@ SPINNER_CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
 
 
 class Priority(object):
+    LOW = 2
     MEDIUM = 1
     HIGH = 0
-
-
-class PrioritizedItem(object):
-    def __init__(self, output, msg_num, priority):
-        self.output = output
-        self.msg_num = msg_num
-        self.priority = priority
-
-    def __lt__(self, other):
-        if self.priority == other.priority:
-            return self.msg_num < other.msg_num
-        else:
-            return self.priority < other.priority
 
 
 def _duration(duration):
@@ -135,37 +120,31 @@ def _timing(timing_info, duration):
 
 class TerminalDisplay(object):
     def __init__(self):
-        self._busy = False
-        self._was_busy = False
         self._spinner = Animation(SPINNER_CHARS)
-        self._queue = PriorityQueue()
-        self._msg_num = 0
 
     def handle(self, message):
         event = message["event"]
         handler = (
             self.HANDLERS[event] if event in self.HANDLERS else self._invalid_command
         )
-        for output in handler(self, message):
-            self._enqueue(output)
+        yield from handler(self, message)
 
     def tick(self):
-        if not self._was_busy and self._busy:
-            self._enqueue(" ")
-            self._enqueue(self._spinner.start())
-            self._was_busy = True
-        if self._busy:
-            self._enqueue(self._spinner.tick())
-        elif self._was_busy:
-            self._enqueue(self._spinner.clear(), Priority.HIGH)
-            self._was_busy = False
-        while not self._queue.empty():
-            item = self._queue.get(False)
-            print(item.output, end="", flush=self._queue.empty())
+        if self._spinner.active:
+            yield (self._spinner.tick(), Priority.LOW)
 
-    def _enqueue(self, output, priority=Priority.MEDIUM):
-        self._queue.put(PrioritizedItem(output, self._msg_num, priority), False)
-        self._msg_num += 1
+    @property
+    def default_priority(self):
+        return Priority.MEDIUM
+
+    def _start_spinner(self):
+        if not self._spinner.active:
+            yield (" ", Priority.LOW)
+            yield (self._spinner.start(), Priority.LOW)
+
+    def _clear_spinner(self):
+        if self._spinner.active:
+            yield (self._spinner.clear(), Priority.HIGH)
 
     def _invalid_command(self, cmd, args):
         yield Text(f"Invalid command {cmd} with arguments {args}", Color.RED)
@@ -176,15 +155,15 @@ class TerminalDisplay(object):
         yield "\n"
 
     def _build_started(self, args):
-        self._busy = True
+        yield from self._start_spinner()
         yield _status("COMP", Color.GREY, args)
 
     def _build_finished(self, args):
-        self._busy = False
+        yield from self._clear_spinner()
         yield CURSOR_RETURN
 
     def _build_failed(self, args):
-        self._busy = False
+        yield from self._clear_spinner()
         yield CURSOR_RETURN
         yield _failure(args)
         yield "\n"
@@ -194,15 +173,15 @@ class TerminalDisplay(object):
             yield args["stderr"]
 
     def _solve_started(self, args):
+        yield from self._start_spinner()
         yield _status("EXEC", Color.CYAN, args)
-        self._busy = True
 
     def _solve_finished(self, args):
-        self._busy = False
+        yield from self._clear_spinner()
         yield CURSOR_RETURN
 
     def _solve_failed(self, args):
-        self._busy = False
+        yield from self._clear_spinner()
         yield CURSOR_RETURN
         yield _failure(args)
         yield "\n"
@@ -229,22 +208,21 @@ class TerminalDisplay(object):
         yield "\n"
 
     def _timing_started(self, args):
+        yield from self._start_spinner()
         yield " "
         yield Text("timing", Color.GREY)
-        self._busy = True
 
     def _timing_skipped(self, args):
         yield "\n"
 
     def _timing_finished(self, args):
-        self._busy = False
-        timing_info = _timing(args["info"], args["duration"])
+        yield from self._clear_spinner()
         yield CURSOR_RETURN
-        yield f"{_success(args)} {timing_info}"
+        yield f"{_success(args)} {_timing(args['info'], args['duration'])}"
         yield "\n"
 
     def _timing_failed(self, args):
-        self._busy = False
+        yield from self._clear_spinner()
         yield CURSOR_RETURN
         yield _failure(args)
         yield "\n"

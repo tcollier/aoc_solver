@@ -7,9 +7,9 @@ class DisplayEventLoop(object):
     # the display.
     REFRESH_RATE_FPS = 30
 
-    def __init__(self, display, conn):
-        self.display = display
-        self.conn = conn
+    def __init__(self, handler, conn):
+        self._handler = handler
+        self._conn = conn
 
     def __call__(self, parent_pid):
         """
@@ -19,13 +19,13 @@ class DisplayEventLoop(object):
         """
         running = True
         while running:
-            if self.conn.poll(1 / self.REFRESH_RATE_FPS):
-                message = self.conn.recv()
+            if self._conn.poll(1 / self.REFRESH_RATE_FPS):
+                message = self._conn.recv()
                 event = message["event"]
                 if event == SolverEvent.TERMINATE:
                     running = False
                 else:
-                    self.display.handle(message)
+                    self._handler.handle(message)
             if not is_process_running(parent_pid):
                 running = False
-            self.display.tick()
+            self._handler.tick()

@@ -100,6 +100,7 @@ class Animation(object):
     """
 
     def __init__(self, frames, refresh_rate_fps=16):
+        self.active = False
         self._frames = frames
         self._started_at = None
         self._refresh_interval = timedelta(milliseconds=1000 // refresh_rate_fps)
@@ -108,16 +109,21 @@ class Animation(object):
     def start(self):
         self._started_at = datetime.now()
         self._index = -1
+        self.active = True
         # Return a blank placeholder that will get removed after the first tick
         return " " * len(self._frames[self._index])
 
     def tick(self):
-        clear = self.clear()
+        clear = self._erase_previous()
         self._index = (datetime.now() - self._started_at) // self._refresh_interval
         self._index %= len(self._frames)
         return f"{clear}{self._frames[self._index]}"
 
     def clear(self):
+        self.active = False
+        return self._erase_previous()
+
+    def _erase_previous(self):
         chars_to_clear = len(self._frames[self._index])
         return "\b" * chars_to_clear + " " * chars_to_clear + "\b" * chars_to_clear
 
