@@ -95,18 +95,17 @@ class Box(object):
 
 class Animation(object):
     """
-
+    Animate the frames (a list of strings) at the given refresh rate. The `tick`
+    function will clear any previously drawn characters.
     """
 
     def __init__(self, frames, refresh_rate_fps=16):
-        self.active = False
         self._frames = frames
         self._started_at = None
         self._refresh_interval = timedelta(milliseconds=1000 // refresh_rate_fps)
-        self._index = 0
+        self._index = -1
 
     def start(self):
-        self.active = True
         self._started_at = datetime.now()
         self._index = -1
         # Return a blank placeholder that will get removed after the first tick
@@ -119,7 +118,6 @@ class Animation(object):
         return f"{clear}{self._frames[self._index]}"
 
     def clear(self):
-        self.active = False
         chars_to_clear = len(self._frames[self._index])
         return "\b" * chars_to_clear + " " * chars_to_clear + "\b" * chars_to_clear
 
