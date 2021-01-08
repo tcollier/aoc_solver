@@ -3,7 +3,7 @@ from queue import PriorityQueue
 from lib.languages import all_languages
 from lib.shell import is_process_running
 from lib.solver_event import SolverEvent
-from lib.ui import CURSOR_RETURN, Align, Box, Color, Spinner, Table, Text
+from lib.terminal_ui import CURSOR_RETURN, Box, BoxAlign, Color, Spinner, Table, Text
 
 
 class Priority(object):
@@ -50,7 +50,7 @@ def _duration(duration):
         color = Color.RED
     formatted_value = "{:.2f}".format(value)
     box_width = len(f"NNN.NN {unit}")
-    return str(Box(Text(f"{formatted_value} {unit}", color), box_width, Align.RIGHT))
+    return str(Box(Text(f"{formatted_value} {unit}", color), box_width, BoxAlign.RIGHT))
 
 
 def _language(language):
@@ -91,17 +91,18 @@ def _diff(expected, actual):
         act_parts[0] = ""
     if act_parts[1] is None:
         act_parts[1] = ""
-
-    table = [[""], ["Expected"], ["Actual"]]
+    exp_color = Color.CYAN
+    act_color = Color.YELLOW
+    table = [[Text("")], [Text("Expected", exp_color)], [Text("Actual", act_color)]]
     if exp_parts[0] != act_parts[0]:
-        table[0].append("Part 1")
-        table[1].append(exp_parts[0])
-        table[2].append(act_parts[0])
+        table[0].append(Text("Part 1"))
+        table[1].append(Text(exp_parts[0], exp_color))
+        table[2].append(Text(act_parts[0], act_color))
     if exp_parts[1] != act_parts[1]:
-        table[0].append("Part 2")
-        table[1].append(exp_parts[1])
-        table[2].append(act_parts[1])
-    return Table(table, {1: Color.CYAN, 2: Color.YELLOW})
+        table[0].append(Text("Part 2"))
+        table[1].append(Text(exp_parts[1], exp_color))
+        table[2].append(Text(act_parts[1], act_color))
+    return Table(table)
 
 
 def _timing(timing_info, duration):
