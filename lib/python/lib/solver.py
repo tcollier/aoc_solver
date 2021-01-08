@@ -14,6 +14,14 @@ from lib.shell import (
 from lib.solver_event import SolverEvent
 
 
+def _dispatch(conn, event, args={}):
+    args["event"] = event
+    try:
+        conn.send(args)
+    except OSError:
+        raise TerminationException("Terminating because pipe was unexpectedly closed")
+
+
 class LanguageSolver(object):
     def __init__(self, parent_pid, conn, language, year, day, filename):
         self.parent_pid = parent_pid
@@ -41,11 +49,10 @@ class LanguageSolver(object):
                 self._dispatch(SolverEvent.TIMING_SKIPPED)
 
     def _dispatch(self, event, args={}):
-        args["event"] = event
         args["language"] = self.language
         args["year"] = self.year
         args["day"] = self.day
-        self.conn.send(args)
+        _dispatch(self.conn, event, args)
 
     def _shell_out(self, cmd):
         def should_terminate():
@@ -155,6 +162,8 @@ class Solver(object):
             except KeyboardInterrupt as e:
                 raise e
             except TerminationException:
+                # We may have terminated because the pipe was closed, so do not attempt
+                # to send any messages
                 break
             except:
                 print()
@@ -165,10 +174,9 @@ class Solver(object):
                 self._dispatch(SolverEvent.MISSING_SRC, {"language": language})
 
     def _dispatch(self, event, args={}):
-        args["event"] = event
         args["year"] = self.year
         args["day"] = self.day
-        self.conn.send(args)
+        _dispatch(self.conn, event, args)
 
     def _find_files(self, languages):
         if not languages:
