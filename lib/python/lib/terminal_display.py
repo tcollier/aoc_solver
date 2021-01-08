@@ -168,7 +168,7 @@ class TerminalDisplay(object):
         yield "\n"
 
     def _missing_src(self, args):
-        yield f"{_failure(args)} (no source code found)\n"
+        yield f"{_failure(args)} (no source code found)"
         yield "\n"
 
     def _build_started(self, args):
