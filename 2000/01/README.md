@@ -1,6 +1,6 @@
-## Day 0?!
+## Day 1
 
-Nope, there is no secret day 0 challege for the 2020 Advent of Code! This directory contains "Hello, World" solutions for every supported language as reference implementations I can easily test with. The timing metrics also provide a good baseline for how fast a solution could be in a given language.
+This directory contains "Hello, World" solutions for every supported language as reference implementations I can easily test with. The timing metrics also provide a good baseline for how fast a solution could be in a given language.
 
 Notice the performance differences between java and python despite the fact that both solutions are just returning a string passed in. Also notice that while scala can "compute" the solution just as fast as any other language, it takes nearly half a second just to spin up the VM.
 
