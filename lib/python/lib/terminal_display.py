@@ -1,4 +1,4 @@
-from multiprocessing import Pipe, Process
+from queue import SimpleQueue
 
 from lib.languages import all_languages
 from lib.shell import is_process_running
@@ -18,20 +18,41 @@ class Color(object):
 TABLE_CELL_PADDING = 2
 
 
+# class DisplayText(object):
+#     def __init__(self, text, color=None):
+#         self.text = text
+#         self.color = color
+
+#     def width(self):
+#         len(self.text) + (0 if not self.color else len(color) + len(Color.ENDC))
+
+#     def __repr__(self):
+#         if self.color:
+#             return f"{color}{string}{Color.ENDC}"
+#         else:
+#             return self.text
+
+
 class Spinner(object):
     CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
 
     def __init__(self):
-        self.index = 0
-        # Add empty space as a placeholder for the spinner.
-        print(" ", end="")
+        self.ticker = 0
+        self.active = False
+
+    def start(self):
+        self.ticker = 0
+        self.active = True
+        return " " * 2  # One space as padding and the other as the placeholder
 
     def tick(self):
-        self.index = (self.index + 1) % len(self.CHARS)
-        print(f"\b{self.CHARS[self.index]}", end="", flush=True)
+        self.ticker += 1
+        self.index = self.ticker // 2 % len(self.CHARS)
+        return f"\b{self.CHARS[self.index]}"
 
     def stop(self):
-        print("\b", end="", flush=True)
+        self.active = False
+        return "\b "
 
 
 def _colorize(color, string):
@@ -207,140 +228,130 @@ def _split_args(args):
 
 
 def _cursor_reset():
-    print("\033[A")
+    return "\033[A\n"
 
 
 class TerminalDisplay(object):
-    # The refresh rate (in frames per second) that the event loop will update
-    # the display. The only animation to speak of is the spinner, so the
-    # primary effect of changing this value will be changing the speed that
-    # the spinner spins.
-    REFRESH_RATE_FPS = 15
+    def __init__(self):
+        self.busy = False
+        self._was_busy = False
+        self._spinner = Spinner()
+        self._queue = SimpleQueue()
 
-    def __init__(self, conn):
-        self.conn = conn
-        self.spinner = None
+    def handle(self, message):
+        event = message["event"]
+        handler = (
+            self.HANDLERS[event] if event in self.HANDLERS else self._invalid_command
+        )
+        for output in handler(self, message):
+            self._queue.put(output, False)
 
-    def start_spinner(self):
-        if self.spinner:
-            return
-        self.spinner = Spinner()
-
-    def stop_spinner(self):
-        if not self.spinner:
-            return
-        self.spinner.stop()
-        self.spinner = None
-
-    def __call__(self, parent_pid):
-        """
-        :param parent_pid: Process ID of the parent that spawned the terminal
-        display. Keep tabs on it so we can exit if it mysteriously vanishes,
-        e.g. with a SIGKILL
-        """
-        running = True
-        while running:
-            if self.conn.poll(1 / self.REFRESH_RATE_FPS):
-                message = self.conn.recv()
-                event = message["event"]
-                if event == SolverEvent.TERMINATE:
-                    running = False
-                    self.stop_spinner()
-                    if "error" in message:
-                        print(message["error"])
-                elif event in self.HANDLERS:
-                    self.HANDLERS[event](self, message)
-                else:
-                    self._invalid_command(event, message)
-            if not is_process_running(parent_pid):
-                running = False
-                self.stop_spinner()
-            if self.spinner:
-                self.spinner.tick()
+    def tick(self):
+        if not self._was_busy and self.busy:
+            self._queue.put(self._spinner.start())
+            self._was_busy = True
+        if self.busy:
+            self._queue.put(self._spinner.tick())
+        elif self._was_busy:
+            print(self._spinner.stop(), end="", flush=True)
+            self._was_busy = False
+        while not self._queue.empty():
+            text = self._queue.get(False)
+            print(text, end="", flush=self._queue.empty())
 
     def _invalid_command(self, cmd, args):
-        print(_colorize(Color.RED, f"Invalid command {cmd} with arguments {args}"))
+        yield _colorize(Color.RED, f"Invalid command {cmd} with arguments {args}")
+        yield "\n"
 
     def _missing_src(self, args):
         language, year, day = _split_args(args)
-        print(f"{_failure(language, year, day)} (no source code found)")
+        yield f"{_failure(language, year, day)} (no source code found)\n"
+        yield "\n"
 
     def _build_started(self, args):
+        self.busy = True
         language, year, day = _split_args(args)
-        print(_building(language, year, day), end=" ", flush=True)
-        self.start_spinner()
+        yield _building(language, year, day)
 
     def _build_finished(self, args):
-        self.stop_spinner()
-        _cursor_reset()
+        self.busy = False
+        yield _cursor_reset()
 
     def _build_failed(self, args):
-        self.stop_spinner()
+        self.busy = False
         language, year, day = _split_args(args)
-        _cursor_reset()
-        print(_failure(language, year, day), end="  \n")
+        yield _cursor_reset()
+        yield _failure(language, year, day)
+        yield "\n"
         if "stdout" in args:
-            print(args["stdout"], end="")
+            yield args["stdout"]
         if "stderr" in args:
-            print(args["stderr"], end="")
+            yield args["stderr"]
 
     def _solve_started(self, args):
         language, year, day = _split_args(args)
-        print(_solving(language, year, day), end=" ", flush=True)
-        self.start_spinner()
+        yield _solving(language, year, day)
+        self.busy = True
 
     def _solve_finished(self, args):
-        self.stop_spinner()
-        _cursor_reset()
+        self.busy = False
+        yield _cursor_reset()
 
     def _solve_failed(self, args):
-        self.stop_spinner()
+        self.busy = False
         language, year, day = _split_args(args)
-        _cursor_reset()
-        print(_failure(language, year, day), end="  \n")
+        yield _cursor_reset()
+        yield _failure(language, year, day)
+        yield "\n"
         if "stderr" in args:
-            print(args["stderr"], end="")
+            yield args["stderr"]
 
     def _solve_attempted(self, args):
         language, year, day = _split_args(args)
-        print(_attempt(language, year, day), end="  \n")
-        print(args["actual"].rstrip())
+        yield _attempt(language, year, day)
+        yield "\n"
+        yield args["actual"].rstrip()
+        yield "\n"
 
     def _solve_succeeded(self, args):
         language, year, day = _split_args(args)
-        print(
-            _success(language, year, day), end=" ", flush=True,
-        )
+        yield _success(language, year, day)
 
     def _solve_incorrect(self, args):
         language, year, day = _split_args(args)
-        print(_failure(language, year, day), end="  \n")
-        print(_diff(args["expected"], args["actual"]))
+        yield _failure(language, year, day)
+        yield "\n"
+        yield _diff(args["expected"], args["actual"])
+        yield "\n"
 
     def _output_saved(self, args):
-        print(f"Saved result to {args['file']}")
+        yield f"Saved result to {args['file']}"
+        yield "\n"
 
     def _timing_started(self, args):
-        print(_colorize(Color.GREY, "timing"), end=" ")
-        self.start_spinner()
+        yield " "
+        yield _colorize(Color.GREY, "timing")
+        self.busy = True
 
     def _timing_skipped(self, args):
-        print("  ")  # Overwrite the spinner and add new line
+        yield "\n"
 
     def _timing_finished(self, args):
-        self.stop_spinner()
+        self.busy = False
         language, year, day = _split_args(args)
         timing_info = _timing(args["info"], args["duration"])
-        _cursor_reset()
-        print(f"{_success(language, year, day)} {timing_info}")
+        yield _cursor_reset()
+        yield f"{_success(language, year, day)} {timing_info}"
+        yield "\n"
 
     def _timing_failed(self, args):
-        self.stop_spinner()
+        self.busy = False
         language, year, day = _split_args(args)
-        _cursor_reset()
-        print(_failure(language, year, day), end="  \n")
+        yield _cursor_reset()
+        yield _failure(language, year, day)
+        yield "\n"
         if "stderr" in args:
-            print(args["stderr"], end="")
+            yield args["stderr"]
 
     HANDLERS = {
         SolverEvent.MISSING_SRC: _missing_src,

@@ -55,6 +55,7 @@ import time
 from datetime import datetime
 from multiprocessing import Pipe, Process
 
+from lib.display_event_loop import DisplayEventLoop
 from lib.languages import all_languages
 from lib.solver import Solver
 from lib.solver_event import SolverEvent
@@ -211,7 +212,7 @@ try:
     ContextManager.add_conn(solver_conn)
 
     # Spin up the display process.
-    display = TerminalDisplay(display_conn)
+    display = DisplayEventLoop(TerminalDisplay(), display_conn)
     display_proc = Process(target=display, name="AoC-display", args=(os.getpid(),))
     ContextManager.add_proc(display_proc)
 
