@@ -1,3 +1,6 @@
+CURSOR_RETURN = "\033[A\n"
+
+
 class Color(object):
     CYAN = "\033[96m"
     GREEN = "\033[92m"
@@ -8,21 +11,13 @@ class Color(object):
     UNDERLINE = "\033[4m"
 
 
-class Decimal(object):
-    def __init__(self, number):
-        self.number = number
-
-    def __repr__(self):
-        return "{:.2f}".format(self.number)
-
-
 class Align(object):
     LEFT = 1
     RIGHT = 2
     CENTER = 3
 
 
-class TermText(object):
+class Text(object):
     def __init__(self, text, color=None, underlined=False):
         self.text = text or ""
         self.color = color
@@ -98,29 +93,22 @@ class Table(object):
 
     def __repr__(self):
         string = ""
+        for row, col, value in self._cells():
+            width = self.col_widths[col]
+            underlined = row == 0
+            align = Align.CENTER if row == 0 else self.align(value)
+            color = self.row_colors[row] if row in self.row_colors else None
+            string += str(Box(Text(value, color, underlined=underlined), width, align))
+            if col == len(self.values[row]) - 1:
+                string += "\n"
+            else:
+                string += " " * self.CELL_PADDING
+        return string
+
+    def _cells(self):
         for row in range(len(self.values)):
             for col in range(len(self.values[row])):
-                if row == 0:
-                    string += str(
-                        Box(
-                            TermText(self.values[row][col], underlined=True),
-                            self.col_widths[col],
-                            Align.CENTER,
-                        )
-                    )
-                else:
-                    string += str(
-                        Box(
-                            TermText(self.values[row][col], self.row_colors[row]),
-                            self.col_widths[col],
-                            self.align(self.values[row][col]),
-                        )
-                    )
-                string += (
-                    (" " * self.CELL_PADDING) if col < len(self.values[row]) - 1 else ""
-                )
-            string += "\n"
-        return string
+                yield row, col, self.values[row][col]
 
     @staticmethod
     def align(value):

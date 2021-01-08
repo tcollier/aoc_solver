@@ -3,7 +3,7 @@ from queue import SimpleQueue
 from lib.languages import all_languages
 from lib.shell import is_process_running
 from lib.solver_event import SolverEvent
-from lib.ui import Align, Box, Color, Decimal, Spinner, Table, TermText
+from lib.ui import CURSOR_RETURN, Align, Box, Color, Spinner, Table, Text
 
 
 def _duration(duration):
@@ -30,7 +30,9 @@ def _duration(duration):
         value = duration / 1000000
         unit = "s"
         color = Color.RED
-    return Box(TermText(f"{Decimal(value)} {unit}", color), 7 + len(unit), Align.RIGHT)
+    formatted_value = "{:.2f}".format(value)
+    box_width = len(f"NNN.NN {unit}")
+    return str(Box(Text(f"{formatted_value} {unit}", color), box_width, Align.RIGHT))
 
 
 def _language(language):
@@ -45,32 +47,23 @@ def _language(language):
     return language.ljust(max, " ")
 
 
-def _status(label, color, language, year, day):
+def _status(label, color, args):
     """
     Generic formatter for the solver's status of running the language/day
     """
+    language = args["language"]
+    year = args["year"]
+    day = args["day"]
     day_language = f"{year}/{day.rjust(2, '0')} {_language(language)}"
-    return TermText(f"{label.ljust(4, ' ')} [{day_language}]", color)
+    return Text(f"{label.ljust(4, ' ')} [{day_language}]", color)
 
 
-def _attempt(language, year, day):
-    return _status("TRY", Color.YELLOW, language, year, day)
+def _success(args):
+    return _status("PASS", Color.GREEN, args)
 
 
-def _building(language, year, day):
-    return _status("COMP", Color.GREY, language, year, day)
-
-
-def _solving(language, year, day):
-    return _status("EXEC", Color.CYAN, language, year, day)
-
-
-def _success(language, year, day):
-    return _status("PASS", Color.GREEN, language, year, day)
-
-
-def _failure(language, year, day):
-    return _status("FAIL", Color.RED, language, year, day)
+def _failure(args):
+    return _status("FAIL", Color.RED, args)
 
 
 def _diff(expected, actual):
@@ -122,14 +115,6 @@ def _timing(timing_info, duration):
     return f"({contents})"
 
 
-def _split_args(args):
-    return args["language"], args["year"], args["day"]
-
-
-def _cursor_reset():
-    return "\033[A\n"
-
-
 class TerminalDisplay(object):
     def __init__(self):
         self.busy = False
@@ -159,28 +144,25 @@ class TerminalDisplay(object):
             print(text, end="", flush=self._queue.empty())
 
     def _invalid_command(self, cmd, args):
-        yield TermText(f"Invalid command {cmd} with arguments {args}", Color.RED)
+        yield Text(f"Invalid command {cmd} with arguments {args}", Color.RED)
         yield "\n"
 
     def _missing_src(self, args):
-        language, year, day = _split_args(args)
-        yield f"{_failure(language, year, day)} (no source code found)\n"
+        yield f"{_failure(args)} (no source code found)\n"
         yield "\n"
 
     def _build_started(self, args):
         self.busy = True
-        language, year, day = _split_args(args)
-        yield _building(language, year, day)
+        yield _status("COMP", Color.GREY, args)
 
     def _build_finished(self, args):
         self.busy = False
-        yield _cursor_reset()
+        yield CURSOR_RETURN
 
     def _build_failed(self, args):
         self.busy = False
-        language, year, day = _split_args(args)
-        yield _cursor_reset()
-        yield _failure(language, year, day)
+        yield CURSOR_RETURN
+        yield _failure(args)
         yield "\n"
         if "stdout" in args:
             yield args["stdout"]
@@ -188,37 +170,32 @@ class TerminalDisplay(object):
             yield args["stderr"]
 
     def _solve_started(self, args):
-        language, year, day = _split_args(args)
-        yield _solving(language, year, day)
+        yield _status("EXEC", Color.CYAN, args)
         self.busy = True
 
     def _solve_finished(self, args):
         self.busy = False
-        yield _cursor_reset()
+        yield CURSOR_RETURN
 
     def _solve_failed(self, args):
         self.busy = False
-        language, year, day = _split_args(args)
-        yield _cursor_reset()
-        yield _failure(language, year, day)
+        yield CURSOR_RETURN
+        yield _failure(args)
         yield "\n"
         if "stderr" in args:
             yield args["stderr"]
 
     def _solve_attempted(self, args):
-        language, year, day = _split_args(args)
-        yield _attempt(language, year, day)
+        yield _status("TRY", Color.YELLOW, args)
         yield "\n"
         yield args["actual"].rstrip()
         yield "\n"
 
     def _solve_succeeded(self, args):
-        language, year, day = _split_args(args)
-        yield _success(language, year, day)
+        yield _success(args)
 
     def _solve_incorrect(self, args):
-        language, year, day = _split_args(args)
-        yield _failure(language, year, day)
+        yield _failure(args)
         yield "\n"
         yield _diff(args["expected"], args["actual"])
         yield "\n"
@@ -229,9 +206,7 @@ class TerminalDisplay(object):
 
     def _timing_started(self, args):
         yield " "
-        yield TermText(
-            "timing", Color.GREY,
-        )
+        yield Text("timing", Color.GREY)
         self.busy = True
 
     def _timing_skipped(self, args):
@@ -239,17 +214,15 @@ class TerminalDisplay(object):
 
     def _timing_finished(self, args):
         self.busy = False
-        language, year, day = _split_args(args)
         timing_info = _timing(args["info"], args["duration"])
-        yield _cursor_reset()
-        yield f"{_success(language, year, day)} {timing_info}"
+        yield CURSOR_RETURN
+        yield f"{_success(args)} {timing_info}"
         yield "\n"
 
     def _timing_failed(self, args):
         self.busy = False
-        language, year, day = _split_args(args)
-        yield _cursor_reset()
-        yield _failure(language, year, day)
+        yield CURSOR_RETURN
+        yield _failure(args)
         yield "\n"
         if "stderr" in args:
             yield args["stderr"]
