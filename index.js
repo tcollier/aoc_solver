@@ -15,12 +15,15 @@ const continueTiming = (iterations, durationMillis) => {
 
 const timeIt = (fn, data) => {
   let i = 0;
-  const startTime = Date.now();
+  let runningTime = 0;
 
-  for (; continueTiming(i, Date.now() - startTime); i++) {
-    fn(data);
+  for (; continueTiming(i, runningTime); i++) {
+    const dataCopy = [...data]
+    const startTime = Date.now();
+    fn(dataCopy);
+    runningTime += Date.now() - startTime;
   }
-  return {duration: (Date.now() - startTime) * 1000, iterations: i};
+  return {duration: runningTime * 1000, iterations: i};
 
 }
 if (timing) {
