@@ -23,7 +23,7 @@ Below is template code for using the executor
 
 ```c
 // main.c
-#include "../../lib/lib.h"
+#include "../../lib/c/lib.h"
 
 char *part1_result(char *input[])
 {
@@ -153,7 +153,7 @@ executor.run(ARGV)
 
 ```
 % cd 2020/01
-% ln -s ../../lib/util.rs
+% ln -s ../../lib/rust/util.rs
 ```
 
 Below is template code for using the executor

@@ -14,15 +14,15 @@ class Commands(object):
 
 def c_cmds(file):
     bin_file = file.replace(".", "_")
-    cmds = Commands(f"./{bin_file}")
-    lib_files = glob.glob("lib/*.c")
+    cmds = Commands(os.path.join(".", bin_file))
+    lib_files = glob.glob(os.path.join("lib", "c", "*.c"))
     cmds.add_compiler_command(f"gcc -O3 -o {bin_file} {file} {' '.join(lib_files)}")
     return cmds
 
 
 def golang_cmds(file):
     bin_file = file.replace(".", "_")
-    cmds = Commands(f"./{bin_file}")
+    cmds = Commands(os.path.join(".", bin_file))
     cmds.add_compiler_command(f"go build -o {bin_file} {file}")
     return cmds
 
@@ -39,7 +39,7 @@ def java_cmds(file):
         return args
 
     def purge_class_files():
-        class_files = glob.glob(f"{base_dir}/*.class")
+        class_files = glob.glob(os.path.join(base_dir, "*.class"))
         if class_files:
             return f"rm {' '.join(class_files)}"
         else:
@@ -60,10 +60,10 @@ def java_cmds(file):
     cmds = Commands(f"java -jar {jar_file}")
     cmds.add_compiler_command(purge_class_files)
     cmds.add_compiler_command(
-        f"javac -sourcepath {lib_dir} -classpath ./lib/java -d {lib_dir} {' '.join(lib_src)}"
+        f"javac -sourcepath {lib_dir} -d {lib_dir} {' '.join(lib_src)}"
     )
     cmds.add_compiler_command(
-        f"javac -sourcepath {base_dir} -classpath ./lib/java -d {base_dir} {file}"
+        f"javac -sourcepath {base_dir} -classpath {lib_dir} -d {base_dir} {file}"
     )
     cmds.add_compiler_command(build_jar)
     cmds.add_compiler_command(purge_class_files)
@@ -83,9 +83,10 @@ def ruby_cmds(file):
 
 
 def rust_cmds(file):
+    lib_dir = os.path.join("lib", "rust")
     bin_file = file.replace(".", "_")
-    cmds = Commands(f"./{bin_file}")
-    cmds.add_compiler_command(f"rustc -C opt-level=3 -o {bin_file} {file} -L ./lib")
+    cmds = Commands(os.path.join(".", bin_file))
+    cmds.add_compiler_command(f"rustc -C opt-level=3 -o {bin_file} {file} -L {lib_dir}")
     return cmds
 
 
@@ -100,11 +101,9 @@ def scala_cmds(file):
 
 
 def typescript_cmds(file):
-    js_file = file.replace(".ts", "")
-
-    # node writes errors to stdout
-    # @see https://github.com/microsoft/TypeScript/issues/615
-    cmds = Commands(f"node index.js ./{js_file}")
+    js_file = os.path.join(".", file.replace(".ts", ""))
+    entry_file = os.path.join(".", "lib", "javascript", "index.js")
+    cmds = Commands(f"node {entry_file} {js_file}")
     cmds.add_compiler_command(f"yarn tsc {file}")
     return cmds
 

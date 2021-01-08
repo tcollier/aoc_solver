@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "../../lib/lib.h"
+#include "../../lib/c/lib.h"
 
 #define BV_TYPE unsigned long int
 #define BV_BITS 64 // sizeof(BV_TYPE) * 8

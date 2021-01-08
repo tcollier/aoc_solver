@@ -1,4 +1,4 @@
-#include "../../lib/lib.h"
+#include "../../lib/c/lib.h"
 
 char *part1_result(char *data[])
 {
