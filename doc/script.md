@@ -14,8 +14,8 @@ Run Advent of Code solution for a given year/day in the chosen language
 
 optional arguments:
   -h, --help            show this help message and exit
-  -y YEAR, --year YEAR  competition year (default: <current year in UTC>)
-  -d DAY, --day DAY     competition day (default: <current day of month in UTC>)
+  -y YEAR, --year YEAR  competition year
+  -d DAY, --day DAY     competition day
   -l LANGUAGE [LANGUAGE ...], --language LANGUAGE [LANGUAGE ...]
                         programming language of the solution to run (available
                         languages: c, golang, java, lisp, python, ruby, rust,
@@ -24,12 +24,10 @@ optional arguments:
   --save                save the programs output to output.txt
 ```
 
-#### Example: run solution for the current day
-
-When providing no arguments to the script, it will execute any source code for the current day's directory, where the current day is determined by UTC time. The default can be overridden by setting the environment variables `YEAR` and `DAY`.
+#### Example: run solution for a single day
 
 ```
-% PYTHONPATH=$HOME/aoc/lib/python ./bin/solver
+% PYTHONPATH=$HOME/aoc/lib/python ./bin/solver -y 2020 -d 1
 TRY  [2020/01 typescript]
 1003971
 84035952
@@ -40,7 +38,7 @@ TRY  [2020/01 typescript]
 Once the solutions for both parts have been verified as correct, you can save the solution using the `--save` flag. This allows you to tweak the implementation and validate against regressions or implement the solution in another language and test along the way.
 
 ```
-% ./bin/solver --save
+% ./bin/solver -y 2020 -d 1 --save
 TRY  [2020/01 typescript]
 1003971
 84035952
@@ -52,7 +50,7 @@ Saved result to 2020/01/output.txt
 Once the solution output is saved, rerunning the script (without the `--save` flag) will validate the correctness of the new output and print out timing information. In order to leverage the timing features of the solver script, the solution must be implemented using a [language-specific executor](languages.md).
 
 ```
-% ./bin/solver
+% ./bin/solver -y 2020 -d 1
 PASS [2020/01 typescript] (part1:   6.77 μs, part2:   4.96 μs, overhead:  46.06 ms)
 ```
 
@@ -61,7 +59,7 @@ The executor running the solution invokes functions specific to each challenge p
 If the computed solution does _not_ match `output.txt`, then a diff is shown
 
 ```
-% ./bin/solver
+% ./bin/solver -y 2020 -d 1
 FAIL [2020/01 typescript]
            Part 2
 Expected  84035952

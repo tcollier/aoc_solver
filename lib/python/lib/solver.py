@@ -126,10 +126,10 @@ class LanguageSolver(object):
 class Solver(object):
     def __init__(self, conn, year, day, save=False):
         if not os.path.isdir(year):
-            raise ValueError(f"No source code exists for year {year}")
+            raise ValueError(f"No solutions found for {year}")
         padded_day = day.zfill(2)
         if not os.path.isdir(os.path.join(year, padded_day)):
-            raise ValueError(f"No source code exists for day {day} in {year}")
+            raise ValueError(f"No solutions found for day {day} in {year}")
         self.base_dir = os.path.join(year, padded_day)
         self.conn = conn
         self.year = year

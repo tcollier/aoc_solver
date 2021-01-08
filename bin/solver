@@ -8,13 +8,12 @@ Run Advent of Code solution for a given year/day in the chosen language
 
 optional arguments:
   -h, --help            show this help message and exit
-  -y YEAR, --year YEAR  competition year (default: <current year in UTC>)
-  -d DAY, --day DAY     competition day (default: <current day of month in UTC>)
+  -y YEAR, --year YEAR  competition year
+  -d DAY, --day DAY     competition day
   -l LANGUAGE [LANGUAGE ...], --language LANGUAGE [LANGUAGE ...]
                         programming language of the solution to run (available
                         languages: c, golang, java, lisp, python, ruby, rust,
                         scala, typescript)
-  --all                 run all challenge days in all languages
   --save                save the programs output to output.txt
 """
 
@@ -61,33 +60,14 @@ from lib.solver import Solver
 from lib.solver_event import SolverEvent
 from lib.terminal_display import TerminalDisplay
 
-# Current day in UTC is a decent default value, since new challenges are released
-# at midnight EST. This gives the user a couple hours before the start time to set
-# up and test any boiler plate code and give time the morning after to continue
-# working on it.
-default_day = datetime.utcnow()
-
 parser = argparse.ArgumentParser(
     description=(
         "Run Advent of Code solution for a given year/day in the chosen language"
     )
 )
 
-default_year = os.environ.get("YEAR", str(default_day.year))
-parser.add_argument(
-    "-y",
-    "--year",
-    help=f"competition year (default: {default_year}, override by setting $YEAR)",
-    default=default_year,
-)
-
-default_day = os.environ.get("DAY", str(default_day.day))
-parser.add_argument(
-    "-d",
-    "--day",
-    help=f"competition day (default: {default_day}, override by setting $DAY)",
-    default=default_day,
-)
+parser.add_argument("year", help=f"competition year")
+parser.add_argument("day", help=f"competition day", nargs="?")
 
 language_helper = f"available languages: {', '.join(all_languages())}"
 parser.add_argument(
@@ -95,9 +75,6 @@ parser.add_argument(
     "--language",
     nargs="+",
     help=f"programming language of the solution to run ({language_helper})",
-)
-parser.add_argument(
-    "--all", help=f"run all challenge days in all languages", action="store_true"
 )
 parser.add_argument(
     "--save", help=f"save the programs output to output.txt", action="store_true"
@@ -119,8 +96,8 @@ def argument_error(args):
             all_str = ", ".join(all_languages())
             return f"Unrecognized language(s): {unknown_str} (available: {all_str})"
     if args.save:
-        if args.all:
-            return "Cannot use `--save` with `--all`"
+        if not args.day:
+            return "Must use `--save` with a specific day"
         elif Solver.has_solution(args.year, args.day):
             return (
                 "Cannot save results when output already saved, "
@@ -205,16 +182,16 @@ def days_to_solve(args):
     :yield year, day: Yields each year/day combination that the arguments
     dictate need to be solved.
     """
-    if args.all:
-        years = glob.glob("20??")
-        years.sort()
-        for year in years:
-            days = glob.glob(f"{year}/[0123][0123456789]")
+    if args.day:
+        yield args.year, args.day
+    else:
+        days = glob.glob(f"{args.year}/[0-9][0-9]")
+        if len(days) > 0:
             days.sort()
             for day in days:
-                yield year, day.split("/")[-1]
-    else:
-        yield args.year, args.day
+                yield args.year, day.split("/")[-1]
+        else:
+            raise ValueError(f"No solutions found for {args.year}")
 
 
 ###

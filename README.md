@@ -27,7 +27,7 @@ I added a script that helps me compile and run my solutions. Once the correct so
 With basic usage, you can easily compile (if necessary) and run your solutions
 
 ```
-% PYTHONPATH=$HOME/aoc/lib/python ./bin/solver
+% PYTHONPATH=$HOME/aoc/lib/python ./bin/solver -y 2020 -d 1
 TRY  [2020/01 typescript]
 1003971
 84035952
