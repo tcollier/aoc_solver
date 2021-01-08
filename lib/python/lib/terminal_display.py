@@ -241,17 +241,17 @@ class TerminalDisplay(object):
         running = True
         while running:
             if self.conn.poll(1 / self.REFRESH_RATE_FPS):
-                cmd = self.conn.recv()
-                args = self.conn.recv()
-                if cmd in self.HANDLERS:
-                    self.HANDLERS[cmd](self, args)
-                elif cmd == SolverEvent.TERMINATE:
+                message = self.conn.recv()
+                event = message["event"]
+                if event == SolverEvent.TERMINATE:
                     running = False
                     self.stop_spinner()
-                    if "error" in args:
-                        print(args["error"])
+                    if "error" in message:
+                        print(message["error"])
+                elif event in self.HANDLERS:
+                    self.HANDLERS[event](self, message)
                 else:
-                    self._invalid_command(cmd, args)
+                    self._invalid_command(event, message)
             if not is_process_running(parent_pid):
                 running = False
                 self.stop_spinner()

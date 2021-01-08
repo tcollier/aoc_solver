@@ -152,13 +152,12 @@ class Context(object):
         """
         while self.conns:
             conn = self.conns.pop()
-            conn.send(SolverEvent.TERMINATE)
-            args = {}
+            message = {"event": SolverEvent.TERMINATE}
             if signal:
-                args["signal"] = signal
+                message["signal"] = signal
             if error:
-                args["error"] = error
-            conn.send(args)
+                message["error"] = error
+            conn.send(message)
             conn.close()
         while self.procs:
             proc = self.procs.pop()

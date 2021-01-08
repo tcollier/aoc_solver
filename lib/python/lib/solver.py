@@ -41,10 +41,10 @@ class LanguageSolver(object):
                 self._dispatch(SolverEvent.TIMING_SKIPPED)
 
     def _dispatch(self, event, args={}):
+        args["event"] = event
         args["language"] = self.language
         args["year"] = self.year
         args["day"] = self.day
-        self.conn.send(event)
         self.conn.send(args)
 
     def _shell_out(self, cmd):
@@ -53,9 +53,8 @@ class LanguageSolver(object):
                 return True
             if not self.conn.poll(0):
                 return False
-            cmd = self.conn.recv()
-            _args = self.conn.recv()
-            return cmd == SolverEvent.TERMINATE
+            message = self.conn.recv()
+            return message["event"] == SolverEvent.TERMINATE
 
         unwrapped = cmd() if callable(cmd) else cmd
         return shell_out(unwrapped, should_terminate)
@@ -166,9 +165,9 @@ class Solver(object):
                 self._dispatch(SolverEvent.MISSING_SRC, {"language": language})
 
     def _dispatch(self, event, args={}):
+        args["event"] = event
         args["year"] = self.year
         args["day"] = self.day
-        self.conn.send(event)
         self.conn.send(args)
 
     def _find_files(self, languages):
