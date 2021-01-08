@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 CURSOR_RETURN = "\033[A\n"
 
 
@@ -65,19 +67,24 @@ class Box(object):
 class Spinner(object):
     CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
 
-    def __init__(self):
-        self.ticker = 0
+    def __init__(self, refresh_rate_fps=16):
         self.active = False
+        self._last_refreshed_at = None
+        self._refresh_interval = timedelta(milliseconds=1000 // refresh_rate_fps)
+        self._index = 0
 
     def start(self):
-        self.ticker = 0
         self.active = True
+        self._last_refreshed_at = datetime.now()
+        self._index = 0
         return " " * 2  # One space as padding and the other as the placeholder
 
     def tick(self):
-        self.ticker += 1
-        self.index = self.ticker // 2 % len(self.CHARS)
-        return f"\b{self.CHARS[self.index]}"
+        now = datetime.now()
+        if datetime.now() - self._last_refreshed_at >= self._refresh_interval:
+            self._index = (self._index + 1) % len(self.CHARS)
+            self._last_refreshed_at = now
+        return f"\b{self.CHARS[self._index]}"
 
     def stop(self):
         self.active = False
