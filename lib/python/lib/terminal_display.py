@@ -3,7 +3,9 @@ from queue import PriorityQueue
 from lib.languages import all_languages
 from lib.shell import is_process_running
 from lib.solver_event import SolverEvent
-from lib.terminal_ui import CURSOR_RETURN, Box, BoxAlign, Color, Spinner, Table, Text
+from lib.terminal_ui import CURSOR_RETURN, Animation, Box, BoxAlign, Color, Table, Text
+
+SPINNER_CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
 
 
 class Priority(object):
@@ -135,7 +137,7 @@ class TerminalDisplay(object):
     def __init__(self):
         self._busy = False
         self._was_busy = False
-        self._spinner = Spinner()
+        self._spinner = Animation(SPINNER_CHARS)
         self._queue = PriorityQueue()
         self._msg_num = 0
 
@@ -149,12 +151,13 @@ class TerminalDisplay(object):
 
     def tick(self):
         if not self._was_busy and self._busy:
+            self._enqueue(" ")
             self._enqueue(self._spinner.start())
             self._was_busy = True
         if self._busy:
             self._enqueue(self._spinner.tick())
         elif self._was_busy:
-            self._enqueue(self._spinner.stop(), Priority.HIGH)
+            self._enqueue(self._spinner.clear(), Priority.HIGH)
             self._was_busy = False
         while not self._queue.empty():
             item = self._queue.get(False)

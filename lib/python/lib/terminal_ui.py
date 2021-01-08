@@ -93,37 +93,35 @@ class Box(object):
             return str(self.text).ljust(self.width, " ")
 
 
-class Spinner(object):
-    """
-    A simple spinner that can indicate a process is busy running. The `start`,
-    `tick` and `stop` functions all return strings that should be printed to a
-    terminal.
+class Animation(object):
     """
 
-    CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
+    """
 
-    def __init__(self, refresh_rate_fps=16):
+    def __init__(self, frames, refresh_rate_fps=16):
         self.active = False
-        self._last_refreshed_at = None
+        self._frames = frames
+        self._started_at = None
         self._refresh_interval = timedelta(milliseconds=1000 // refresh_rate_fps)
         self._index = 0
 
     def start(self):
         self.active = True
-        self._last_refreshed_at = datetime.now()
-        self._index = 0
-        return " " * 2  # One space as padding and the other as the placeholder
+        self._started_at = datetime.now()
+        self._index = -1
+        # Return a blank placeholder that will get removed after the first tick
+        return " " * len(self._frames[self._index])
 
     def tick(self):
-        now = datetime.now()
-        if datetime.now() - self._last_refreshed_at >= self._refresh_interval:
-            self._index = (self._index + 1) % len(self.CHARS)
-            self._last_refreshed_at = now
-        return f"\b{self.CHARS[self._index]}"
+        clear = self.clear()
+        self._index = (datetime.now() - self._started_at) // self._refresh_interval
+        self._index %= len(self._frames)
+        return f"{clear}{self._frames[self._index]}"
 
-    def stop(self):
+    def clear(self):
         self.active = False
-        return "\b "
+        chars_to_clear = len(self._frames[self._index])
+        return "\b" * chars_to_clear + " " * chars_to_clear + "\b" * chars_to_clear
 
 
 class Table(object):
