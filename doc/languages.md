@@ -12,7 +12,7 @@ A c executor exists with the following signature
 
 ```c
 void executor(
-    char *data[],
+    char *input[],
     char *(*part1_fn)(char **),
     char *(*part2_fn)(char **),
     int argc,
@@ -25,13 +25,13 @@ Below is template code for using the executor
 // main.c
 #include "../../lib/lib.h"
 
-char *part1_result(char *data[])
+char *part1_result(char *input[])
 {
   // compute part 1 solution
   return solution;
 }
 
-char *part2_result(char *data[])
+char *part2_result(char *input[])
 {
   // compute part 2 solution
   return solution;
@@ -40,7 +40,7 @@ char *part2_result(char *data[])
 int main(int argc, char *argv[])
 {
   // load challenge input
-  executor(data, part1_result, part2_result, argc, argv);
+  executor(input, part1_result, part2_result, argc, argv);
 }
 ```
 
@@ -91,7 +91,7 @@ class Day1Solution implements Solution<String> {
 
 class Main {
   public static void main(String[] args) {
-    ArrayList<String> input = // load data
+    ArrayList<String> input = // load input
     Executor executor = new Executor(new Day1Solution(), input);
     executor.run(args);
   }
@@ -124,8 +124,8 @@ def part2_solution(input):
     # compute part 2 solution
     return solution
 
-data = # fetch data
-executor = Executor(data, part1_solution, part2_solution)
+input = # load input
+executor = Executor(input, part1_solution, part2_solution)
 executor(sys.argv)
 ```
 
@@ -197,7 +197,7 @@ A scala executor exists, below is template code for using the executor
 import tcollier.Executor;
 import tcollier.Solution;
 
-class Day1Solution(val input: Array[String]) extends Solution {
+class Day1Solution() extends Solution {
   def part1Answer(): String = {
     // compute part 1 solution
     return solution
@@ -211,8 +211,8 @@ class Day1Solution(val input: Array[String]) extends Solution {
 
 object Main {
   def main(args: Array[String]): Unit = {
-    val data: Array[String] = // load data
-    val executor: Executor = new Executor(new Day0Solution(data));
+    val input: Array[String] = // load input
+    val executor: Executor = new Executor(new Day0Solution(input), input);
     executor.run(args);
   }
 }
@@ -230,7 +230,7 @@ A typescript executor exists, below is template code for using the executor
 
 ```ts
 // main.ts
-const loadData = (): string[] => // load data
+const loadData = (): string[] => // load input
 
 const part1Result = (words: string[]): string => {
   // compute and return part 1 solution
