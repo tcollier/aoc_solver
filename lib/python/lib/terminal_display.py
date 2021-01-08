@@ -15,22 +15,58 @@ class Color(object):
     UNDERLINE = "\033[4m"
 
 
+class Align(object):
+    LEFT = 1
+    RIGHT = 2
+    CENTER = 3
+
+
 TABLE_CELL_PADDING = 2
 
 
-# class DisplayText(object):
-#     def __init__(self, text, color=None):
-#         self.text = text
-#         self.color = color
+class TermText(object):
+    def __init__(self, text, color=None, underlined=False):
+        self.text = text or ""
+        self.color = color
+        self.underlined = underlined
 
-#     def width(self):
-#         len(self.text) + (0 if not self.color else len(color) + len(Color.ENDC))
+    @property
+    def hidden_width(self):
+        return len(str(self)) - len(self.text)
 
-#     def __repr__(self):
-#         if self.color:
-#             return f"{color}{string}{Color.ENDC}"
-#         else:
-#             return self.text
+    def __len__(self):
+        return len(self.text)
+
+    def __repr__(self):
+        string = self.text
+        if self.underlined:
+            string = f"{Color.UNDERLINE}{string}"
+        if self.color:
+            string = f"{self.color}{string}"
+        if self.underlined or self.color:
+            string = f"{string}{Color.ENDC}"
+        return string
+
+
+class Box(object):
+    def __init__(self, text, width=None, align=Align.LEFT):
+        self.text = text
+        self.align = align
+        self.width = width if width else len(text)
+        self.width += text.hidden_width
+
+    def __repr__(self):
+        if self.align == Align.RIGHT:
+            return str(self.text).rjust(self.width, " ")
+        elif self.align == Align.CENTER:
+            space = self.width - len(self.text) - self.text.hidden_width
+            return (
+                str(self.text)
+                .rjust(self.width - space // 2, " ")
+                .ljust(self.width, " ")
+            )
+        elif self.align == Align.LEFT:
+            return str(self.text).ljust(self.width, " ")
 
 
 class Spinner(object):
@@ -64,28 +100,15 @@ def _colorized_width(color):
 
 
 def _table_header(value, width):
-    if not value:
-        return " " * (width)
-    underlined = _colorize(Color.UNDERLINE, value)
-    width += _colorized_width(Color.UNDERLINE)
-    lpad = " " * ((width - len(underlined)) // 2)
-    rpad = " " * (width - len(underlined) - len(lpad))
-    return f"{lpad}{underlined}{rpad}"
+    return str(Box(TermText(value, underlined=True), width, Align.CENTER))
 
 
 def _table_cell(value, width, color):
-    if color:
-        colored = _colorize(color, value)
-        width += _colorized_width(color)
-    else:
-        colored = value
-
     try:
         int(value)
-        justified = colored.rjust(width, " ")
+        return str(Box(TermText(value, color), width, Align.RIGHT))
     except:
-        justified = colored.ljust(width, " ")
-    return justified
+        return str(Box(TermText(value, color), width))
 
 
 def _table(table, row_colors):
