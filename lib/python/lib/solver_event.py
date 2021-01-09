@@ -1,4 +1,4 @@
-class SolverEvent(object):
+class SolverEvent:
     MISSING_SRC = "missing-source"
     BUILD_STARTED = "build-started"
     BUILD_FINISHED = "build-finished"

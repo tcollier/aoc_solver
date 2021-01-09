@@ -7,7 +7,7 @@ INPUT = "198753462"
 # INPUT = "389125467"
 
 
-class Cup(object):
+class Cup:
     def __init__(self, label):
         self.label = label
         self.next = None

@@ -7,7 +7,7 @@ from lib.solver_event import SolverEvent
 from lib.typing import PipeConnection
 
 
-class DisplayEventLoop(object):
+class DisplayEventLoop:
     def __init__(self, display: Any, conn: PipeConnection, refresh_rate: int = 30):
         """
         :param refresh_rate: rate (in frames per second) at which events are process
@@ -41,7 +41,7 @@ class DisplayEventLoop(object):
             self._handler.tick()
 
 
-class PrioritizedItem(object):
+class PrioritizedItem:
     def __init__(self, output, msg_num: int, priority: int):
         self.output = output
         self.msg_num = msg_num
@@ -54,7 +54,7 @@ class PrioritizedItem(object):
             return self.priority < other.priority
 
 
-class TextHandler(object):
+class TextHandler:
     """
     Generic event handler for printing the display output as text.
     """

@@ -21,7 +21,7 @@ TextDisplayableHandler = Generator[TextDisplayableMessage, None, None]
 SPINNER_CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
 
 
-class Priority(object):
+class Priority:
     LOW = 2
     MEDIUM = 1
     HIGH = 0
@@ -134,7 +134,7 @@ def _timing(timing_info: dict, duration: float) -> str:
     return f"({contents})"
 
 
-class Display(object):
+class Display:
     def __init__(self):
         self._spinner = Animation(SPINNER_CHARS)
 

@@ -4,7 +4,7 @@ from lib.solver_event import SolverEvent
 from lib.typing import PipeConnection
 
 
-class Context(object):
+class Context:
     """
     Container for all connections and processes managed in the file. Provides
     an easy way to clean up these resources when exiting the script.
@@ -40,7 +40,7 @@ class Context(object):
             proc.join()
 
 
-class ContextManager(object):
+class ContextManager:
     """
     The class provides access to a global Context so we can shutdown from
     anywhere in this script.

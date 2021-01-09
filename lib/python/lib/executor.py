@@ -7,7 +7,7 @@ Input = Union[List[str], List[int]]
 SolverCallable = Callable[[Input], str]
 
 
-class Executor(object):
+class Executor:
     def __init__(self, data: Input, part1_fn: SolverCallable, part2_fn: SolverCallable):
         self.data = data
         self.part1_fn = part1_fn

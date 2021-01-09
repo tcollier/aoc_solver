@@ -21,7 +21,7 @@ import os
 import sys
 
 
-class ExitCode(object):
+class ExitCode:
     INVALID_ARGS = 2
     SIGNAL_BASE = 128
     SIGINT = SIGNAL_BASE + 2

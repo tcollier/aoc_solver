@@ -1,7 +1,7 @@
 import timeit
 
 
-class TrieMap(object):
+class TrieMap:
     def __init__(self):
         self.nodes = {}
         self.value = None

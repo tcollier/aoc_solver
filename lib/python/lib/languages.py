@@ -7,7 +7,7 @@ from typing import Callable, Union
 CompilerCommand = Union[str, Callable[[], str]]
 
 
-class Commands(object):
+class Commands:
     def __init__(self, exec: str):
         self.compiler = []
         self.exec = exec
@@ -113,7 +113,7 @@ def typescript_cmds(file: str) -> Commands:
     return cmds
 
 
-class LanguageConfig(object):
+class LanguageConfig:
     def __init__(self, extension: str, commands: Commands, timing: bool = True):
         self.extension = extension
         self.commands = commands

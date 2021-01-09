@@ -1,7 +1,7 @@
 DICTIONARY_FILE = "/usr/share/dict/words"
 
 
-class Trie(object):
+class Trie:
     def __init__(self):
         self.nodes = {}
         self.terminal = False

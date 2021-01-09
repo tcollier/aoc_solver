@@ -8,7 +8,7 @@ from lib.executor import Executor
 CWD = os.path.dirname(os.path.abspath(__file__))
 
 
-class Board3D(object):
+class Board3D:
     def __init__(self, cubes):
         self.cubes = cubes
 
@@ -70,7 +70,7 @@ class Board3D(object):
         return Board3D(new_cubes)
 
 
-class Board4D(object):
+class Board4D:
     def __init__(self, hcubes):
         self.hcubes = hcubes
 

@@ -1,7 +1,7 @@
 import random
 
 
-class Heap(object):
+class Heap:
     def __init__(self, min=True):
         self.items = []
         self.size = 0
@@ -71,7 +71,7 @@ class Heap(object):
             self._percolate_down(child_index)
 
 
-class RunningMedian(object):
+class RunningMedian:
     def __init__(self):
         self.upper = Heap(True)
         self.lower = Heap(False)

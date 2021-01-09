@@ -24,7 +24,7 @@ def _dispatch(conn, event: str, args: PipeMessage = {}):
         raise TerminationException("Terminating because pipe was unexpectedly closed")
 
 
-class LanguageSolver(object):
+class LanguageSolver:
     def __init__(
         self,
         parent_pid: int,
@@ -133,7 +133,7 @@ class LanguageSolver(object):
         )
 
 
-class SolverEngine(object):
+class SolverEngine:
     def __init__(self, conn: PipeConnection, year: int, day: int, save: bool = False):
         if not os.path.isdir(str(year)):
             raise ValueError(f"No solutions found for {year}")

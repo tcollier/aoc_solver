@@ -4,12 +4,12 @@ from typing import Generator, List, Set
 CURSOR_RETURN = "\033[A\n"
 
 
-class Element(object):
+class Element:
     def __repr__(self):
         raise NotImplementedError(f"{type(self).__name__} must implement __repr__()")
 
 
-class Color(object):
+class Color:
     CYAN = "\033[96m"
     GREEN = "\033[92m"
     YELLOW = "\033[93m"
@@ -17,7 +17,7 @@ class Color(object):
     GREY = "\033[90m"
 
 
-class TextFormat(object):
+class TextFormat:
     BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
 
@@ -69,7 +69,7 @@ class Text(Element):
         return formatted
 
 
-class BoxAlign(object):
+class BoxAlign:
     LEFT = 1
     RIGHT = 2
     CENTER = 3
@@ -105,7 +105,7 @@ class Box(Element):
             return str(self.text).ljust(self.width, " ")
 
 
-class Animation(object):
+class Animation:
     """
     Animate the frames (a list of strings) at the given refresh rate. The `tick`
     function will clear any previously drawn characters.

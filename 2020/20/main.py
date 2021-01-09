@@ -16,7 +16,7 @@ def flip_matrix(matrix):
     return [row[::-1] for row in matrix]
 
 
-class Tile(object):
+class Tile:
     def __init__(self, tile_num, pixels, flipped):
         self.tile_num = tile_num
         self.pixels = [[p for p in row] for row in pixels]
