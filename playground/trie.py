@@ -2,9 +2,8 @@ DICTIONARY_FILE = "/usr/share/dict/words"
 
 
 class Trie:
-    def __init__(self):
-        self.nodes = {}
-        self.terminal = False
+    nodes = {}
+    terminal = False
 
     def add(self, word):
         if not word:

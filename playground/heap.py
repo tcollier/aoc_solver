@@ -2,9 +2,10 @@ import random
 
 
 class Heap:
+    size = 0
+
     def __init__(self, min=True):
         self.items = []
-        self.size = 0
         if min:
             self.cmp = self.__class__.min_cmp
         else:
@@ -72,9 +73,8 @@ class Heap:
 
 
 class RunningMedian:
-    def __init__(self):
-        self.upper = Heap(True)
-        self.lower = Heap(False)
+    upper = Heap(True)
+    lower = Heap(False)
 
     def size(self):
         return self.upper.size + self.lower.size

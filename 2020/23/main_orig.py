@@ -8,9 +8,10 @@ INPUT = "198753462"
 
 
 class Cup:
+    next = None
+
     def __init__(self, label):
         self.label = label
-        self.next = None
 
 
 def cups_to_str(head, highlight_head=False, delim=" "):

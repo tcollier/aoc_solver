@@ -10,9 +10,8 @@ class Context:
     an easy way to clean up these resources when exiting the script.
     """
 
-    def __init__(self):
-        self.conns = []
-        self.procs = []
+    conns = []
+    procs = []
 
     def add_conn(self, conn: PipeConnection):
         self.conns.append(conn)

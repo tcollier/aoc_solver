@@ -111,12 +111,13 @@ class Animation:
     function will clear any previously drawn characters.
     """
 
+    active = False
+    _started_at = None
+    _index = -1
+
     def __init__(self, frames: List[str], refresh_rate_fps: int = 16):
-        self.active = False
         self._frames = frames
-        self._started_at = None
         self._refresh_interval = timedelta(milliseconds=1000 // refresh_rate_fps)
-        self._index = -1
 
     def start(self) -> str:
         self._started_at = datetime.now()

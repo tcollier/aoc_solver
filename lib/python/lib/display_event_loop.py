@@ -59,10 +59,11 @@ class TextHandler:
     Generic event handler for printing the display output as text.
     """
 
+    _msg_num = 0
+
     def __init__(self, display: Any):
         self._display = display
         self._queue = PriorityQueue()
-        self._msg_num = 0
 
     def handle(self, message: Dict[str, str]):
         def output_gen():

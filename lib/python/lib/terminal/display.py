@@ -135,8 +135,7 @@ def _timing(timing_info: dict, duration: float) -> str:
 
 
 class Display:
-    def __init__(self):
-        self._spinner = Animation(SPINNER_CHARS)
+    _spinner = Animation(SPINNER_CHARS)
 
     def handle(self, message: PipeMessage) -> TextDisplayableHandler:
         event = message["event"]

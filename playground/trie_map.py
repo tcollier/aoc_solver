@@ -2,9 +2,10 @@ import timeit
 
 
 class TrieMap:
+    value = None
+
     def __init__(self):
         self.nodes = {}
-        self.value = None
 
     def __setitem__(self, word, value):
         if not word:
