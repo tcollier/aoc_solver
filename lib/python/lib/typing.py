@@ -3,8 +3,7 @@ from typing import Any, Dict, Callable, Generator, Tuple, Union
 
 from lib.terminal_ui import Element
 
-Display = Any
-DisplayHandler = Any
+TextDisplay = Any
 CompilerCommand = Union[str, Callable[[], str]]
 PipeConnection = connection.Connection
 PipeMessage = Dict[str, str]
