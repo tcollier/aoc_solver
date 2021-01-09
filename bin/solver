@@ -57,7 +57,7 @@ from multiprocessing import Pipe, Process
 
 from lib.display_event_loop import DisplayEventLoop
 from lib.languages import all_languages
-from lib.solver import Solver
+from lib.solver_engine import SolverEngine
 from lib.solver_event import SolverEvent
 from lib.terminal.display import Display
 from lib.typing import PipeConnection
@@ -100,7 +100,7 @@ def argument_error(args):
     if args.save:
         if not args.day:
             return "Must use `--save` with a specific day"
-        elif Solver.has_solution(args.year, args.day):
+        elif SolverEngine.has_solution(args.year, args.day):
             return (
                 "Cannot save results when output already saved, "
                 "please delete existing file"
@@ -219,7 +219,7 @@ try:
 
     for year, day in days_to_solve(args):
         # Spin up the solver for the given year/day
-        solver = Solver(solver_conn, year, day, args.save)
+        solver = SolverEngine(solver_conn, year, day, args.save)
         solver_proc = Process(
             target=solver, args=(os.getpid(), args.language), name="AoC-solver",
         )

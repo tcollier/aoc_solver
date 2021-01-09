@@ -133,7 +133,7 @@ class LanguageSolver(object):
         )
 
 
-class Solver(object):
+class SolverEngine(object):
     def __init__(self, conn: PipeConnection, year: int, day: int, save: bool = False):
         if not os.path.isdir(str(year)):
             raise ValueError(f"No solutions found for {year}")
