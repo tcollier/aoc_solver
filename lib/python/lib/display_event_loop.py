@@ -1,10 +1,11 @@
 from __future__ import annotations
+from dataclasses import dataclass, field
 from queue import PriorityQueue
 from typing import Any, Callable, Dict, Generator
 
 from lib.shell import is_process_running
 from lib.solver_event import SolverEvent
-from lib.typing import PipeConnection
+from lib.typing import PipeConnection, TextDisplayableMessage
 
 
 class DisplayEventLoop:
@@ -41,17 +42,11 @@ class DisplayEventLoop:
             self._handler.tick()
 
 
+@dataclass(order=True)
 class PrioritizedItem:
-    def __init__(self, output, msg_num: int, priority: int):
-        self.output = output
-        self.msg_num = msg_num
-        self.priority = priority
-
-    def __lt__(self, other: PrioritizedItem):
-        if self.priority == other.priority:
-            return self.msg_num < other.msg_num
-        else:
-            return self.priority < other.priority
+    output: TextDisplayableMessage = field(compare=False)
+    priority: int
+    msg_num: int
 
 
 class TextHandler:
@@ -86,5 +81,5 @@ class TextHandler:
                 output, priority = output
             else:
                 priority = self._display.default_priority
-            self._queue.put(PrioritizedItem(output, self._msg_num, priority), False)
+            self._queue.put(PrioritizedItem(output, priority, self._msg_num), False)
             self._msg_num += 1

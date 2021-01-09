@@ -12,16 +12,12 @@ from lib.terminal.ui import (
     Table,
     Text,
 )
-from lib.typing import PipeMessage
-
-TextDisplayable = Union[str, Element]
-TextDisplayableMessage = Union[TextDisplayable, Tuple[TextDisplayable, int]]
-TextDisplayableHandler = Generator[TextDisplayableMessage, None, None]
+from lib.typing import PipeMessage, TextDisplayableHandler
 
 SPINNER_CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
 
 
-class Priority:
+class MessagePriority:
     LOW = 2
     MEDIUM = 1
     HIGH = 0
@@ -146,20 +142,20 @@ class Display:
 
     def tick(self) -> TextDisplayableHandler:
         if self._spinner.active:
-            yield (self._spinner.tick(), Priority.LOW)
+            yield (self._spinner.tick(), MessagePriority.LOW)
 
     @property
     def default_priority(self) -> int:
-        return Priority.MEDIUM
+        return MessagePriority.MEDIUM
 
     def _start_spinner(self) -> TextDisplayableHandler:
         if not self._spinner.active:
-            yield (" ", Priority.LOW)
-            yield (self._spinner.start(), Priority.LOW)
+            yield (" ", MessagePriority.LOW)
+            yield (self._spinner.start(), MessagePriority.LOW)
 
     def _clear_spinner(self) -> TextDisplayableHandler:
         if self._spinner.active:
-            yield (self._spinner.clear(), Priority.HIGH)
+            yield (self._spinner.clear(), MessagePriority.HIGH)
 
     def _invalid_command(_self, cmd: str, args: PipeMessage) -> TextDisplayableHandler:
         yield Text(f"Invalid command {cmd} with arguments {args}", Color.RED)

@@ -1,12 +1,13 @@
 from datetime import datetime, timedelta
 from typing import Generator, List, Set
 
+from lib.typing import Stringable
+
 CURSOR_RETURN = "\033[A\n"
 
 
-class Element:
-    def __repr__(self):
-        raise NotImplementedError(f"{type(self).__name__} must implement __repr__()")
+class Element(Stringable):
+    pass
 
 
 class Color:
