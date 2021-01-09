@@ -3,6 +3,7 @@ import os
 import traceback
 
 from datetime import datetime
+from typing import List, Generator
 
 from lib.languages import language_config, all_languages
 from lib.shell import (
@@ -12,9 +13,10 @@ from lib.shell import (
     shell_out,
 )
 from lib.solver_event import SolverEvent
+from lib.typing import PipeConnection, PipeMessage
 
 
-def _dispatch(conn, event, args={}):
+def _dispatch(conn, event: str, args: PipeMessage = {}):
     args["event"] = event
     try:
         conn.send(args)
@@ -23,7 +25,15 @@ def _dispatch(conn, event, args={}):
 
 
 class LanguageSolver(object):
-    def __init__(self, parent_pid, conn, language, year, day, filename):
+    def __init__(
+        self,
+        parent_pid: int,
+        conn: PipeConnection,
+        language: str,
+        year: int,
+        day: int,
+        filename: str,
+    ):
         self.parent_pid = parent_pid
         self.conn = conn
         self.language = language
@@ -31,7 +41,7 @@ class LanguageSolver(object):
         self.day = day
         self.filename = filename
 
-    def __call__(self, expected, outfile):
+    def __call__(self, expected: str, outfile: str):
         config = language_config(self.language)
         commands = config.commands(self.filename)
         if commands.compiler:
@@ -48,13 +58,13 @@ class LanguageSolver(object):
             else:
                 self._dispatch(SolverEvent.TIMING_SKIPPED)
 
-    def _dispatch(self, event, args={}):
+    def _dispatch(self, event: str, args: PipeMessage = {}):
         args["language"] = self.language
         args["year"] = self.year
         args["day"] = self.day
         _dispatch(self.conn, event, args)
 
-    def _shell_out(self, cmd):
+    def _shell_out(self, cmd: str):
         def should_terminate():
             if not is_process_running(self.parent_pid):
                 return True
@@ -66,7 +76,7 @@ class LanguageSolver(object):
         unwrapped = cmd() if callable(cmd) else cmd
         return shell_out(unwrapped, should_terminate)
 
-    def _build(self, compiler_cmds):
+    def _build(self, compiler_cmds: Generator[str, None, None]):
         self._dispatch(SolverEvent.BUILD_STARTED)
         try:
             for cmd in compiler_cmds:
@@ -82,7 +92,7 @@ class LanguageSolver(object):
             self._dispatch(SolverEvent.BUILD_FAILED)
             raise e
 
-    def _solve(self, cmd):
+    def _solve(self, cmd: str):
         self._dispatch(SolverEvent.SOLVE_STARTED)
         try:
             actual = self._shell_out(cmd)
@@ -95,13 +105,13 @@ class LanguageSolver(object):
             self._dispatch(SolverEvent.SOLVE_FAILED)
             raise e
 
-    def _handle_output(self, actual, outfile):
+    def _handle_output(self, actual: str, outfile: str):
         self._dispatch(SolverEvent.SOLVE_ATTEMPTED, {"actual": actual})
         if outfile:
             open(outfile, "w").write(actual)
             self._dispatch(SolverEvent.OUTPUT_SAVED, {"file": outfile})
 
-    def _handle_timing(self, cmd):
+    def _handle_timing(self, cmd: str):
         self._dispatch(SolverEvent.TIMING_STARTED)
         try:
             start_time = datetime.now()
@@ -117,34 +127,34 @@ class LanguageSolver(object):
             self._dispatch(SolverEvent.TIMING_FAILED)
             raise e
 
-    def _handle_invalid_output(self, expected, actual):
+    def _handle_invalid_output(self, expected: str, actual: str):
         self._dispatch(
             SolverEvent.SOLVE_INCORRECT, {"expected": expected, "actual": actual}
         )
 
 
 class Solver(object):
-    def __init__(self, conn, year, day, save=False):
-        if not os.path.isdir(year):
+    def __init__(self, conn: PipeConnection, year: int, day: int, save: bool = False):
+        if not os.path.isdir(str(year)):
             raise ValueError(f"No solutions found for {year}")
-        padded_day = day.zfill(2)
-        if not os.path.isdir(os.path.join(year, padded_day)):
+        padded_day = str(day).zfill(2)
+        self.base_dir = os.path.join(str(year), padded_day)
+        if not os.path.isdir(self.base_dir):
             raise ValueError(f"No solutions found for day {day} in {year}")
-        self.base_dir = os.path.join(year, padded_day)
         self.conn = conn
         self.year = year
         self.day = day
         self.save = save
-        self.outfile = os.path.join(year, padded_day, "output.txt")
+        self.outfile = os.path.join(self.base_dir, "output.txt")
         self.expected = None
         if os.path.isfile(self.outfile):
             self.expected = "".join(open(self.outfile, "r").readlines())
 
     @classmethod
-    def has_solution(cls, year, day):
-        return os.path.isfile(os.path.join(year, day.zfill(2), "output.txt"))
+    def has_solution(cls, year: int, day: int) -> bool:
+        return os.path.isfile(os.path.join(str(year), day.zfill(2), "output.txt"))
 
-    def __call__(self, parent_pid, languages, save=False):
+    def __call__(self, parent_pid: int, languages: List[str], save=False):
         """
         :param parent_pid: Process ID of the parent that spawned the solver. Keep
         tabs on it so we can exit if it mysteriously vanishes, e.g. with a SIGKILL
@@ -173,12 +183,12 @@ class Solver(object):
             for language in languages:
                 self._dispatch(SolverEvent.MISSING_SRC, {"language": language})
 
-    def _dispatch(self, event, args={}):
+    def _dispatch(self, event: str, args: PipeMessage = {}):
         args["year"] = self.year
         args["day"] = self.day
         _dispatch(self.conn, event, args)
 
-    def _find_files(self, languages):
+    def _find_files(self, languages: List[str]):
         if not languages:
             languages = all_languages()
         for language in languages:

@@ -1,6 +1,12 @@
 from datetime import datetime, timedelta
+from typing import Generator, List, Set
 
 CURSOR_RETURN = "\033[A\n"
+
+
+class Element(object):
+    def __repr__(self):
+        raise NotImplementedError(f"{type(self).__name__} must implement __repr__()")
 
 
 class Color(object):
@@ -11,23 +17,29 @@ class Color(object):
     GREY = "\033[90m"
 
 
-class Text(object):
+class TextFormat(object):
+    BOLD = "\033[1m"
     UNDERLINE = "\033[4m"
+
+
+class Text(Element):
     END_FORMATTING = "\033[0m"
 
-    def __init__(self, string, color=None, underlined=False):
+    def __init__(
+        self, string: str, color: Color = None, formats: Set[TextFormat] = None
+    ):
         """
         Object that ties formatting information together with a string
         """
         self._string = string or ""
         self._color = color
-        self._underlined = underlined
+        self._formats = formats if formats else set()
 
-    def set_underlined(self, underlined):
-        self._underlined = underlined
+    def add_format(self, format: TextFormat):
+        self._formats.add(format)
 
     @property
-    def hidden_width(self):
+    def hidden_width(self) -> int:
         """
         Returns the number of characters used to format the string. When displayed in
         a terminal, the width of the string is simply the number of characters in
@@ -36,7 +48,7 @@ class Text(object):
         return len(str(self)) - len(self._string)
 
     @property
-    def is_numeric(self):
+    def is_numeric(self) -> bool:
         try:
             float(self._string)
             return True
@@ -48,11 +60,11 @@ class Text(object):
 
     def __repr__(self):
         formatted = self._string
-        if self._underlined:
-            formatted = f"{self.UNDERLINE}{formatted}"
+        for format in self._formats:
+            formatted = f"{format}{formatted}"
         if self._color:
             formatted = f"{self._color}{formatted}"
-        if self._underlined or self._color:
+        if self._formats or self._color:
             formatted = f"{formatted}{self.END_FORMATTING}"
         return formatted
 
@@ -63,8 +75,8 @@ class BoxAlign(object):
     CENTER = 3
 
 
-class Box(object):
-    def __init__(self, text, width=None, align=BoxAlign.LEFT):
+class Box(Element):
+    def __init__(self, text: Text, width: int = None, align: BoxAlign = BoxAlign.LEFT):
         """
         A box of set width and unit height that contains a `Text` object
         which can be aligned within the box
@@ -99,37 +111,39 @@ class Animation(object):
     function will clear any previously drawn characters.
     """
 
-    def __init__(self, frames, refresh_rate_fps=16):
+    def __init__(self, frames: List[str], refresh_rate_fps: int = 16):
         self.active = False
         self._frames = frames
         self._started_at = None
         self._refresh_interval = timedelta(milliseconds=1000 // refresh_rate_fps)
         self._index = -1
 
-    def start(self):
+    def start(self) -> str:
         self._started_at = datetime.now()
         self._index = -1
         self.active = True
         # Return a blank placeholder that will get removed after the first tick
         return " " * len(self._frames[self._index])
 
-    def tick(self):
+    def tick(self) -> str:
         clear = self._erase_previous()
         self._index = (datetime.now() - self._started_at) // self._refresh_interval
         self._index %= len(self._frames)
         return f"{clear}{self._frames[self._index]}"
 
-    def clear(self):
+    def clear(self) -> str:
         self.active = False
         return self._erase_previous()
 
-    def _erase_previous(self):
+    def _erase_previous(self) -> str:
         chars_to_clear = len(self._frames[self._index])
         return "\b" * chars_to_clear + " " * chars_to_clear + "\b" * chars_to_clear
 
 
-class Table(object):
-    def __init__(self, cells, headers=True, col_padding=2):
+class Table(Element):
+    def __init__(
+        self, cells: List[List[Element]], headers: bool = True, col_padding: int = 2
+    ):
         """
         Display a table of Text objects
 
@@ -147,7 +161,7 @@ class Table(object):
         string = ""
         for row, col, cell in self._each_cell():
             if self._headers and row == 0:
-                cell.set_underlined(True)
+                cell.add_format(TextFormat.UNDERLINE)
                 align = BoxAlign.CENTER
             elif cell.is_numeric:
                 align = BoxAlign.RIGHT
@@ -160,17 +174,17 @@ class Table(object):
                 string += " " * self._col_padding
         return string
 
-    def _each_cell(self):
+    def _each_cell(self) -> Generator[int, int, Element]:
         for row in range(len(self._cells)):
             for col in range(len(self._cells[row])):
                 yield row, col, self._cells[row][col]
 
     @property
-    def _col_count(self):
+    def _col_count(self) -> int:
         return len(self._cells[0])
 
     @property
-    def col_widths(self):
+    def col_widths(self) -> List[int]:
         widths = [0 for _ in self._cells[0]]
         for row in range(len(self._cells)):
             for col in range(len(self._cells[row])):

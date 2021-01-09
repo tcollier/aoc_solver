@@ -1,13 +1,17 @@
+from __future__ import annotations
 from queue import PriorityQueue
+from typing import Callable, Dict, Generator
+
+from lib.typing import Display
 
 
 class PrioritizedItem(object):
-    def __init__(self, output, msg_num, priority):
+    def __init__(self, output, msg_num: int, priority: int):
         self.output = output
         self.msg_num = msg_num
         self.priority = priority
 
-    def __lt__(self, other):
+    def __lt__(self, other: PrioritizedItem):
         if self.priority == other.priority:
             return self.msg_num < other.msg_num
         else:
@@ -15,12 +19,12 @@ class PrioritizedItem(object):
 
 
 class TextHandler(object):
-    def __init__(self, display):
+    def __init__(self, display: Display):
         self._display = display
         self._queue = PriorityQueue()
         self._msg_num = 0
 
-    def handle(self, message):
+    def handle(self, message: Dict[str, str]):
         def output_gen():
             return self._display.handle(message)
 
@@ -35,7 +39,7 @@ class TextHandler(object):
             item = self._queue.get(False)
             print(item.output, end="", flush=self._queue.empty())
 
-    def _enqueue(self, output_gen):
+    def _enqueue(self, output_gen: Callable[[], Generator]):
         for output in output_gen():
             if isinstance(output, tuple):
                 output, priority = output

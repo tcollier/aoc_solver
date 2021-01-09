@@ -1,15 +1,19 @@
 import json
 
 from datetime import datetime
+from typing import Callable, Dict, List, Union
+
+Input = Union[List[str], List[int]]
+SolverCallable = Callable[[Input], str]
 
 
 class Executor(object):
-    def __init__(self, data, part1_fn, part2_fn):
+    def __init__(self, data: Input, part1_fn: SolverCallable, part2_fn: SolverCallable):
         self.data = data
         self.part1_fn = part1_fn
         self.part2_fn = part2_fn
 
-    def __call__(self, argv):
+    def __call__(self, argv: List[str]):
         if argv[-1] == "--time":
             self._time()
         else:
@@ -29,7 +33,7 @@ class Executor(object):
             )
         )
 
-    def _time_fn(self, fn):
+    def _time_fn(self, fn: SolverCallable) -> Dict:
         def duration_us(duration):
             return duration.seconds * 1000 * 1000 + duration.microseconds
 

@@ -28,7 +28,7 @@ class ExitCode(object):
     UNKNOWN_ERROR = 255
 
     @classmethod
-    def for_signal(cls, signal):
+    def for_signal(cls, signal: int) -> int:
         return cls.SIGNAL_BASE + signal
 
 
@@ -61,6 +61,7 @@ from lib.solver import Solver
 from lib.solver_event import SolverEvent
 from lib.terminal_display import TerminalDisplay
 from lib.text_handler import TextHandler
+from lib.typing import PipeConnection
 
 parser = argparse.ArgumentParser(
     description=(
@@ -117,14 +118,14 @@ class Context(object):
         self.conns = []
         self.procs = []
 
-    def add_conn(self, conn):
+    def add_conn(self, conn: PipeConnection):
         self.conns.append(conn)
 
-    def add_proc(self, proc):
+    def add_proc(self, proc: Process):
         proc.start()
         self.procs.append(proc)
 
-    def shutdown(self, signal=None, error=None):
+    def shutdown(self, signal: int = None, error: str = None):
         """
         Send a TERMINATE event to all connections and join all processes
         to properly shutdown all resources.
@@ -152,19 +153,19 @@ class ContextManager(object):
     _context = Context()
 
     @classmethod
-    def add_conn(cls, conn):
+    def add_conn(cls, conn: PipeConnection):
         cls._context.add_conn(conn)
 
     @classmethod
-    def add_proc(cls, proc):
+    def add_proc(cls, proc: Process):
         cls._context.add_proc(proc)
 
     @classmethod
-    def shutdown(cls, signal=None, error=None):
+    def shutdown(cls, signal: int = None, error: str = None):
         cls._context.shutdown(signal, error)
 
 
-def sig_handler(signal, _frame):
+def sig_handler(signal: int, _frame):
     ContextManager.shutdown(signal=signal)
     sys.exit(ExitCode.for_signal(signal))
 
@@ -185,13 +186,13 @@ def days_to_solve(args):
     dictate need to be solved.
     """
     if args.day:
-        yield args.year, args.day
+        yield int(args.year), int(args.day)
     else:
         days = glob.glob(f"{args.year}/[0-9][0-9]")
         if len(days) > 0:
             days.sort()
             for day in days:
-                yield args.year, day.split("/")[-1]
+                yield int(args.year), int(day.split("/")[-1])
         else:
             raise ValueError(f"No solutions found for {args.year}")
 

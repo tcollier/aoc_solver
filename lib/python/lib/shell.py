@@ -3,13 +3,15 @@ import shlex
 import subprocess
 import time
 
+from typing import IO
+
 
 class TerminationException(Exception):
     pass
 
 
 class ShellException(Exception):
-    def __init__(self, exitcode, stdout, stderr):
+    def __init__(self, exitcode: int, stdout: str, stderr: str):
         self.exitcode = exitcode
         self.stdout = stdout
         self.stderr = stderr
@@ -18,7 +20,7 @@ class ShellException(Exception):
         return (ShellException, (self.exitcode, self.stdout, self.stderr))
 
 
-def _read_output(stream):
+def _read_output(stream: IO[str]) -> str:
     output = ""
     line = stream.readline()
     while line:
@@ -27,7 +29,7 @@ def _read_output(stream):
     return output
 
 
-def shell_out(cmd, should_terminate):
+def shell_out(cmd: str, should_terminate: bool):
     process = subprocess.Popen(
         shlex.split(cmd),
         stdout=subprocess.PIPE,
@@ -49,7 +51,7 @@ def shell_out(cmd, should_terminate):
     return _read_output(process.stdout)
 
 
-def is_process_running(pid):
+def is_process_running(pid: int) -> bool:
     try:
         os.kill(pid, 0)
         return True

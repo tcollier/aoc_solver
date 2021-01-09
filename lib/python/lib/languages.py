@@ -1,18 +1,20 @@
 import glob
 import os
 
+from lib.typing import CompilerCommand
+
 
 class Commands(object):
-    def __init__(self, exec):
+    def __init__(self, exec: str):
         self.compiler = []
         self.exec = exec
         self.time = f"{exec} --time"
 
-    def add_compiler_command(self, command):
+    def add_compiler_command(self, command: CompilerCommand):
         self.compiler.append(command)
 
 
-def c_cmds(file):
+def c_cmds(file: str) -> Commands:
     bin_file = file.replace(".", "_")
     cmds = Commands(os.path.join(".", bin_file))
     lib_files = glob.glob(os.path.join("lib", "c", "*.c"))
@@ -20,14 +22,14 @@ def c_cmds(file):
     return cmds
 
 
-def golang_cmds(file):
+def golang_cmds(file: str) -> Commands:
     bin_file = file.replace(".", "_")
     cmds = Commands(os.path.join(".", bin_file))
     cmds.add_compiler_command(f"go build -o {bin_file} {file}")
     return cmds
 
 
-def java_cmds(file):
+def java_cmds(file: str) -> Commands:
     lib_dir = os.path.join("lib", "java")
     lib_src = glob.glob(os.path.join(lib_dir, "**", "*.java"))
     base_dir = os.path.dirname(file)
@@ -70,19 +72,19 @@ def java_cmds(file):
     return cmds
 
 
-def lisp_cmds(file):
+def lisp_cmds(file: str) -> Commands:
     return Commands(f"sbcl --script {file}")
 
 
-def python_cmds(file):
+def python_cmds(file: str) -> Commands:
     return Commands(f"python {file}")
 
 
-def ruby_cmds(file):
+def ruby_cmds(file: str) -> Commands:
     return Commands(f"ruby {file}")
 
 
-def rust_cmds(file):
+def rust_cmds(file: str) -> Commands:
     lib_dir = os.path.join("lib", "rust")
     bin_file = file.replace(".", "_")
     cmds = Commands(os.path.join(".", bin_file))
@@ -90,7 +92,7 @@ def rust_cmds(file):
     return cmds
 
 
-def scala_cmds(file):
+def scala_cmds(file: str) -> Commands:
     lib_dir = os.path.join("lib", "scala")
     lib_src = glob.glob(os.path.join(lib_dir, "**", "*.java"))
     base_dir = os.path.dirname(file)
@@ -100,7 +102,7 @@ def scala_cmds(file):
     return cmds
 
 
-def typescript_cmds(file):
+def typescript_cmds(file: str) -> Commands:
     js_file = os.path.join(".", file.replace(".ts", ""))
     entry_file = os.path.join(".", "lib", "javascript", "index.js")
     cmds = Commands(f"node {entry_file} {js_file}")
@@ -109,7 +111,7 @@ def typescript_cmds(file):
 
 
 class LanguageConfig(object):
-    def __init__(self, extension, commands, timing=True):
+    def __init__(self, extension: str, commands: Commands, timing: bool = True):
         self.extension = extension
         self.commands = commands
         self.timing = timing
