@@ -243,9 +243,7 @@ class Display:
     def _terminate(self, args: PipeMessage) -> TextDisplayableHandler:
         if "error" in args:
             yield args["error"]
-        else:
-            yield "Unknown error occurred. Terminating..."
-        yield "\n"
+            yield "\n"
 
     HANDLERS = {
         SolverEvent.MISSING_SRC: _missing_src,

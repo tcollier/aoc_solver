@@ -154,7 +154,7 @@ class SolverEngine:
     def has_solution(cls, year: int, day: int) -> bool:
         return os.path.isfile(os.path.join(str(year), day.zfill(2), "output.txt"))
 
-    def __call__(self, parent_pid: int, languages: List[str], save=False):
+    def __call__(self, parent_pid: int, languages: List[str]):
         """
         :param parent_pid: Process ID of the parent that spawned the solver. Keep
         tabs on it so we can exit if it mysteriously vanishes, e.g. with a SIGKILL
