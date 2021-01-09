@@ -59,7 +59,7 @@ from lib.display_event_loop import DisplayEventLoop
 from lib.languages import all_languages
 from lib.solver import Solver
 from lib.solver_event import SolverEvent
-from lib.terminal_display import TerminalDisplay
+from lib.terminal.display import Display
 from lib.typing import PipeConnection
 
 parser = argparse.ArgumentParser(
@@ -213,7 +213,7 @@ try:
     ContextManager.add_conn(solver_conn)
 
     # Spin up the display process.
-    display = DisplayEventLoop(TerminalDisplay(), display_conn)
+    display = DisplayEventLoop(Display(), display_conn)
     display_proc = Process(target=display, name="AoC-display", args=(os.getpid(),))
     ContextManager.add_proc(display_proc)
 

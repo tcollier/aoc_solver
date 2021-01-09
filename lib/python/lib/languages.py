@@ -1,7 +1,10 @@
 import glob
 import os
 
-from lib.typing import CompilerCommand
+from typing import Callable, Union
+
+
+CompilerCommand = Union[str, Callable[[], str]]
 
 
 class Commands(object):

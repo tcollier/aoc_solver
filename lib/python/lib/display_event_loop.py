@@ -1,16 +1,14 @@
 from __future__ import annotations
 from queue import PriorityQueue
-from typing import Callable, Dict, Generator
+from typing import Any, Callable, Dict, Generator
 
 from lib.shell import is_process_running
 from lib.solver_event import SolverEvent
-from lib.typing import TextDisplay, PipeConnection
+from lib.typing import PipeConnection
 
 
 class DisplayEventLoop(object):
-    def __init__(
-        self, display: TextDisplay, conn: PipeConnection, refresh_rate: int = 30
-    ):
+    def __init__(self, display: Any, conn: PipeConnection, refresh_rate: int = 30):
         """
         :param refresh_rate: rate (in frames per second) at which events are process
         and thus the maximum rate the display will be updated.
@@ -21,9 +19,8 @@ class DisplayEventLoop(object):
 
     def __call__(self, parent_pid: int):
         """
-        :param parent_pid: Process ID of the parent that spawned the terminal
-        display. Keep tabs on it so we can exit if it mysteriously vanishes,
-        e.g. with a SIGKILL
+        :param parent_pid: Process ID of the parent that spawned the this event loop.
+        Keep tabs on it so we can exit if it mysteriously vanishes, e.g. with a SIGKILL
         """
         running = True
         while running:
@@ -62,7 +59,7 @@ class TextHandler(object):
     Generic event handler for printing the display output as text.
     """
 
-    def __init__(self, display: Display):
+    def __init__(self, display: Any):
         self._display = display
         self._queue = PriorityQueue()
         self._msg_num = 0

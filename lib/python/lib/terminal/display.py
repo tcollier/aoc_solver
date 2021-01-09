@@ -1,8 +1,8 @@
-from typing import Generator
+from typing import Generator, Tuple, Union
 
 from lib.languages import all_languages
 from lib.solver_event import SolverEvent
-from lib.terminal_ui import (
+from lib.terminal.ui import (
     CURSOR_RETURN,
     Animation,
     Box,
@@ -12,7 +12,11 @@ from lib.terminal_ui import (
     Table,
     Text,
 )
-from lib.typing import PipeMessage, TextDisplayableHandler
+from lib.typing import PipeMessage
+
+TextDisplayable = Union[str, Element]
+TextDisplayableMessage = Union[TextDisplayable, Tuple[TextDisplayable, int]]
+TextDisplayableHandler = Generator[TextDisplayableMessage, None, None]
 
 SPINNER_CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
 
@@ -130,7 +134,7 @@ def _timing(timing_info: dict, duration: float) -> str:
     return f"({contents})"
 
 
-class TerminalDisplay(object):
+class Display(object):
     def __init__(self):
         self._spinner = Animation(SPINNER_CHARS)
 
