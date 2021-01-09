@@ -12,6 +12,7 @@ class Element(Stringable):
 class TextColor:
     CYAN = "\033[96m"
     GREEN = "\033[92m"
+    MAGENTA = "\033[95m"
     YELLOW = "\033[93m"
     RED = "\033[91m"
     GREY = "\033[90m"

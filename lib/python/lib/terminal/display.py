@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Generator, Tuple, Union
+from typing import Generator, List, Tuple, Union
 
 from lib.languages import all_languages
 from lib.solver_event import SolverEvent
@@ -14,9 +14,11 @@ from lib.terminal.ui import (
     Table,
     Text,
 )
-from lib.typing import PipeMessage, TextDisplayableHandler
+from lib.typing import PipeMessage, TextDisplayable, TextDisplayableHandler
 
 SPINNER_CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
+
+MAX_LANGUAGE_WIDTH = max([len(l) for l in all_languages()])
 
 
 class MessagePriority:
@@ -42,7 +44,7 @@ class StatusBox(Element):
     color: str
     solution: Solution
     display: BoxDisplay
-    details: str = None
+    details: TextDisplayable = None
 
     @classmethod
     def build(_cls, settings, args, display=BoxDisplay.INLINE, details=None):
@@ -51,23 +53,25 @@ class StatusBox(Element):
 
     def __repr__(self):
         formatted_day = f"{self.solution.year}/{str(self.solution.day).rjust(2, '0')}"
-        day_language = f"{formatted_day} {_language(self.solution.language)}"
+        formatted_language = Box(Text(self.solution.language), width=MAX_LANGUAGE_WIDTH)
+        day_language = f"{formatted_day} {formatted_language}"
         status = Text(f"{self.status.ljust(4, ' ')} [{day_language}]", self.color)
         if self.details:
-            status = Text(" ".join([str(status), self.details]))
+            status = Text(" ".join([str(status), str(self.details)]))
         return str(Box(status, display=self.display))
 
 
 class StatusSettings:
     COMPILING = ("COMP", TextColor.GREY)
     SOLVING = ("EXEC", TextColor.CYAN)
-    TIMING = ("TIME", TextColor.CYAN)
+    TIMING = ("TIME", TextColor.MAGENTA)
     ATTEMPTED = ("TRY", TextColor.YELLOW)
     SUCCEEDED = ("PASS", TextColor.GREEN)
     FAILED = ("FAIL", TextColor.RED)
 
 
-def _duration(duration: float) -> Element:
+@dataclass
+class TimingDuration(Element):
     """
     Convert the duration from microseconds to the unit that will allow the
     number to be between 1 <= n < 1,000 and apply the unit (e.g. "ms") and
@@ -75,84 +79,89 @@ def _duration(duration: float) -> Element:
 
     :param duration: time in microseconds
     """
-    if duration < 1:
-        value = duration * 1000
-        unit = "ns"
-        color = TextColor.GREEN
-    elif duration < 1000:
-        value = duration
-        unit = "μs"
-        color = None
-    elif duration < 1000000:
-        value = duration / 1000
-        unit = "ms"
-        color = TextColor.YELLOW
-    else:
-        value = duration / 1000000
-        unit = "s"
-        color = TextColor.RED
-    formatted_value = "{:.2f}".format(value)
-    box_width = len(f"NNN.NN {unit}")
-    return Box(Text(f"{formatted_value} {unit}", color), box_width, BoxAlign.RIGHT)
+
+    duration: float
+
+    def __repr__(self):
+        if self.duration < 1:
+            value = self.duration * 1000
+            unit = "ns"
+            color = TextColor.GREEN
+        elif self.duration < 1000:
+            value = self.duration
+            unit = "μs"
+            color = None
+        elif self.duration < 1000000:
+            value = self.duration / 1000
+            unit = "ms"
+            color = TextColor.YELLOW
+        else:
+            value = self.duration / 1000000
+            unit = "s"
+            color = TextColor.RED
+        formatted_value = "{:.2f}".format(value)
+        box_width = len(f"NNN.NN {unit}")
+        return str(
+            Box(Text(f"{formatted_value} {unit}", color), box_width, BoxAlign.RIGHT)
+        )
 
 
-def _language(language: str) -> Element:
-    """
-    Right pad the language name with spaces so that all languages will take up
-    the same width.
-    """
-    max = 0
-    for l in all_languages():
-        if len(l) > max:
-            max = len(l)
-    return Box(Text(language), max)
+@dataclass
+class TimingDetails(Element):
+    timing_info: dict
+    duration: float
+
+    def _avg_time(self, part: str) -> float:
+        return self.timing_info[part]["duration"] / self.timing_info[part]["iterations"]
+
+    @property
+    def _timing_duration(self):
+        return (
+            self.timing_info["part1"]["duration"]
+            + self.timing_info["part2"]["duration"]
+        )
+
+    def __repr__(self):
+        duration_us = self.duration.seconds * 1000000 + self.duration.microseconds
+        overhead = duration_us - self._timing_duration
+        part1_avg_time = self._avg_time("part1")
+        part2_avg_time = self._avg_time("part2")
+        part2_spacer = " " if part1_avg_time >= 1000000 else ""
+        overhead_spacer = " " if part2_avg_time >= 1000000 else ""
+        end_spacer = " " if overhead >= 1000000 else ""
+        contents = ", ".join(
+            [
+                f"part1: {TimingDuration(part1_avg_time)}",
+                f"{part2_spacer}part2: {TimingDuration(part2_avg_time)}",
+                f"{overhead_spacer}overhead: {TimingDuration(overhead)}{end_spacer}",
+            ]
+        )
+        return f"({contents})"
 
 
-def _diff_table(expected: str, actual: str) -> Element:
-    exp_parts = expected.split("\n")
-    act_parts = actual.split("\n")
-    if act_parts[0] is None:
-        act_parts[0] = ""
-    if act_parts[1] is None:
-        act_parts[1] = ""
-    exp_color = TextColor.CYAN
-    act_color = TextColor.YELLOW
-    table = [[Text("")], [Text("Expected", exp_color)], [Text("Actual", act_color)]]
-    if exp_parts[0] != act_parts[0]:
-        table[0].append(Text("Part 1"))
-        table[1].append(Text(exp_parts[0], exp_color))
-        table[2].append(Text(act_parts[0], act_color))
-    if exp_parts[1] != act_parts[1]:
-        table[0].append(Text("Part 2"))
-        table[1].append(Text(exp_parts[1], exp_color))
-        table[2].append(Text(act_parts[1], act_color))
-    return Table(table, display=BoxDisplay.BLOCK)
+class DiffTable(Element):
+    EXPECTED_COLOR = TextColor.CYAN
+    ACTUAL_COLOR = TextColor.YELLOW
 
+    def __init__(self, expected: List[str], actual: List[str]):
+        self.expected = expected
+        self.actual = actual
+        for i in range(len(self.expected)):
+            if self.actual[i] is None:
+                self.actual[i] = ""
 
-def _timing(timing_info: dict, duration: float) -> str:
-    duration_us = duration.seconds * 1000000 + duration.microseconds
-    overhead = (
-        duration_us
-        - timing_info["part1"]["duration"]
-        - timing_info["part2"]["duration"]
-    )
-    part1_avg_time = (
-        timing_info["part1"]["duration"] / timing_info["part1"]["iterations"]
-    )
-    part2_avg_time = (
-        timing_info["part2"]["duration"] / timing_info["part2"]["iterations"]
-    )
-    part2_spacer = " " if part1_avg_time >= 1000000 else ""
-    overhead_spacer = " " if part2_avg_time >= 1000000 else ""
-    end_spacer = " " if overhead >= 1000000 else ""
-    contents = ", ".join(
-        [
-            f"part1: {_duration(part1_avg_time)}",
-            f"{part2_spacer}part2: {_duration(part2_avg_time)}",
-            f"{overhead_spacer}overhead: {_duration(overhead)}{end_spacer}",
+    def __repr__(self):
+        table = [
+            [Text("")],
+            [Text("Expected", self.EXPECTED_COLOR)],
+            [Text("Actual", self.ACTUAL_COLOR)],
         ]
-    )
-    return f"({contents})"
+        for i in range(len(self.expected)):
+            if self.expected[i] != self.actual[i]:
+                table[0].append(Text(f"Part {i}"))
+                table[1].append(Text(self.expected[i], self.EXPECTED_COLOR))
+                table[2].append(Text(self.actual[i], self.ACTUAL_COLOR))
+        return str(Table(table, display=BoxDisplay.BLOCK))
 
 
 class Display:
@@ -242,7 +251,7 @@ class Display:
 
     def _solve_incorrect(self, args: PipeMessage) -> TextDisplayableHandler:
         yield StatusBox.build(StatusSettings.FAILED, args, display=BoxDisplay.BLOCK)
-        yield _diff_table(args["expected"], args["actual"])
+        yield DiffTable(args["expected"].split("\n"), args["actual"].split("\n"))
 
     def _output_saved(self, args: PipeMessage) -> TextDisplayableHandler:
         yield Box(Text(f"Saved result to {args['file']}"), display=BoxDisplay.BLOCK)
@@ -261,7 +270,7 @@ class Display:
         yield StatusBox.build(
             StatusSettings.SUCCEEDED,
             args,
-            details=_timing(args["info"], args["duration"]),
+            details=TimingDetails(args["info"], args["duration"]),
             display=BoxDisplay.BLOCK,
         )
 
@@ -274,7 +283,7 @@ class Display:
 
     def _terminate(self, args: PipeMessage) -> TextDisplayableHandler:
         if "error" in args:
-            yield Box(Text(args["error"]), display=BoxDisplay.BLOCK)
+            yield Box(Text(str(args["error"])), display=BoxDisplay.BLOCK)
 
     HANDLERS = {
         SolverEvent.MISSING_SRC: _missing_src,
