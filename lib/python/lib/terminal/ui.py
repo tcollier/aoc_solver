@@ -1,16 +1,15 @@
 from datetime import datetime, timedelta
+from enum import Enum
 from typing import Generator, List, Set
 
 from lib.typing import Stringable
-
-CURSOR_RETURN = "\033[A\n"
 
 
 class Element(Stringable):
     pass
 
 
-class Color:
+class TextColor:
     CYAN = "\033[96m"
     GREEN = "\033[92m"
     YELLOW = "\033[93m"
@@ -27,7 +26,7 @@ class Text(Element):
     END_FORMATTING = "\033[0m"
 
     def __init__(
-        self, string: str, color: Color = None, formats: Set[TextFormat] = None
+        self, string: str, color: TextColor = None, formats: Set[TextFormat] = None
     ):
         """
         Object that ties formatting information together with a string
@@ -70,14 +69,28 @@ class Text(Element):
         return formatted
 
 
-class BoxAlign:
+CURSOR_RETURN = Text("\033[A\n")
+
+
+class BoxAlign(Enum):
     LEFT = 1
     RIGHT = 2
     CENTER = 3
 
 
+class BoxDisplay(Enum):
+    INLINE = 0
+    BLOCK = 1
+
+
 class Box(Element):
-    def __init__(self, text: Text, width: int = None, align: BoxAlign = BoxAlign.LEFT):
+    def __init__(
+        self,
+        text: Text,
+        width: int = None,
+        align: BoxAlign = BoxAlign.LEFT,
+        display: BoxDisplay = BoxDisplay.INLINE,
+    ):
         """
         A box of set width and unit height that contains a `Text` object
         which can be aligned within the box
@@ -87,23 +100,24 @@ class Box(Element):
         of the text)
         :params align: how to align the text within the box
         """
-        self.text = text
-        self.align = align
-        self.width = width if width else len(text)
-        self.width += text.hidden_width
+        self._text = text
+        self._align = align
+        self._display = display
+        self._width = width if width else len(text)
+        self._width += text.hidden_width
 
     def __repr__(self):
-        if self.align == BoxAlign.RIGHT:
-            return str(self.text).rjust(self.width, " ")
-        elif self.align == BoxAlign.CENTER:
-            space = self.width - len(self.text) - self.text.hidden_width
-            return (
-                str(self.text)
-                .rjust(self.width - space // 2, " ")
-                .ljust(self.width, " ")
-            )
-        elif self.align == BoxAlign.LEFT:
-            return str(self.text).ljust(self.width, " ")
+        string = str(self._text)
+        if self._align == BoxAlign.RIGHT:
+            string = string.rjust(self._width, " ")
+        elif self._align == BoxAlign.CENTER:
+            space = self._width - len(self._text) - self._text.hidden_width
+            string = string.rjust(self._width - space // 2, " ").ljust(self._width, " ")
+        elif self._align == BoxAlign.LEFT:
+            string = string.ljust(self._width, " ")
+        if self._display == BoxDisplay.BLOCK:
+            string += "\n"
+        return string
 
 
 class Animation:
@@ -125,17 +139,17 @@ class Animation:
         self._index = -1
         self.active = True
         # Return a blank placeholder that will get removed after the first tick
-        return " " * len(self._frames[self._index])
+        return Text(" " * len(self._frames[self._index]))
 
     def tick(self) -> str:
         clear = self._erase_previous()
         self._index = (datetime.now() - self._started_at) // self._refresh_interval
         self._index %= len(self._frames)
-        return f"{clear}{self._frames[self._index]}"
+        return Text(f"{clear}{self._frames[self._index]}")
 
     def clear(self) -> str:
         self.active = False
-        return self._erase_previous()
+        return Text(self._erase_previous())
 
     def _erase_previous(self) -> str:
         chars_to_clear = len(self._frames[self._index])
@@ -144,7 +158,11 @@ class Animation:
 
 class Table(Element):
     def __init__(
-        self, cells: List[List[Element]], headers: bool = True, col_padding: int = 2
+        self,
+        cells: List[List[Element]],
+        headers: bool = True,
+        col_padding: int = 2,
+        display: BoxDisplay = BoxDisplay.BLOCK,
     ):
         """
         Display a table of Text objects
@@ -158,6 +176,7 @@ class Table(Element):
         self._cells = cells
         self._headers = headers
         self._col_padding = col_padding
+        self._display = display
 
     def __repr__(self):
         string = ""
@@ -174,7 +193,7 @@ class Table(Element):
                 string += "\n"
             else:
                 string += " " * self._col_padding
-        return string
+        return string + ("\n" if self._display == BoxDisplay.BLOCK else "")
 
     def _each_cell(self) -> Generator[int, int, Element]:
         for row in range(len(self._cells)):

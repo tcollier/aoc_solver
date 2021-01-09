@@ -7,7 +7,8 @@ from lib.terminal.ui import (
     Animation,
     Box,
     BoxAlign,
-    Color,
+    BoxDisplay,
+    TextColor,
     Element,
     Table,
     Text,
@@ -34,7 +35,7 @@ def _duration(duration: float) -> Element:
     if duration < 1:
         value = duration * 1000
         unit = "ns"
-        color = Color.GREEN
+        color = TextColor.GREEN
     elif duration < 1000:
         value = duration
         unit = "μs"
@@ -42,11 +43,11 @@ def _duration(duration: float) -> Element:
     elif duration < 1000000:
         value = duration / 1000
         unit = "ms"
-        color = Color.YELLOW
+        color = TextColor.YELLOW
     else:
         value = duration / 1000000
         unit = "s"
-        color = Color.RED
+        color = TextColor.RED
     formatted_value = "{:.2f}".format(value)
     box_width = len(f"NNN.NN {unit}")
     return Box(Text(f"{formatted_value} {unit}", color), box_width, BoxAlign.RIGHT)
@@ -64,7 +65,13 @@ def _language(language: str) -> Element:
     return Box(Text(language), max)
 
 
-def _status(label: str, color: Color, args: PipeMessage) -> Element:
+def _status_box(
+    label: str,
+    color: TextColor,
+    args: PipeMessage,
+    details: str = None,
+    display: BoxDisplay = BoxDisplay.INLINE,
+) -> Element:
     """
     Generic formatter for the solver's status of running the language/day
     """
@@ -72,26 +79,33 @@ def _status(label: str, color: Color, args: PipeMessage) -> Element:
     year = args["year"]
     day = args["day"]
     day_language = f"{year}/{str(day).rjust(2, '0')} {_language(language)}"
-    return Text(f"{label.ljust(4, ' ')} [{day_language}]", color)
+    status = Text(f"{label.ljust(4, ' ')} [{day_language}]", color)
+    if details:
+        status = Text(" ".join([str(status), details]))
+    return Box(status, display=display)
 
 
-def _success(args: PipeMessage) -> Element:
-    return _status("PASS", Color.GREEN, args)
+def _success_box(
+    args: PipeMessage, details: str = None, display: BoxDisplay = BoxDisplay.INLINE,
+) -> Element:
+    return _status_box("PASS", TextColor.GREEN, args, details=details, display=display)
 
 
-def _failure(args: PipeMessage) -> Element:
-    return _status("FAIL", Color.RED, args)
+def _failure_box(args: PipeMessage, details: str = None) -> Element:
+    return _status_box(
+        "FAIL", TextColor.RED, args, details=details, display=BoxDisplay.BLOCK
+    )
 
 
-def _diff(expected: str, actual: str) -> Element:
+def _diff_table(expected: str, actual: str) -> Element:
     exp_parts = expected.split("\n")
     act_parts = actual.split("\n")
     if act_parts[0] is None:
         act_parts[0] = ""
     if act_parts[1] is None:
         act_parts[1] = ""
-    exp_color = Color.CYAN
-    act_color = Color.YELLOW
+    exp_color = TextColor.CYAN
+    act_color = TextColor.YELLOW
     table = [[Text("")], [Text("Expected", exp_color)], [Text("Actual", act_color)]]
     if exp_parts[0] != act_parts[0]:
         table[0].append(Text("Part 1"))
@@ -101,7 +115,7 @@ def _diff(expected: str, actual: str) -> Element:
         table[0].append(Text("Part 2"))
         table[1].append(Text(exp_parts[1], exp_color))
         table[2].append(Text(act_parts[1], act_color))
-    return Table(table)
+    return Table(table, display=BoxDisplay.BLOCK)
 
 
 def _timing(timing_info: dict, duration: float) -> str:
@@ -158,16 +172,17 @@ class Display:
             yield (self._spinner.clear(), MessagePriority.HIGH)
 
     def _invalid_command(_self, cmd: str, args: PipeMessage) -> TextDisplayableHandler:
-        yield Text(f"Invalid command {cmd} with arguments {args}", Color.RED)
-        yield "\n"
+        yield Box(
+            Text(f"Invalid command {cmd} with arguments {args}", TextColor.RED),
+            display=BoxDisplay.BLOCK,
+        )
 
     def _missing_src(_self, args: PipeMessage) -> TextDisplayableHandler:
-        yield f"{_failure(args)} (no source code found)"
-        yield "\n"
+        yield _failure_box(args, details="(no source code found)")
 
     def _build_started(self, args: PipeMessage) -> TextDisplayableHandler:
         yield from self._start_spinner()
-        yield _status("COMP", Color.GREY, args)
+        yield _status_box("COMP", TextColor.GREY, args)
 
     def _build_finished(self, args: PipeMessage) -> TextDisplayableHandler:
         yield from self._clear_spinner()
@@ -176,16 +191,15 @@ class Display:
     def _build_failed(self, args: PipeMessage) -> TextDisplayableHandler:
         yield from self._clear_spinner()
         yield CURSOR_RETURN
-        yield _failure(args)
-        yield "\n"
+        yield _failure_box(args)
         if "stdout" in args:
-            yield args["stdout"]
+            yield Box(Text(args["stdout"]), display=BoxDisplay.BLOCK)
         if "stderr" in args:
-            yield args["stderr"]
+            yield Box(Text(args["stderr"]), display=BoxDisplay.BLOCK)
 
     def _solve_started(self, args: PipeMessage) -> TextDisplayableHandler:
         yield from self._start_spinner()
-        yield _status("EXEC", Color.CYAN, args)
+        yield _status_box("EXEC", TextColor.CYAN, args)
 
     def _solve_finished(self, args: PipeMessage) -> TextDisplayableHandler:
         yield from self._clear_spinner()
@@ -194,56 +208,56 @@ class Display:
     def _solve_failed(self, args: PipeMessage) -> TextDisplayableHandler:
         yield from self._clear_spinner()
         yield CURSOR_RETURN
-        yield _failure(args)
-        yield "\n"
+        yield _failure_box(args)
         if "stderr" in args:
-            yield args["stderr"]
+            yield Box(Text(args["stderr"]), display=BoxDisplay.BLOCK)
 
     def _solve_attempted(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield _status("TRY", Color.YELLOW, args)
-        yield "\n"
-        yield args["actual"].rstrip()
-        yield "\n"
+        yield _status_box("TRY", TextColor.YELLOW, args, display=BoxDisplay.BLOCK)
+        yield Table(
+            [
+                [Text("Output")],
+                *[[Text(v)] for v in args["actual"].rstrip().split("\n")],
+            ]
+        )
 
     def _solve_succeeded(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield _success(args)
+        yield _success_box(args)
 
     def _solve_incorrect(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield _failure(args)
-        yield "\n"
-        yield _diff(args["expected"], args["actual"])
-        yield "\n"
+        yield _failure_box(args)
+        yield _diff_table(args["expected"], args["actual"])
 
     def _output_saved(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield f"Saved result to {args['file']}"
-        yield "\n"
+        yield Box(Text(f"Saved result to {args['file']}"), display=BoxDisplay.BLOCK)
+
+    def _timing_skipped(self, *_):
+        yield Box(Text(""), display=BoxDisplay.BLOCK)
 
     def _timing_started(self, args: PipeMessage) -> TextDisplayableHandler:
         yield from self._start_spinner()
-        yield " "
-        yield Text("timing", Color.GREY)
-
-    def _timing_skipped(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield "\n"
+        yield Text(" ")
+        yield Text("timing", TextColor.GREY)
 
     def _timing_finished(self, args: PipeMessage) -> TextDisplayableHandler:
         yield from self._clear_spinner()
         yield CURSOR_RETURN
-        yield f"{_success(args)} {_timing(args['info'], args['duration'])}"
-        yield "\n"
+        yield _success_box(
+            args,
+            details=_timing(args["info"], args["duration"]),
+            display=BoxDisplay.BLOCK,
+        )
 
     def _timing_failed(self, args: PipeMessage) -> TextDisplayableHandler:
         yield from self._clear_spinner()
         yield CURSOR_RETURN
-        yield _failure(args)
-        yield "\n"
+        yield _failure_box(args)
         if "stderr" in args:
-            yield args["stderr"]
+            yield Box(Text(args["stderr"]), display=BoxDisplay.BLOCK)
 
     def _terminate(self, args: PipeMessage) -> TextDisplayableHandler:
         if "error" in args:
-            yield args["error"]
-            yield "\n"
+            yield Box(Text(args["error"]), display=BoxDisplay.BLOCK)
 
     HANDLERS = {
         SolverEvent.MISSING_SRC: _missing_src,
