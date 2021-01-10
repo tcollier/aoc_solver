@@ -5,7 +5,7 @@ import traceback
 from datetime import datetime
 from typing import List, Generator
 
-from lib.languages import language_config, all_languages
+from lib.lang.registry import LanguageRegistry
 from lib.shell import (
     ShellException,
     TerminationException,
@@ -42,19 +42,18 @@ class LanguageSolver:
         self.filename = filename
 
     def __call__(self, expected: str, outfile: str):
-        config = language_config(self.language)
-        commands = config.commands(self.filename)
-        if commands.compiler:
-            self._build(commands.compiler)
-        actual = self._solve(commands.exec)
+        _, LanguageSettings, timing = LanguageRegistry.get(self.language)
+        settings = LanguageSettings(self.filename)
+        self._build(settings.compile())
+        actual = self._solve(settings.solve())
         if not expected:
             self._handle_output(actual, outfile)
         elif actual != expected:
             self._handle_invalid_output(expected, actual)
         else:
             self._dispatch(SolverEvent.SOLVE_SUCCEEDED)
-            if config.timing:
-                self._handle_timing(commands.time)
+            if timing:
+                self._handle_timing(settings.time())
             else:
                 self._dispatch(SolverEvent.TIMING_SKIPPED)
 
@@ -76,12 +75,18 @@ class LanguageSolver:
         unwrapped = cmd() if callable(cmd) else cmd
         return shell_out(unwrapped, should_terminate)
 
-    def _build(self, compiler_cmds: Generator[str, None, None]):
-        self._dispatch(SolverEvent.BUILD_STARTED)
+    def _build(self, compiler_gen: Generator[str, None, None]):
+        if not compiler_gen:
+            return
+        started = False
         try:
-            for cmd in compiler_cmds:
-                self._shell_out(cmd)
-            self._dispatch(SolverEvent.BUILD_FINISHED)
+            for compiler_cmd in compiler_gen:
+                if not started:
+                    self._dispatch(SolverEvent.BUILD_STARTED)
+                    started = True
+                self._shell_out(compiler_cmd)
+            if started:
+                self._dispatch(SolverEvent.BUILD_FINISHED)
         except ShellException as e:
             # Include stdout since node writes error messages to stdout
             self._dispatch(
@@ -190,9 +195,9 @@ class SolverEngine:
 
     def _find_files(self, languages: List[str]):
         if not languages:
-            languages = all_languages()
+            languages = LanguageRegistry.all()
         for language in languages:
-            ext = language_config(language).extension
+            ext, _, _ = LanguageRegistry.get(language)
             filename = os.path.join(self.base_dir, f"main.{ext}")
             if os.path.isfile(filename):
                 yield language, filename

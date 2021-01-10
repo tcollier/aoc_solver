@@ -57,7 +57,7 @@ from multiprocessing import Pipe, Process
 
 from lib.context_manager import ContextManager
 from lib.display_event_loop import DisplayEventLoop
-from lib.languages import all_languages
+from lib.lang.registry import LanguageRegistry
 from lib.solver_engine import SolverEngine
 from lib.terminal.display import Display
 
@@ -70,7 +70,8 @@ parser = argparse.ArgumentParser(
 parser.add_argument("year", help=f"competition year")
 parser.add_argument("day", help=f"competition day", nargs="?")
 
-language_helper = f"available languages: {', '.join(all_languages())}"
+supported_languages = [l for l in LanguageRegistry.all()]
+language_helper = f"available languages: {', '.join(supported_languages)}"
 parser.add_argument(
     "-l",
     "--language",
@@ -91,10 +92,10 @@ def argument_error(args):
     :param args: parsed arguments from argparse
     """
     if args.language:
-        unknown = list(set(args.language) - set(all_languages()))
+        unknown = list(set(args.language) - set(supported_languages))
         if unknown:
             unknown_str = ", ".join(unknown)
-            all_str = ", ".join(all_languages())
+            all_str = ", ".join(supported_languages)
             return f"Unrecognized language(s): {unknown_str} (available: {all_str})"
     if args.save:
         if not args.day:

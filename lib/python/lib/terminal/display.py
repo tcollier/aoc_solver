@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Generator, List, Tuple, Union
 
-from lib.languages import all_languages
+from lib.lang.registry import LanguageRegistry
 from lib.solver_event import SolverEvent
 from lib.terminal.ui import (
     CURSOR_RETURN,
@@ -18,7 +18,7 @@ from lib.typing import PipeMessage, TextDisplayable, TextDisplayableHandler
 
 SPINNER_CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
 
-MAX_LANGUAGE_WIDTH = max([len(l) for l in all_languages()])
+MAX_LANGUAGE_WIDTH = max([len(l) for l in LanguageRegistry.all()])
 
 
 class MessagePriority:
@@ -216,7 +216,7 @@ class Display:
     def _build_failed(self, args: PipeMessage) -> TextDisplayableHandler:
         yield from self._clear_spinner()
         yield CURSOR_RETURN
-        yield StatusBox.build(StatusSettings.FAILED, args, display=BoxDisplay.BLOCK)
+        yield StatusBox.build(StatusSettings.FAILED, args, display=BoxDisplay.INLINE)
         if "stdout" in args:
             yield Box(Text(args["stdout"]), display=BoxDisplay.BLOCK)
         if "stderr" in args:
