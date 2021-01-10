@@ -3,11 +3,12 @@ package main
 import (
 	"bufio"
 	"errors"
-	"fmt"
 	"log"
 	"os"
 	"sort"
 	"strconv"
+
+	"aoc.com/tcollier"
 )
 
 type pair struct {
@@ -74,23 +75,27 @@ func loadNumbers(fn string) ([]int, error) {
 	return numbers, nil
 }
 
+func part1Answer(input tcollier.Input) string {
+	pair, err := pairWithSum(input.([]int), 2020)
+	if err == nil {
+		return strconv.Itoa(pair.a * pair.b)
+	}
+	return err.Error()
+}
+
+func part2Answer(input tcollier.Input) string {
+	triplet, err := tripletWithSum(input.([]int), 2020)
+	if err == nil {
+		return strconv.Itoa(triplet.a * triplet.b * triplet.c)
+	}
+	return err.Error()
+}
+
 func main() {
 	numbers, err := loadNumbers("2020/01/input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	pair, err := pairWithSum(numbers, 2020)
-	if err == nil {
-		fmt.Printf("%d\n", pair.a*pair.b)
-	} else {
-		fmt.Println(err)
-	}
-
-	triplet, err := tripletWithSum(numbers, 2020)
-	if err == nil {
-		fmt.Printf("%d\n", triplet.a*triplet.b*triplet.c)
-	} else {
-		fmt.Println(err)
-	}
+	tcollier.Executor(numbers, part1Answer, part2Answer, os.Args)
 }

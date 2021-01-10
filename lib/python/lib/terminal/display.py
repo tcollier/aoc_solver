@@ -158,7 +158,7 @@ class DiffTable(Element):
         ]
         for i in range(len(self.expected)):
             if self.expected[i] != self.actual[i]:
-                table[0].append(Text(f"Part {i}"))
+                table[0].append(Text(f"Part {i + 1}"))
                 table[1].append(Text(self.expected[i], self.EXPECTED_COLOR))
                 table[2].append(Text(self.actual[i], self.ACTUAL_COLOR))
         return str(Table(table, display=BoxDisplay.BLOCK))
@@ -251,7 +251,9 @@ class Display:
 
     def _solve_incorrect(self, args: PipeMessage) -> TextDisplayableHandler:
         yield StatusBox.build(StatusSettings.FAILED, args, display=BoxDisplay.BLOCK)
-        yield DiffTable(args["expected"].split("\n"), args["actual"].split("\n"))
+        yield DiffTable(
+            args["expected"].rstrip().split("\n"), args["actual"].rstrip().split("\n")
+        )
 
     def _output_saved(self, args: PipeMessage) -> TextDisplayableHandler:
         yield Box(Text(f"Saved result to {args['file']}"), display=BoxDisplay.BLOCK)

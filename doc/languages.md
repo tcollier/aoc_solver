@@ -46,7 +46,44 @@ int main(int argc, char *argv[])
 
 ### Golang
 
-Support for golang is minimal. `solver` will compile and run a solution in `main.go`, but there is no exector for performance timing.
+**IMPORTANT**: To compile golang code, set your `GOPATH` to the `lib/go` directory of this repository
+
+### Timing Support
+
+A golang executor exists with the following signature
+
+```go
+type Input interface{}
+
+type solverFunc func(Input) string
+
+func Executor(input Input, part1 solverFunc, part2 solverFunc, args []string)
+```
+
+Below is template code for using the executor
+
+```go
+package main
+
+import (
+	"os"
+
+	"aoc.com/tcollier"
+)
+
+func part1Answer(input tcollier.Input) string {
+	return // the answer
+}
+
+func part2Answer(input tcollier.Input) string {
+	return // the answer
+}
+
+func main() {
+  var input = // load input
+	tcollier.Executor(input, part1Answer, part2Answer, os.Args)
+}
+```
 
 ### Java
 
