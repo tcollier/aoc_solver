@@ -3,7 +3,7 @@ from typing import Generator, List, Tuple, Union
 
 from lib.lang.registry import LanguageRegistry
 from lib.solver_event import SolverEvent
-from lib.terminal.ui import (
+from lib.terminal.elements import (
     CURSOR_RETURN,
     Animation,
     Box,
@@ -168,6 +168,7 @@ class DiffTable(Element):
 
 
 class Display:
+    default_priority = MessagePriority.MEDIUM
     _spinner = Animation(SPINNER_CHARS)
 
     def handle(self, message: PipeMessage) -> TextDisplayableHandler:
@@ -181,17 +182,11 @@ class Display:
         if self._spinner.active:
             yield (self._spinner.tick(), MessagePriority.LOW)
 
-    @property
-    def default_priority(self) -> int:
-        return MessagePriority.MEDIUM
-
-    def _start_spinner(self) -> TextDisplayableHandler:
-        if not self._spinner.active:
+    def _set_busy(self, busy) -> TextDisplayableHandler:
+        if busy and not self._spinner.active:
             yield (" ", MessagePriority.LOW)
             yield (self._spinner.start(), MessagePriority.LOW)
-
-    def _clear_spinner(self) -> TextDisplayableHandler:
-        if self._spinner.active:
+        elif not busy and self._spinner.active:
             yield (self._spinner.clear(), MessagePriority.HIGH)
 
     def _invalid_command(_self, cmd: str, args: PipeMessage) -> TextDisplayableHandler:
@@ -209,15 +204,15 @@ class Display:
         )
 
     def _build_started(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield from self._start_spinner()
+        yield from self._set_busy(True)
         yield StatusBox.build(StatusSettings.COMPILING, args)
 
     def _build_finished(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield from self._clear_spinner()
+        yield from self._set_busy(False)
         yield CURSOR_RETURN
 
     def _build_failed(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield from self._clear_spinner()
+        yield from self._set_busy(False)
         yield CURSOR_RETURN
         yield StatusBox.build(StatusSettings.FAILED, args, display=BoxDisplay.INLINE)
         if "stdout" in args:
@@ -226,15 +221,15 @@ class Display:
             yield Box(Text(args["stderr"]), display=BoxDisplay.BLOCK)
 
     def _solve_started(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield from self._start_spinner()
+        yield from self._set_busy(True)
         yield StatusBox.build(StatusSettings.SOLVING, args)
 
     def _solve_finished(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield from self._clear_spinner()
+        yield from self._set_busy(False)
         yield CURSOR_RETURN
 
     def _solve_failed(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield from self._clear_spinner()
+        yield from self._set_busy(False)
         yield CURSOR_RETURN
         yield StatusBox.build(StatusSettings.FAILED, args, display=BoxDisplay.BLOCK)
         if "stderr" in args:
@@ -265,12 +260,12 @@ class Display:
         yield Box(Text(""), display=BoxDisplay.BLOCK)
 
     def _timing_started(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield from self._start_spinner()
+        yield from self._set_busy(True)
         yield CURSOR_RETURN
         yield StatusBox.build(StatusSettings.TIMING, args)
 
     def _timing_finished(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield from self._clear_spinner()
+        yield from self._set_busy(False)
         yield CURSOR_RETURN
         yield StatusBox.build(
             StatusSettings.SUCCEEDED,
@@ -280,7 +275,7 @@ class Display:
         )
 
     def _timing_failed(self, args: PipeMessage) -> TextDisplayableHandler:
-        yield from self._clear_spinner()
+        yield from self._set_busy(False)
         yield CURSOR_RETURN
         yield StatusBox.build(StatusSettings.FAILED, args, display=BoxDisplay.BLOCK)
         if "stderr" in args:
