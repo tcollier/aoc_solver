@@ -1,6 +1,6 @@
 ## Language Support
 
-The languages currently have some level of support in the `solver` script. Most contain an executor that is compatible with performance timing, but some do not.
+The languages currently have some level of support in the `solver` script. Most contain an executor that is compatible with performance timing, but some do not. To add support for a new language, see the [adding laguage support documentation](../lib/python/lib/lang/README.md).
 
 ### C
 

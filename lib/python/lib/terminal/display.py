@@ -108,6 +108,9 @@ class TimingDuration(Element):
 
 @dataclass
 class TimingDetails(Element):
+    # Dictionary that contains "part1" and "part2" keys, both of which point to objects
+    # that have "iterations" (number of times the solver function was inovked) and
+    # "duration" (total time in microseconds all iterations took)
     timing_info: dict
     duration: float
 
