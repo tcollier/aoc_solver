@@ -137,7 +137,25 @@ class Main {
 
 ### Lisp
 
-Support for common lisp is minimal. `solver` will run a solution in `main.lisp` using `sbcl` ([download from sbcl.org](http://www.sbcl.org/) or install with HomeBrew), but there is no exector for performance timing.
+`solver` will run a solution in `main.lisp` using `sbcl` ([download from sbcl.org](http://www.sbcl.org/) or install with HomeBrew).
+
+### Timing Support
+
+Below is template code for using the executor
+
+```lisp
+(load "lib/lisp/executor.lisp")
+
+(defun part1 (input)
+  (car input)
+)
+
+(defun part2 (input)
+  (car (cdr input))
+)
+
+(executor (list "Hello" "World!") #'part1 #'part2 *posix-argv*)
+```
 
 ### Python
 

@@ -1,3 +1,5 @@
+(load "lib/lisp/executor.lisp")
+
 (defun get-numbers (filename)
     (sort
         (with-open-file (stream filename)
@@ -37,15 +39,14 @@
     )
 )
 
-(defun print-results (numbers sum)
-    (format t "~D"
-        (reduce #'* (find-pair (car numbers) (cdr numbers) sum) :initial-value 1)
-    )
-    (fresh-line)
-    (format t "~D"
-        (reduce #'* (find-triplet (car numbers) (cdr numbers) sum) :initial-value 1)
-    )
-    (fresh-line)
+
+(defun part1 (numbers)
+  (reduce #'* (find-pair (car numbers) (cdr numbers) 2020) :initial-value 1)
 )
 
-(print-results (get-numbers "2020/01/input.txt") 2020)
+(defun part2 (numbers)
+  (reduce #'* (find-triplet (car numbers) (cdr numbers) 2020) :initial-value 1)
+)
+
+
+(executor (get-numbers "2020/01/input.txt") #'part1 #'part2 *posix-argv*)
