@@ -38,11 +38,12 @@ class Executor[T](solution: Solution[T] , input: Array[T]) {
     var i: Int = 0
     var runningTime: Long = 0
     while (continueTiming(i, runningTime)) {
+      val List[T] inputClone = (List<T>)input.clone()
       val startTime: Long = System.currentTimeMillis()
       if (part == 1) {
-        solution.part1Answer(input)
+        solution.part1Answer(inputClone)
       } else {
-        solution.part2Answer(input)
+        solution.part2Answer(inputClone)
       }
       runningTime += System.currentTimeMillis() - startTime
       i += 1
