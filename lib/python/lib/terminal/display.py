@@ -2,7 +2,9 @@ from dataclasses import dataclass
 from functools import wraps
 from typing import Generator, List, Tuple, Union
 
-from lib.terminal import handlers
+# By importing this module, all handlers defined there will get registered to
+# be used in the HandlerRegistry
+from lib.terminal import handlers  # pylint: disable=unused-import
 from lib.terminal.elements import (
     Animation,
     Box,

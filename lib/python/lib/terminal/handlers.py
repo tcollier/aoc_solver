@@ -160,7 +160,7 @@ class DiffTable(Element):
 
 
 @register_handler(SolverEvent.MISSING_SRC)
-def _missing_src(_self, args: PipeMessage) -> TextDisplayableHandler:
+def _missing_src(_display, args: PipeMessage) -> TextDisplayableHandler:
     yield StatusBox.build(
         StatusSettings.FAILED,
         args,
@@ -170,20 +170,20 @@ def _missing_src(_self, args: PipeMessage) -> TextDisplayableHandler:
 
 
 @register_handler(SolverEvent.BUILD_STARTED)
-def _build_started(self, args: PipeMessage) -> TextDisplayableHandler:
-    yield from self.set_busy(True)
+def _build_started(display, args: PipeMessage) -> TextDisplayableHandler:
+    yield from display.set_busy(True)
     yield StatusBox.build(StatusSettings.COMPILING, args)
 
 
 @register_handler(SolverEvent.BUILD_FINISHED)
-def _build_finished(self, args: PipeMessage) -> TextDisplayableHandler:
-    yield from self.set_busy(False)
+def _build_finished(display, args: PipeMessage) -> TextDisplayableHandler:
+    yield from display.set_busy(False)
     yield CURSOR_RETURN
 
 
 @register_handler(SolverEvent.BUILD_FAILED)
-def _build_failed(self, args: PipeMessage) -> TextDisplayableHandler:
-    yield from self.set_busy(False)
+def _build_failed(display, args: PipeMessage) -> TextDisplayableHandler:
+    yield from display.set_busy(False)
     yield CURSOR_RETURN
     yield StatusBox.build(StatusSettings.FAILED, args, display=BoxDisplay.INLINE)
     if "stdout" in args:
@@ -193,20 +193,20 @@ def _build_failed(self, args: PipeMessage) -> TextDisplayableHandler:
 
 
 @register_handler(SolverEvent.SOLVE_STARTED)
-def _solve_started(self, args: PipeMessage) -> TextDisplayableHandler:
-    yield from self.set_busy(True)
+def _solve_started(display, args: PipeMessage) -> TextDisplayableHandler:
+    yield from display.set_busy(True)
     yield StatusBox.build(StatusSettings.SOLVING, args)
 
 
 @register_handler(SolverEvent.SOLVE_FINISHED)
-def _solve_finished(self, args: PipeMessage) -> TextDisplayableHandler:
-    yield from self.set_busy(False)
+def _solve_finished(display, _args: PipeMessage) -> TextDisplayableHandler:
+    yield from display.set_busy(False)
     yield CURSOR_RETURN
 
 
 @register_handler(SolverEvent.SOLVE_FAILED)
-def _solve_failed(self, args: PipeMessage) -> TextDisplayableHandler:
-    yield from self.set_busy(False)
+def _solve_failed(display, args: PipeMessage) -> TextDisplayableHandler:
+    yield from display.set_busy(False)
     yield CURSOR_RETURN
     yield StatusBox.build(StatusSettings.FAILED, args, display=BoxDisplay.BLOCK)
     if "stderr" in args:
@@ -214,7 +214,7 @@ def _solve_failed(self, args: PipeMessage) -> TextDisplayableHandler:
 
 
 @register_handler(SolverEvent.SOLVE_ATTEMPTED)
-def _solve_attempted(self, args: PipeMessage) -> TextDisplayableHandler:
+def _solve_attempted(_display, args: PipeMessage) -> TextDisplayableHandler:
     yield StatusBox.build(StatusSettings.ATTEMPTED, args, display=BoxDisplay.BLOCK)
     yield Table(
         [[Text("Output")], *[[Text(v)] for v in args["actual"].rstrip().split("\n")],]
@@ -222,12 +222,12 @@ def _solve_attempted(self, args: PipeMessage) -> TextDisplayableHandler:
 
 
 @register_handler(SolverEvent.SOLVE_SUCCEEDED)
-def _solve_succeeded(self, args: PipeMessage) -> TextDisplayableHandler:
+def _solve_succeeded(_display, args: PipeMessage) -> TextDisplayableHandler:
     yield StatusBox.build(StatusSettings.SUCCEEDED, args)
 
 
 @register_handler(SolverEvent.SOLVE_INCORRECT)
-def _solve_incorrect(self, args: PipeMessage) -> TextDisplayableHandler:
+def _solve_incorrect(_display, args: PipeMessage) -> TextDisplayableHandler:
     yield StatusBox.build(StatusSettings.FAILED, args, display=BoxDisplay.BLOCK)
     yield DiffTable(
         args["expected"].rstrip().split("\n"), args["actual"].rstrip().split("\n")
@@ -235,25 +235,25 @@ def _solve_incorrect(self, args: PipeMessage) -> TextDisplayableHandler:
 
 
 @register_handler(SolverEvent.OUTPUT_SAVED)
-def _output_saved(self, args: PipeMessage) -> TextDisplayableHandler:
+def _output_saved(_display, args: PipeMessage) -> TextDisplayableHandler:
     yield Box(Text(f"Saved result to {args['file']}"), display=BoxDisplay.BLOCK)
 
 
 @register_handler(SolverEvent.TIMING_SKIPPED)
-def _timing_skipped(self, *_):
+def _timing_skipped(_display, _args: PipeMessage):
     yield Box(Text(""), display=BoxDisplay.BLOCK)
 
 
 @register_handler(SolverEvent.TIMING_STARTED)
-def _timing_started(self, args: PipeMessage) -> TextDisplayableHandler:
-    yield from self.set_busy(True)
+def _timing_started(display, args: PipeMessage) -> TextDisplayableHandler:
+    yield from display.set_busy(True)
     yield CURSOR_RETURN
     yield StatusBox.build(StatusSettings.TIMING, args)
 
 
 @register_handler(SolverEvent.TIMING_FINISHED)
-def _timing_finished(self, args: PipeMessage) -> TextDisplayableHandler:
-    yield from self.set_busy(False)
+def _timing_finished(display, args: PipeMessage) -> TextDisplayableHandler:
+    yield from display.set_busy(False)
     yield CURSOR_RETURN
     yield StatusBox.build(
         StatusSettings.SUCCEEDED,
@@ -264,8 +264,8 @@ def _timing_finished(self, args: PipeMessage) -> TextDisplayableHandler:
 
 
 @register_handler(SolverEvent.TIMING_FAILED)
-def _timing_failed(self, args: PipeMessage) -> TextDisplayableHandler:
-    yield from self.set_busy(False)
+def _timing_failed(display, args: PipeMessage) -> TextDisplayableHandler:
+    yield from display.set_busy(False)
     yield CURSOR_RETURN
     yield StatusBox.build(StatusSettings.FAILED, args, display=BoxDisplay.BLOCK)
     if "stderr" in args:
@@ -273,6 +273,6 @@ def _timing_failed(self, args: PipeMessage) -> TextDisplayableHandler:
 
 
 @register_handler(SolverEvent.TERMINATE)
-def _terminate(self, args: PipeMessage) -> TextDisplayableHandler:
+def _terminate(_display, args: PipeMessage) -> TextDisplayableHandler:
     if "error" in args:
         yield Box(Text(str(args["error"])), display=BoxDisplay.BLOCK)
