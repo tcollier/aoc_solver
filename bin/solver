@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 
 """
-usage: solver [-h] [-y YEAR] [-d DAY] [-l LANGUAGE [LANGUAGE ...]] [--all]
-              [--save]
+usage: solver [-h] [-l LANGUAGE [LANGUAGE ...]] [--save] year [day]
 
 Run Advent of Code solution for a given year/day in the chosen language
 
+positional arguments:
+  year                  competition year
+  day                   competition day
+
 optional arguments:
   -h, --help            show this help message and exit
-  -y YEAR, --year YEAR  competition year
-  -d DAY, --day DAY     competition day
   -l LANGUAGE [LANGUAGE ...], --language LANGUAGE [LANGUAGE ...]
                         programming language of the solution to run (available
-                        languages: c, golang, java, lisp, python, ruby, rust,
-                        scala, typescript)
+                        languages: c, golang, haskell, java, kotlin, lisp,
+                        python, ruby, rust, scala, typescript)
   --save                save the programs output to output.txt
 """
 

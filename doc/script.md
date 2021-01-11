@@ -7,20 +7,20 @@ I added a script that helps me compile and run my solutions. Once the correct so
 Ensure that the `PYTHONPATH` path variable is set to `<root of this repo>/lib/python` when running the script. I added this to the first example, but will leave it out of all others to aid readability.
 
 ```
-usage: solver [-h] [-y YEAR] [-d DAY] [-l LANGUAGE [LANGUAGE ...]] [--all]
-              [--save]
+usage: solver [-h] [-l LANGUAGE [LANGUAGE ...]] [--save] year [day]
 
 Run Advent of Code solution for a given year/day in the chosen language
 
+positional arguments:
+  year                  competition year
+  day                   competition day
+
 optional arguments:
   -h, --help            show this help message and exit
-  -y YEAR, --year YEAR  competition year
-  -d DAY, --day DAY     competition day
   -l LANGUAGE [LANGUAGE ...], --language LANGUAGE [LANGUAGE ...]
                         programming language of the solution to run (available
-                        languages: c, golang, java, lisp, python, ruby, rust,
-                        scala, typescript)
-  --all                 run all challenge days in all languages
+                        languages: c, golang, haskell, java, kotlin, lisp,
+                        python, ruby, rust, scala, typescript)
   --save                save the programs output to output.txt
 ```
 
