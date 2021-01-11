@@ -1,6 +1,8 @@
 main_c
 main_go
+main_hs
 main_rs
+main.hi
 main.jar
 *.class
 *.js
