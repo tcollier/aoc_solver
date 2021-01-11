@@ -4,8 +4,6 @@ I added a script that helps me compile and run my solutions. Once the correct so
 
 ### Usage
 
-Ensure that the `PYTHONPATH` path variable is set to `<root of this repo>/lib/python` when running the script. I added this to the first example, but will leave it out of all others to aid readability.
-
 ```
 usage: solver [-h] [-l LANGUAGE [LANGUAGE ...]] [--save] year [day]
 
@@ -24,10 +22,17 @@ optional arguments:
   --save                save the programs output to output.txt
 ```
 
+#### Required environment vairables
+
+Ensure that the following environment variables are set
+
+- `PYTHONPATH` -- `<root of this repo>/lib/python`
+- `AOC_SOLUTIONS_PATH` -- absolute path to the base directory containing all solutions (the expected path to a solution is `$AOC_SOLUTIONS_PATH/<YYYY>/<DD>/main.<ext>`)
+
 #### Example: run solution for a single day
 
 ```
-% PYTHONPATH=$HOME/aoc/lib/python ./bin/solver -y 2020 -d 1
+% ./bin/solver -y 2020 -d 1
 TRY  [2020/01 typescript]
 1003971
 84035952
