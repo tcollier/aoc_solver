@@ -26,7 +26,6 @@ optional arguments:
 
 Ensure that the following environment variables are set
 
-- `PYTHONPATH` -- `<root of this repo>/lib/python`
 - `AOC_SOLUTIONS_PATH` -- absolute path to the base directory containing all solutions (the expected path to a solution is `$AOC_SOLUTIONS_PATH/<YYYY>/<DD>/main.<ext>`)
 
 #### Example: run solution for a single day

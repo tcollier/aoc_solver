@@ -34,6 +34,7 @@ class ExitCode:
 
 
 AOC_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+sys.path.append(AOC_ROOT)
 
 # Verify AOC_SOLUTIONS_PATH is set to a valid directory.
 if not os.environ.get("AOC_SOLUTIONS_PATH") or not os.path.isdir(
@@ -44,20 +45,6 @@ if not os.environ.get("AOC_SOLUTIONS_PATH") or not os.path.isdir(
     sys.exit(ExitCode.INVALID_ARGS)
 
 SOLUTIONS_PATH = os.environ.get("AOC_SOLUTIONS_PATH")
-
-# Verify PYTHONPATH is set correctly so that local packages will load
-# correctly. If the path is not set, print a useful message telling the
-# user how to set it.
-expected_path = AOC_ROOT
-actual_path = os.environ.get("PYTHONPATH") and os.path.abspath(
-    os.environ.get("PYTHONPATH")
-)
-if not actual_path or actual_path != expected_path:
-    print(
-        f"Please set PYTHONPATH to the lib/python/ directory of this repository, e.g."
-    )
-    print(f"PYTHONPATH={expected_path} {' '.join(sys.argv)}")
-    sys.exit(ExitCode.INVALID_ARGS)
 
 import argparse
 import glob
