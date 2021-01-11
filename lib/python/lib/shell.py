@@ -30,25 +30,30 @@ def _read_output(stream: IO[str]) -> str:
 
 
 def shell_out(cmd: str, should_terminate: bool):
-    process = subprocess.Popen(
-        shlex.split(cmd),
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        universal_newlines=True,
-    )
-    while True:
-        exitcode = process.poll()
-        if exitcode is None:
-            if should_terminate():
-                raise TerminationException()
-            time.sleep(0.01)
-        elif exitcode > 0:
-            stdout = _read_output(process.stdout)
-            stderr = _read_output(process.stderr)
-            raise ShellException(exitcode, stdout, stderr)
-        else:
-            break
-    return _read_output(process.stdout)
+    try:
+        process = subprocess.Popen(
+            shlex.split(cmd),
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            universal_newlines=True,
+        )
+        while True:
+            exitcode = process.poll()
+            if exitcode is None:
+                if should_terminate():
+                    raise TerminationException()
+                time.sleep(0.01)
+            elif exitcode > 0:
+                stdout = _read_output(process.stdout)
+                stderr = _read_output(process.stderr)
+                raise ShellException(exitcode, stdout, stderr)
+            else:
+                break
+        return _read_output(process.stdout)
+    except ShellException as e:
+        raise e
+    except Exception as e:
+        raise ShellException(-1, None, str(e))
 
 
 def is_process_running(pid: int) -> bool:

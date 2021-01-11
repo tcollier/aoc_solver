@@ -95,7 +95,7 @@ class LanguageSolver:
             )
             raise e
         except Exception as e:
-            self._dispatch(SolverEvent.BUILD_FAILED)
+            self._dispatch(SolverEvent.BUILD_FAILED, {"error": e})
             raise e
 
     def _solve(self, cmd: str):
