@@ -6,7 +6,7 @@ The languages currently have some level of support in the `solver` script. Most 
 
 C source code is compiled with `gcc` without any fancy options or libraries.
 
-### Timing Support
+#### Timing Support
 
 A c executor exists with the following signature
 
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 
 **IMPORTANT**: To compile golang code, set your `GOPATH` to the `lib/go` directory of this repository
 
-### Timing Support
+#### Timing Support
 
 A golang executor exists with the following signature
 
@@ -85,9 +85,13 @@ func main() {
 }
 ```
 
+### Haskell
+
+Basic support for compiling and running Haskell solutions is availabe, but no timing support
+
 ### Java
 
-### Timing Support
+#### Timing Support
 
 A Java executor exists with the following signature
 
@@ -135,11 +139,15 @@ class Main {
 }
 ```
 
+### Kotlin
+
+Basic support for compiling and running Kotlin solutions is availabe, but no timing support
+
 ### Lisp
 
 `solver` will run a solution in `main.lisp` using `sbcl` ([download from sbcl.org](http://www.sbcl.org/) or install with HomeBrew).
 
-### Timing Support
+#### Timing Support
 
 Below is template code for using the executor
 
@@ -159,7 +167,7 @@ Below is template code for using the executor
 
 ### Python
 
-### Timing Support
+#### Timing Support
 
 A python executor exists, below is template code for using the executor
 
@@ -186,7 +194,7 @@ executor(sys.argv)
 
 ### Ruby
 
-### Timing Support
+#### Timing Support
 
 A ruby executor exists, below is template code for using the executor
 
@@ -202,7 +210,7 @@ executor.run(ARGV)
 
 ### Rust
 
-### Timing Support
+#### Timing Support
 
 **IMPORTANT**: The executor code needs to be soft linked from the challenge day directory in order for rustc to compile correctly, e.g.
 
@@ -244,7 +252,7 @@ fn main() {
 
 ### Scala
 
-### Timing Support
+#### Timing Support
 
 A scala executor exists, below is template code for using the executor
 
@@ -275,11 +283,11 @@ object Main {
 
 ### Typescript
 
-### Requirements
+#### Requirements
 
 The `solver` script uses `node` to compile typescript files and run the compiled javascript. Ensure `node` and `npm` are installed.
 
-### Timing Support
+#### Timing Support
 
 A typescript executor exists, below is template code for using the executor
 
