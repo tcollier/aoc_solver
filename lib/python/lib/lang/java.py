@@ -3,10 +3,16 @@ import os
 
 from lib.lang.registry import LanguageSettings, register_language
 
+AOC_ROOT = os.path.abspath(
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    )
+)
+
 
 @register_language(name="java", extension="java")
 class JavaSettings(LanguageSettings):
-    LIB_DIR = os.path.join("lib", "java")
+    LIB_DIR = os.path.join(AOC_ROOT, "lib", "java")
     LIB_SRC = glob.glob(os.path.join(LIB_DIR, "**", "*.java"))
     LIB_CLS = glob.glob(os.path.join(LIB_DIR, "**", "*.class"))
 

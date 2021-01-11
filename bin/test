@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+AOC_SOLUTIONS_PATH=$(dirname $(dirname $0)) ./bin/solver 2000

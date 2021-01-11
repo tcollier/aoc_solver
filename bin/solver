@@ -33,11 +33,22 @@ class ExitCode:
         return cls.SIGNAL_BASE + signal
 
 
+AOC_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+
+# Verify AOC_SOLUTIONS_PATH is set to a valid directory.
+if not os.environ.get("AOC_SOLUTIONS_PATH") or not os.path.isdir(
+    os.environ.get("AOC_SOLUTIONS_PATH")
+):
+    print(f"Please set AOC_SOLUTIONS_PATH to the root of your solutions folder, e.g.")
+    print(f"AOC_SOLUTIONS_PATH=$HOME/src/aoc-solutions {' '.join(sys.argv)}")
+    sys.exit(ExitCode.INVALID_ARGS)
+
+SOLUTIONS_PATH = os.environ.get("AOC_SOLUTIONS_PATH")
+
 # Verify PYTHONPATH is set correctly so that local packages will load
 # correctly. If the path is not set, print a useful message telling the
 # user how to set it.
-root_dir = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
-expected_path = os.path.join(root_dir, "lib", "python")
+expected_path = os.path.join(AOC_ROOT, "lib", "python")
 actual_path = os.environ.get("PYTHONPATH") and os.path.abspath(
     os.environ.get("PYTHONPATH")
 )
@@ -131,7 +142,7 @@ def days_to_solve(args):
     if args.day:
         yield int(args.year), int(args.day)
     else:
-        days = glob.glob(f"{args.year}/[0-9][0-9]")
+        days = glob.glob(f"{os.path.join(SOLUTIONS_PATH, str(args.year))}/[0-9][0-9]")
         if len(days) > 0:
             days.sort()
             for day in days:
@@ -167,7 +178,7 @@ try:
         languages = LanguageRegistry.all()
     for year, day in days_to_solve(args):
         # Spin up the solver for the given year/day
-        solver = SolverEngine(solver_conn, year, day, args.save)
+        solver = SolverEngine(solver_conn, SOLUTIONS_PATH, year, day, args.save)
         solver_proc = Process(
             target=solver, args=(os.getpid(), languages), name="AoC-solver",
         )
@@ -186,5 +197,8 @@ except KeyboardInterrupt as e:
     ContextManager.shutdown()
     sys.exit(ExitCode.SIGINT)
 except Exception as e:
+    import traceback
+
+    traceback.print_exc()
     ContextManager.shutdown(error=e)
     sys.exit(ExitCode.UNKNOWN_ERROR)

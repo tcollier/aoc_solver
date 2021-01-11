@@ -2,13 +2,19 @@ import os
 
 from lib.lang.registry import LanguageSettings, register_language
 
+AOC_ROOT = os.path.abspath(
+    os.path.dirname(
+        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+    )
+)
+
 
 @register_language(name="typescript", extension="ts")
 class TypescriptSettings(LanguageSettings):
-    ENTRY_FILE = os.path.join(".", "lib", "javascript", "index.js")
+    ENTRY_FILE = os.path.join(AOC_ROOT, "lib", "javascript", "index.js")
 
     def __init__(self, file):
-        self._js_file = os.path.join(".", file.replace(".ts", ""))
+        self._js_file = file.replace(".ts", "")
         super(TypescriptSettings, self).__init__(file)
 
     def compile(self):

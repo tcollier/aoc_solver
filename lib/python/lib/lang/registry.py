@@ -12,7 +12,7 @@ class UnsupportedLanguage(Exception):
 class LanguageSettings:
     file: str
 
-    def compile(self):
+    def compile(_self):
         pass
 
     def solve(self):
@@ -27,7 +27,7 @@ class LanguageSettings:
 
     @property
     def _bin_file(self):
-        return self.file.replace(".", "_")
+        return "_".join(self.file.rsplit(".", 1))
 
 
 class LanguageRegistry:

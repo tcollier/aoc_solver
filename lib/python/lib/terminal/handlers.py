@@ -141,9 +141,8 @@ class DiffTable(Element):
     def __init__(self, expected: List[str], actual: List[str]):
         self.expected = expected
         self.actual = actual
-        for i in range(len(self.expected)):
-            if self.actual[i] is None:
-                self.actual[i] = ""
+        for i in range(len(self.expected) - len(self.actual)):
+            self.actual.append("")
 
     def __repr__(self):
         table = [

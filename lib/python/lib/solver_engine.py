@@ -146,11 +146,20 @@ class LanguageSolver:
 
 
 class SolverEngine:
-    def __init__(self, conn: PipeConnection, year: int, day: int, save: bool = False):
-        if not os.path.isdir(str(year)):
+    def __init__(
+        self,
+        conn: PipeConnection,
+        solutions_path: str,
+        year: int,
+        day: int,
+        save: bool = False,
+    ):
+        if not os.path.isdir(os.path.join(solutions_path, str(year))):
             raise ValueError(f"No solutions found for {year}")
         padded_day = str(day).zfill(2)
-        self.base_dir = os.path.join(str(year), padded_day)
+        self.base_dir = os.path.abspath(
+            os.path.join(solutions_path, str(year), padded_day)
+        )
         if not os.path.isdir(self.base_dir):
             raise ValueError(f"No solutions found for day {day} in {year}")
         self.conn = conn
