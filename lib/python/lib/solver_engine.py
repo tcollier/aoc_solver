@@ -201,8 +201,6 @@ class SolverEngine:
         _dispatch(self.conn, event, args)
 
     def _find_files(self, languages: List[str]):
-        if not languages:
-            languages = LanguageRegistry.all()
         for language in languages:
             ext, _, _ = LanguageRegistry.get(language)
             filename = os.path.join(self.base_dir, f"main.{ext}")

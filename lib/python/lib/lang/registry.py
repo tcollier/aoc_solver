@@ -32,14 +32,32 @@ class LanguageSettings:
 
 class LanguageRegistry:
     _languages = {}
+    _extensions = {}
 
     @classmethod
     def register(cls, name, extension, settings, timing):
         cls._languages[name] = (extension, settings, timing)
+        cls._extensions[extension] = name
 
     @classmethod
     def all(cls):
         yield from cls._languages.keys()
+
+    @classmethod
+    def has(cls, name) -> bool:
+        if name in cls._languages or name in cls._extensions:
+            return True
+        else:
+            return False
+
+    @classmethod
+    def canonical(cls, name) -> bool:
+        if name in cls._languages:
+            return name
+        elif name in cls._extensions:
+            return cls._extensions[name]
+        else:
+            raise UnsupportedLanguage(name)
 
     @classmethod
     def get(cls, name) -> Tuple[str, LanguageSettings, bool]:

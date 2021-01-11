@@ -92,7 +92,7 @@ def argument_error(args):
     :param args: parsed arguments from argparse
     """
     if args.language:
-        unknown = list(set(args.language) - set(supported_languages))
+        unknown = [l for l in args.language if not LanguageRegistry.has(l)]
         if unknown:
             unknown_str = ", ".join(unknown)
             all_str = ", ".join(supported_languages)
@@ -160,11 +160,15 @@ try:
     display_proc = Process(target=display, name="AoC-display", args=(os.getpid(),))
     ContextManager.add_proc(display_proc)
 
+    if args.language:
+        languages = [LanguageRegistry.canonical(l) for l in args.language]
+    else:
+        languages = LanguageRegistry.all()
     for year, day in days_to_solve(args):
         # Spin up the solver for the given year/day
         solver = SolverEngine(solver_conn, year, day, args.save)
         solver_proc = Process(
-            target=solver, args=(os.getpid(), args.language), name="AoC-solver",
+            target=solver, args=(os.getpid(), languages), name="AoC-solver",
         )
         ContextManager.add_proc(solver_proc)
         while solver_proc.is_alive():
