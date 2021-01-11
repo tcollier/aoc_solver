@@ -1,6 +1,6 @@
 ## Language Support
 
-The languages currently have some level of support in the `solver` script. Most contain an executor that is compatible with performance timing, but some do not. To add support for a new language, see the [adding laguage support documentation](../lib/python/lib/lang/README.md).
+The languages currently have some level of support in the `solver` script. Most contain an executor that is compatible with performance timing, but some do not. To add support for a new language, see the [adding laguage support documentation](../lib/lang/README.md).
 
 ### C
 
@@ -23,7 +23,7 @@ Below is template code for using the executor
 
 ```c
 // main.c
-#include "../../lib/c/lib.h"
+#include "../../ext/c/lib.h"
 
 char *part1_result(char *input[])
 {
@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
 ### Golang
 
-**IMPORTANT**: To compile golang code, set your `GOPATH` to the `lib/go` directory of this repository
+**IMPORTANT**: To compile golang code, set your `GOPATH` to the `ext/go` directory of this repository
 
 #### Timing Support
 
@@ -152,7 +152,7 @@ Basic support for compiling and running Kotlin solutions is availabe, but no tim
 Below is template code for using the executor
 
 ```lisp
-(load "lib/lisp/executor.lisp")
+(load "ext/lisp/executor.lisp")
 
 (defun part1 (input)
   (car input)
@@ -200,7 +200,7 @@ A ruby executor exists, below is template code for using the executor
 
 ```ruby
 # main.rb
-require_relative '../../lib/ruby/executor'
+require_relative '../../ext/ruby/executor'
 
 part1_proc = Proc.new { |input| compute_part1_solution(input) }
 part2_proc = Proc.new { |input| compute_part2_solution(input) }
@@ -216,7 +216,7 @@ executor.run(ARGV)
 
 ```
 % cd 2020/01
-% ln -s ../../lib/rust/util.rs
+% ln -s ../../ext/rust/util.rs
 ```
 
 Below is template code for using the executor

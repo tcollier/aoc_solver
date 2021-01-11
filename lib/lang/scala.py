@@ -1,18 +1,13 @@
 import glob
 import os
 
+from lib import AOC_ROOT
 from lib.lang.registry import LanguageSettings, register_language
-
-AOC_ROOT = os.path.abspath(
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    )
-)
 
 
 @register_language(name="scala", extension="scala")
 class ScalaSettings(LanguageSettings):
-    LIB_DIR = os.path.join(AOC_ROOT, "lib", "scala")
+    LIB_DIR = os.path.join(AOC_ROOT, "ext", "scala")
     LIB_SRC = glob.glob(os.path.join(LIB_DIR, "**", "*.java"))
 
     def compile(self):

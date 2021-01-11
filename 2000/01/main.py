@@ -1,6 +1,6 @@
 import sys
 
-from lib.executor import Executor
+from ext.python.executor import Executor
 
 
 def part1_solution(input):

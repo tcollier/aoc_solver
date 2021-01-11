@@ -1,4 +1,7 @@
 import functools
+import os
+
+AOC_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 
 
 def debug(func):

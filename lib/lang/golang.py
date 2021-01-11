@@ -1,17 +1,12 @@
 import os
 
+from lib import AOC_ROOT
 from lib.lang.registry import LanguageSettings, register_language
-
-AOC_ROOT = os.path.abspath(
-    os.path.dirname(
-        os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-    )
-)
 
 
 @register_language(name="golang", extension="go")
 class GolangSettings(LanguageSettings):
-    LIB_PATH = os.path.join(AOC_ROOT, "lib", "go")
+    LIB_PATH = os.path.join(AOC_ROOT, "ext", "go")
 
     def compile(self):
         expected_path = os.path.abspath(self.LIB_PATH)

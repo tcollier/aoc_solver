@@ -48,7 +48,7 @@ SOLUTIONS_PATH = os.environ.get("AOC_SOLUTIONS_PATH")
 # Verify PYTHONPATH is set correctly so that local packages will load
 # correctly. If the path is not set, print a useful message telling the
 # user how to set it.
-expected_path = os.path.join(AOC_ROOT, "lib", "python")
+expected_path = AOC_ROOT
 actual_path = os.environ.get("PYTHONPATH") and os.path.abspath(
     os.environ.get("PYTHONPATH")
 )

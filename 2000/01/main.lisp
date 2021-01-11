@@ -1,4 +1,4 @@
-(load "lib/lisp/executor.lisp")
+(load "ext/lisp/executor.lisp")
 
 (set 'input (list "Hello" "World!"))
 
