@@ -3,6 +3,7 @@ import os
 import traceback
 
 from datetime import datetime
+from json.decoder import JSONDecodeError
 from typing import List, Generator
 
 from lib.lang.registry import LanguageRegistry
@@ -128,6 +129,12 @@ class LanguageSolver:
         except ShellException as e:
             self._dispatch(SolverEvent.TIMING_FAILED, {"stderr": e.stderr})
             raise e
+        except JSONDecodeError as e:
+            url = "https://github.com/tcollier/aoc/blob/main/lib/python/lib/lang/README.md#timing"
+            self._dispatch(
+                SolverEvent.TIMING_FAILED,
+                {"stderr": f"Timing output was not valid JSON, see {url}"},
+            )
         except Exception as e:
             self._dispatch(SolverEvent.TIMING_FAILED)
             raise e
