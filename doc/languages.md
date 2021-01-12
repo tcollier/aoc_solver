@@ -169,28 +169,7 @@ Below is template code for using the executor
 
 #### Timing Support
 
-A python executor exists, below is template code for using the executor
-
-```python
-# main.py
-import sys
-
-from lib.executor import Executor
-
-
-def part1_solution(input):
-    # compute part 1 solution
-    return solution
-
-
-def part2_solution(input):
-    # compute part 2 solution
-    return solution
-
-input = # load input
-executor = Executor(input, part1_solution, part2_solution)
-executor(sys.argv)
-```
+Use the [aoc_executor.py package](https://github.com/tcollier/aoc_executor.py) for timing support
 
 ### Ruby
 
