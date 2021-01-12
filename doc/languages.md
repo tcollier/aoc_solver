@@ -196,17 +196,7 @@ executor(sys.argv)
 
 #### Timing Support
 
-A ruby executor exists, below is template code for using the executor
-
-```ruby
-# main.rb
-require_relative '../../ext/ruby/executor'
-
-part1_proc = Proc.new { |input| compute_part1_solution(input) }
-part2_proc = Proc.new { |input| compute_part2_solution(input) }
-executor = Executor.new(load_input, part1_proc, part2_proc)
-executor.run(ARGV)
-```
+Use the [aoc_executor.rb get](https://github.com/tcollier/aoc_executor.rb) for timing support
 
 ### Rust
 

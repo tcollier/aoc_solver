@@ -1,0 +1,21 @@
+GIT
+  remote: https://github.com/tcollier/aoc_executor.rb
+  revision: 372dcd752ce7479450d881bb8434cd45bcb74c5f
+  branch: main
+  specs:
+    aoc_executor (0.1.0)
+      json (~> 2.5)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    json (2.5.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  aoc_executor!
+
+BUNDLED WITH
+   2.1.4
