@@ -1,8 +1,8 @@
 import glob
 import os
 
-from lib import AOC_ROOT
-from lib.lang.registry import LanguageSettings, register_language
+from aoc_solver import AOC_ROOT
+from aoc_solver.lang.registry import LanguageSettings, register_language
 
 
 @register_language(name="java", extension="java")

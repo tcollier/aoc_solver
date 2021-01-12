@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import List
 
-from lib.lang.registry import LanguageRegistry
-from lib.solver_event import SolverEvent
-from lib.terminal.elements import (
+from aoc_solver.lang.registry import LanguageRegistry
+from aoc_solver.solver_event import SolverEvent
+from aoc_solver.terminal.elements import (
     CURSOR_RETURN,
     Box,
     BoxAlign,
@@ -13,8 +13,8 @@ from lib.terminal.elements import (
     Table,
     Text,
 )
-from lib.terminal.registry import register_handler
-from lib.typing import PipeMessage, TextDisplayable, TextDisplayableHandler
+from aoc_solver.terminal.registry import register_handler
+from aoc_solver.types import PipeMessage, TextDisplayable, TextDisplayableHandler
 
 MAX_LANGUAGE_WIDTH = max([len(l) for l in LanguageRegistry.all()])
 

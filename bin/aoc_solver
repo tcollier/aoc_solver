@@ -1,0 +1,5 @@
+#!/usr/bin/env python
+
+from aoc_solver.exe import main
+
+main()

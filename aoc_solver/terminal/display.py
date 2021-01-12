@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 from functools import wraps
 
-from lib.terminal.elements import (
+from aoc_solver.terminal.elements import (
     Animation,
     Box,
     BoxDisplay,
     TextColor,
     Text,
 )
-from lib.terminal.registry import HandlerRegistry
-from lib.typing import PipeMessage, TextDisplayableHandler
+from aoc_solver.terminal.registry import HandlerRegistry
+from aoc_solver.types import PipeMessage, TextDisplayableHandler
 
 SPINNER_CHARS = ["⣷", "⣯", "⣟", "⡿", "⢿", "⣻", "⣽", "⣾"]
 

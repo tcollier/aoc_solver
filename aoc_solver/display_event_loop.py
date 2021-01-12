@@ -3,9 +3,9 @@ from dataclasses import dataclass, field
 from queue import PriorityQueue
 from typing import Any, Callable, Dict, Generator
 
-from lib.shell import is_process_running
-from lib.solver_event import SolverEvent
-from lib.typing import PipeConnection, TextDisplayableMessage
+from aoc_solver.shell import is_process_running
+from aoc_solver.solver_event import SolverEvent
+from aoc_solver.types import PipeConnection, TextDisplayableMessage
 
 
 class DisplayEventLoop:

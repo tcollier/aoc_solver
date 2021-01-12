@@ -1,6 +1,6 @@
 from typing import Any, Callable, Dict, Iterator
 
-from lib.typing import TextDisplayable
+from aoc_solver.types import TextDisplayable
 
 HandlerFunc = Callable[[Any, Dict], Iterator[TextDisplayable]]
 

@@ -1,7 +1,7 @@
 from multiprocessing import Process
 
-from lib.solver_event import SolverEvent
-from lib.typing import PipeConnection
+from aoc_solver.solver_event import SolverEvent
+from aoc_solver.types import PipeConnection
 
 
 class Context:

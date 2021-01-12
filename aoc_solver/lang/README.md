@@ -4,7 +4,7 @@ The files contained within this directory define which languages are supported a
 
 ```python
 # lib/python/lib/lang/newlang.py
-from lib.lang.registry import LanguageSettings, register_language
+from aoc_solver.lang.registry import LanguageSettings, register_language
 
 
 @register_language(name="newlang", extension="nlg", timing=False)

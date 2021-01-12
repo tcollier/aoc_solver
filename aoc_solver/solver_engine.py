@@ -6,15 +6,15 @@ from datetime import datetime
 from json.decoder import JSONDecodeError
 from typing import List, Generator
 
-from lib.lang.registry import LanguageRegistry
-from lib.shell import (
+from aoc_solver.lang.registry import LanguageRegistry
+from aoc_solver.shell import (
     ShellException,
     TerminationException,
     is_process_running,
     shell_out,
 )
-from lib.solver_event import SolverEvent
-from lib.typing import PipeConnection, PipeMessage
+from aoc_solver.solver_event import SolverEvent
+from aoc_solver.types import PipeConnection, PipeMessage
 
 
 def _dispatch(conn, event: str, args: PipeMessage = {}):

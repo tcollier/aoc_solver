@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Generator, List, Set
 
-from lib.typing import Stringable
+from aoc_solver.types import Stringable
 
 
 class Element(Stringable):
