@@ -51,14 +51,6 @@ from aoc_solver.terminal.display import Display
 
 
 def main():
-    # Verify AOC_SOLUTIONS_PATH is set to a valid directory.
-    if not SOLUTIONS_PATH or not os.path.isdir(SOLUTIONS_PATH):
-        print(
-            f"Please set AOC_SOLUTIONS_PATH to the root of your solutions folder, e.g."
-        )
-        print(f"AOC_SOLUTIONS_PATH=$HOME/src/aoc-solutions {' '.join(sys.argv)}")
-        sys.exit(ExitCode.INVALID_ARGS)
-
     parser = argparse.ArgumentParser(
         description=(
             "Run Advent of Code solution for a given year/day in the chosen language"

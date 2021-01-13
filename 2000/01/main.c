@@ -1,4 +1,4 @@
-#include "../../ext/c/lib.h"
+#include "../../../aoc_executor.c/src/lib.h"
 
 char *part1_result(char *data[])
 {

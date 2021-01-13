@@ -1,13 +1,13 @@
 import glob
 import os
 
-from aoc_solver import AOC_ROOT
+from aoc_solver import SOLUTIONS_ROOT
 from aoc_solver.lang.registry import LanguageSettings, register_language
 
 
 @register_language(name="java", extension="java")
 class JavaSettings(LanguageSettings):
-    LIB_DIR = os.path.join(AOC_ROOT, "ext", "java")
+    LIB_DIR = os.path.join(SOLUTIONS_ROOT, "..", "aoc_executor.java", "src")
     LIB_SRC = glob.glob(os.path.join(LIB_DIR, "**", "*.java"))
     LIB_CLS = glob.glob(os.path.join(LIB_DIR, "**", "*.class"))
 

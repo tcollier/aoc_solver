@@ -2,6 +2,7 @@ import functools
 import os
 
 AOC_ROOT = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+SOLUTIONS_ROOT = os.path.abspath(os.environ.get("PWD"))
 
 
 def debug(func):

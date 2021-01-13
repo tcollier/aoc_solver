@@ -4,45 +4,11 @@ The languages currently have some level of support in the `solver` script. Most 
 
 ### C
 
-C source code is compiled with `gcc` without any fancy options or libraries.
+C source code is compiled with `gcc`.
 
 #### Timing Support
 
-A c executor exists with the following signature
-
-```c
-void executor(
-    char *input[],
-    char *(*part1_fn)(char **),
-    char *(*part2_fn)(char **),
-    int argc,
-    char *argv[]);
-```
-
-Below is template code for using the executor
-
-```c
-// main.c
-#include "../../ext/c/lib.h"
-
-char *part1_result(char *input[])
-{
-  // compute part 1 solution
-  return solution;
-}
-
-char *part2_result(char *input[])
-{
-  // compute part 2 solution
-  return solution;
-}
-
-int main(int argc, char *argv[])
-{
-  // load challenge input
-  executor(input, part1_result, part2_result, argc, argv);
-}
-```
+Use the [aoc_executor.c package](https://github.com/tcollier/aoc_executor.c) for timing support
 
 ### Golang
 
@@ -50,40 +16,7 @@ int main(int argc, char *argv[])
 
 #### Timing Support
 
-A golang executor exists with the following signature
-
-```go
-type Input interface{}
-
-type solverFunc func(Input) string
-
-func Executor(input Input, part1 solverFunc, part2 solverFunc, args []string)
-```
-
-Below is template code for using the executor
-
-```go
-package main
-
-import (
-	"os"
-
-	"aoc.com/tcollier"
-)
-
-func part1Answer(input tcollier.Input) string {
-	return // the answer
-}
-
-func part2Answer(input tcollier.Input) string {
-	return // the answer
-}
-
-func main() {
-  var input = // load input
-	tcollier.Executor(input, part1Answer, part2Answer, os.Args)
-}
-```
+Use the [aoc_executor.go package](https://github.com/tcollier/aoc_executor.go) for timing support
 
 ### Haskell
 
@@ -93,51 +26,7 @@ Basic support for compiling and running Haskell solutions is availabe, but no ti
 
 #### Timing Support
 
-A Java executor exists with the following signature
-
-```java
-public interface Solution<T> {
-  public String part1Answer(ArrayList<T>);
-  public String part2Answer(ArrayList<T>);
-}
-
-public class Executor {
-  public Executor(Solution<T> solution, ArrayList<T> input);
-  public void run(String[] args);
-}
-```
-
-Below is template code for using the executor
-
-```java
-// Main.java
-import java.util.ArrayList;
-
-import tcollier.Executor;
-import tcollier.Solution;
-
-class Day1Solution implements Solution<String> {
-  private ArrayList<String> input;
-
-  public String part1Answer(ArrayList<String> input) {
-    // compute part 1 solution
-    return solution
-  }
-
-  public String part2Answer(ArrayList<String> input) {
-    // compute part 2 solution
-    return solution
-  }
-}
-
-class Main {
-  public static void main(String[] args) {
-    ArrayList<String> input = // load input
-    Executor executor = new Executor(new Day1Solution(), input);
-    executor.run(args);
-  }
-}
-```
+Use the [aoc_executor.java package](https://github.com/tcollier/aoc_executor.java) for timing support
 
 ### Kotlin
 
@@ -151,21 +40,7 @@ Use the [aoc_executor.kt package](https://github.com/tcollier/aoc_executor.kt) f
 
 #### Timing Support
 
-Below is template code for using the executor
-
-```lisp
-(load "ext/lisp/executor.lisp")
-
-(defun part1 (input)
-  (car input)
-)
-
-(defun part2 (input)
-  (car (cdr input))
-)
-
-(executor (list "Hello" "World!") #'part1 #'part2 *posix-argv*)
-```
+Use the [aoc_executor.lisp package](https://github.com/tcollier/aoc_executor.lisp) for timing support
 
 ### Python
 
@@ -183,74 +58,13 @@ Use the [aoc_executor.rb get](https://github.com/tcollier/aoc_executor.rb) for t
 
 #### Timing Support
 
-**IMPORTANT**: The executor code needs to be soft linked from the challenge day directory in order for rustc to compile correctly, e.g.
-
-```
-% cd 2020/01
-% ln -s ../../ext/rust/util.rs
-```
-
-Below is template code for using the executor
-
-```rs
-// main.rs
-use std::env;
-
-mod util;
-
-struct Day1Solution {
-  input: Vec<String>
-}
-
-impl util::Solution for Day1Solution {
-  fn part1_result(&self) -> String {
-    // compute and return part 1 solution
-  }
-
-  fn part2_result(&self) -> String {
-    // compute and return part 2 solution
-  }
-}
-
-fn main() {
-  let input = // load input
-  let solution = Day1Solution { input: input };
-  let executor = util::Executor::new(&solution as &util::Solution);
-  let args = env::args().collect();
-  executor.run(args);
-}
-```
+Use the [aoc_executor.rs get](https://github.com/tcollier/aoc_executor.rs) for timing support
 
 ### Scala
 
 #### Timing Support
 
-A scala executor exists, below is template code for using the executor
-
-```scala
-import tcollier.Executor;
-import tcollier.Solution;
-
-class Day1Solution() extends Solution {
-  def part1Answer(): String = {
-    // compute part 1 solution
-    return solution
-  }
-
-  def part2Answer(): String = {
-    // compute part 2 solution
-    return solution
-  }
-}
-
-object Main {
-  def main(args: Array[String]): Unit = {
-    val input: Array[String] = // load input
-    val executor: Executor = new Executor(new Day0Solution(input), input);
-    executor.run(args);
-  }
-}
-```
+Use the [aoc_executor.scala package](https://github.com/tcollier/aoc_executor.scala) for timing support
 
 ### Typescript
 
@@ -260,19 +74,4 @@ The `solver` script uses `node` to compile typescript files and run the compiled
 
 #### Timing Support
 
-A typescript executor exists, below is template code for using the executor
-
-```ts
-// main.ts
-const loadData = (): string[] => // load input
-
-const part1Result = (words: string[]): string => {
-  // compute and return part 1 solution
-}
-
-const part2Result = (words: string[]): string => {
-  // compute and return part 2 solution
-}
-
-export { loadData, part1Result, part2Result }
-```
+Use the [aoc_executor.kt package](https://github.com/tcollier/aoc_executor.js) for timing support
