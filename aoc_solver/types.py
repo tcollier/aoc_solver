@@ -1,8 +1,12 @@
 from multiprocessing import connection
-from typing import Dict, Generator, Tuple, Union
+from typing import Dict, Iterator, Tuple, Union
 
 
 class Stringable:
+    @property
+    def is_error(_self):
+        return False
+
     def __repr__(self):
         raise NotImplementedError(f"{type(self).__name__} must implement __repr__()")
 
@@ -10,6 +14,5 @@ class Stringable:
 PipeConnection = connection.Connection
 PipeMessage = Dict[str, str]
 Priority = int
-TextDisplayable = Union[str, Stringable]
-TextDisplayableMessage = Union[TextDisplayable, Tuple[TextDisplayable, Priority]]
-TextDisplayableHandler = Generator[TextDisplayableMessage, None, None]
+StringableMessage = Union[Stringable, Tuple[Stringable, Priority]]
+StringableIterator = Iterator[StringableMessage]

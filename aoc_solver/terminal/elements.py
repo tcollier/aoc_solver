@@ -70,6 +70,12 @@ class Text(Element):
         return formatted
 
 
+class ErrorText(Text):
+    @property
+    def is_error(_self):
+        return True
+
+
 CURSOR_RETURN = Text("\033[A\n")
 
 
@@ -119,6 +125,10 @@ class Box(Element):
         if self._display == BoxDisplay.BLOCK:
             string += "\n"
         return string
+
+    @property
+    def is_error(self):
+        return self._text.is_error
 
 
 class Animation:

@@ -1,8 +1,8 @@
 from typing import Any, Callable, Dict, Iterator
 
-from aoc_solver.types import TextDisplayable
+from aoc_solver.types import StringableIterator
 
-HandlerFunc = Callable[[Any, Dict], Iterator[TextDisplayable]]
+HandlerFunc = Callable[[Any, Dict], StringableIterator]
 
 
 class HandlerRegistry:

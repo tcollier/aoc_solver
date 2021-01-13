@@ -1,11 +1,14 @@
 from __future__ import annotations
+
+import sys
+
 from dataclasses import dataclass, field
 from queue import PriorityQueue
 from typing import Any, Callable, Dict, Generator
 
 from aoc_solver.shell import is_process_running
 from aoc_solver.solver_event import SolverEvent
-from aoc_solver.types import PipeConnection, TextDisplayableMessage
+from aoc_solver.types import PipeConnection, Stringable
 
 
 class DisplayEventLoop:
@@ -44,7 +47,7 @@ class DisplayEventLoop:
 
 @dataclass(order=True)
 class PrioritizedItem:
-    output: TextDisplayableMessage = field(compare=False)
+    output: Stringable = field(compare=False)
     priority: int
     msg_num: int
 
@@ -73,7 +76,8 @@ class TextHandler:
         self._enqueue(output_gen)
         while not self._queue.empty():
             item = self._queue.get(False)
-            print(item.output, end="", flush=self._queue.empty())
+            stream = sys.stderr if item.output.is_error else sys.stdout
+            print(item.output, end="", flush=self._queue.empty(), file=stream)
 
     def _enqueue(self, output_gen: Callable[[], Generator]):
         for output in output_gen():

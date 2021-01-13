@@ -89,7 +89,7 @@ class LanguageSolver:
             if started:
                 self._dispatch(SolverEvent.BUILD_FINISHED)
         except ShellException as e:
-            # Include stdout since node writes error messages to stdout
+            # Include stdout since Node.js writes error messages to stdout
             self._dispatch(
                 SolverEvent.BUILD_FAILED, {"stdout": e.stdout, "stderr": e.stderr}
             )
@@ -108,7 +108,7 @@ class LanguageSolver:
             self._dispatch(SolverEvent.SOLVE_FAILED, {"stderr": e.stderr})
             raise e
         except Exception as e:
-            self._dispatch(SolverEvent.SOLVE_FAILED)
+            self._dispatch(SolverEvent.SOLVE_FAILED, {"error": e})
             raise e
 
     def _handle_output(self, actual: str, outfile: str):
@@ -127,7 +127,7 @@ class LanguageSolver:
                 SolverEvent.TIMING_FINISHED, {"info": timing_info, "duration": duration}
             )
         except ShellException as e:
-            self._dispatch(SolverEvent.TIMING_FAILED, {"stderr": e.stderr})
+            self._dispatch(SolverEvent.TIMING_FAILED, {"error": e.stderr})
             raise e
         except JSONDecodeError as e:
             url = "https://github.com/tcollier/aoc/blob/main/lib/python/lib/lang/README.md#timing"
@@ -136,7 +136,7 @@ class LanguageSolver:
                 {"stderr": f"Timing output was not valid JSON, see {url}"},
             )
         except Exception as e:
-            self._dispatch(SolverEvent.TIMING_FAILED)
+            self._dispatch(SolverEvent.TIMING_FAILED, {"error": e})
             raise e
 
     def _handle_invalid_output(self, expected: str, actual: str):
@@ -197,8 +197,6 @@ class SolverEngine:
                 # to send any messages
                 break
             except:
-                print()
-                traceback.print_exc()
                 continue
         if not found and languages:
             for language in languages:
