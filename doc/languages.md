@@ -141,7 +141,9 @@ class Main {
 
 ### Kotlin
 
-Basic support for compiling and running Kotlin solutions is availabe, but no timing support
+#### Timing Support
+
+Use the [aoc_executor.kt package](https://github.com/tcollier/aoc_executor.kt) for timing support
 
 ### Lisp
 
