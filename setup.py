@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="aoc-solver",
-    version="0.0.10",
+    version="0.0.11",
     author="Tom Collier",
     author_email="tcollier@gmail.com",
     description="Utility to run, test, and time Advent of Code solutions",
